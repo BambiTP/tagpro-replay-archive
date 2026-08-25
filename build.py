@@ -107,12 +107,26 @@ def build():
     for f in wdir.glob("*.json"):
         f.unlink()
     for w, recs in out_rows.items():
+        dump = lambda name, obj: json.dump(obj, open(wdir / f"{w}.{name}.json", "w"),
+                                           separators=(",", ":"))
+        # tagpro.eu ids only - a plain list, for looking matches up on the mirror
+        dump("eu", [r["eu_match_id"] for r in recs if r["eu_match_id"] is not None])
+        # replay ids only - uuid identifies the replay, game_id addresses the
+        # recording itself, and you need the latter to request one
+        dump("replay", [{"uuid": r["uuid"], "game_id": r["game_id"]} for r in recs])
+        # everything, including which of the two are actually held
         json.dump(recs, open(wdir / f"{w}.json", "w"), separators=(",", ":"))
 
     json.dump(cov, open(OUT / "data" / "coverage.json", "w"), indent=1)
-    json.dump([{"uuid": r[0], "game_id": r[1], "started": r[2], "map": r[3]}
-               for r in rows if not r[5]],
-              open(OUT / "data" / "missing_replays.json", "w"), separators=(",", ":"))
+
+    # Whole-archive equivalents of the three per-week files.
+    ddir = OUT / "data"
+    dump = lambda name, obj: json.dump(obj, open(ddir / name, "w"), separators=(",", ":"))
+    dump("all.eu.json", [r[7] for r in rows if r[7] is not None])
+    dump("all.replay.json", [{"uuid": r[0], "game_id": r[1]} for r in rows])
+    dump("missing_replays.json",
+         [{"uuid": r[0], "game_id": r[1], "started": r[2], "map": r[3]}
+          for r in rows if not r[5]])
 
     render(cov)
     return cov
@@ -149,7 +163,7 @@ td.wk{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;wi
 td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:150px}
 td.n i{font-style:normal;color:var(--faint)}
 td.p{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);width:56px}
-td.dl{width:44px;text-align:right}
+td.dl{width:104px;text-align:right;white-space:nowrap}
 .track{height:9px;border-radius:3px;background:var(--track);overflow:hidden;min-width:90px}
 .track span{display:block;height:100%}
 .fid span{background:var(--id)}
@@ -162,12 +176,13 @@ td.dl{width:44px;text-align:right}
 .key{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 12px}
 .key i{display:inline-block;width:18px;height:7px;border-radius:2px;vertical-align:1px;margin-right:6px}
 tfoot td{font-weight:640;background:var(--panel);border-top:2px solid var(--rule);padding:10px 12px}
-a{color:var(--id)} .dl a{font-size:11px;color:var(--faint);text-decoration:none}
+a{color:var(--id)}
+.dl a{font-size:10.5px;color:var(--faint);text-decoration:none;border:1px solid var(--rule);border-radius:4px;padding:2px 5px;margin-left:3px}
 .dl a:hover{color:var(--id)}
 footer{padding:26px 0 60px;color:var(--faint);font-size:12.5px;border-top:1px solid var(--rule);margin-top:34px}
 code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em;
 font-family:ui-monospace,Menlo,Consolas,monospace}
-@media(max-width:640px){td.n{width:118px}td.wk{width:88px;font-size:12px}.track{min-width:50px}}
+@media(max-width:640px){td.n{width:100px}td.wk{width:80px;font-size:11px}.track,.bars{min-width:40px}td.dl{width:92px}.dl a{padding:2px 3px;margin-left:2px}}
 """
 
 HEAD = ('<tr><th>Week</th><th></th><th style="text-align:right">Count</th>'
@@ -210,7 +225,11 @@ def render(cov):
                 f'<td>{bar}</td>'
                 f'<td class="n">{f(n)} <i>/ {total}</i></td>'
                 f'<td class="p">{w:.0f}%</td>'
-                f'<td class="dl"><a href="data/weeks/{s["week"]}.json" download>json</a></td></tr>')
+                f'<td class="dl">'
+                f'<a href="data/weeks/{s["week"]}.eu.json" download title="tagpro.eu match ids">eu</a>'
+                f'<a href="data/weeks/{s["week"]}.replay.json" download title="replay ids">rep</a>'
+                f'<a href="data/weeks/{s["week"]}.json" download title="both, with what is held">all</a>'
+                f'</td></tr>')
         return "\n".join(out)
 
     def foot(n, d, var, approx):
@@ -273,8 +292,13 @@ with no id at the same instant. At {pc(ids,est):.2f}% coverage the estimate and 
 all but identical, and the {t('missing_ids')} ids still counted as absent are most likely matches whose
 start times disagree between the two sources rather than genuinely missing records.
 <br><br>
-Per-week <code>json</code> links give every match id for that week with flags for what is held.
-Full inventories: <a href="data/missing_replays.json" download>missing_replays.json</a>,
+Each week offers three downloads: <code>eu</code> is the tagpro.eu match ids, <code>rep</code> is the
+replay ids (uuid plus the game id a recording is requested by), and <code>all</code> is both together
+with flags for which are actually held.
+<br><br>
+Whole archive: <a href="data/all.eu.json" download>all.eu.json</a> &middot;
+<a href="data/all.replay.json" download>all.replay.json</a> &middot;
+<a href="data/missing_replays.json" download>missing_replays.json</a> &middot;
 <a href="data/coverage.json">coverage.json</a>. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.
 Generated {dt.datetime.now(dt.timezone.utc):%d %b %Y}.
 </div></footer>
