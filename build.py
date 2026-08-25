@@ -157,7 +157,10 @@ background:var(--rule);border:1px solid var(--rule);border-radius:9px;overflow:h
 .stat b{display:block;font-size:22px;font-weight:640;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .stat span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
 section{padding:34px 0 8px}
-h2{font-size:15px;font-weight:620;margin:0 0 3px}
+h2{font-size:17px;font-weight:640;margin:0 0 6px;letter-spacing:-.01em;text-transform:none;
+color:var(--ink)}
+.lead{font-size:14px;color:var(--muted);margin:0 0 14px;max-width:70ch}
+.lead strong{color:var(--ink);font-weight:640}
 .note{font-size:13px;color:var(--muted);margin:0 0 16px}
 table{border-collapse:collapse;width:100%;background:var(--panel);
 border:1px solid var(--rule);border-radius:9px;overflow:hidden}
@@ -294,14 +297,16 @@ def render(cov, missing=()):
 <div class="stats">
 <div class="stat"><b>{f(ids)}</b><span>replay ids</span></div>
 <div class="stat"><b>100%</b><span>replay id coverage</span></div>
-<div class="stat"><b>{f(rep)}</b><span>replays</span></div>
-<div class="stat"><b>{pc(rep,ids):.2f}%</b><span>replay coverage</span></div>
+<div class="stat"><b>{f(rep)}</b><span>recordings held</span></div>
+<div class="stat"><b>{pc(rep,ids):.2f}%</b><span>recordings downloaded</span></div>
 </div>
 </div></header>
 
 <div class="wrap">
 <section>
-<h2>ID coverage</h2>
+<h2>Replay ids &mdash; complete</h2>
+<p class="lead">Every ranked match the replay listing returns has its id here: <strong>{f(ids)} of
+{f(ids)}, 100%</strong>. Nothing is outstanding.</p>
 <p class="note">Replay ids collected per week, with the tagpro.eu layer beneath: how many of those
 matches have a tagpro.eu id, and how many of those were rebuilt here from an archived recording
 rather than carried by the mirror.</p>
@@ -318,7 +323,9 @@ are exact rather than estimated.</p>
 </section>
 
 <section>
-<h2>Replay coverage</h2>
+<h2>Recordings downloaded &mdash; {pc(rep,ids):.1f}%</h2>
+<p class="lead">This is the part that is incomplete. Of the {f(ids)} matches we have ids for, the
+actual recording has been downloaded for <strong>{f(rep)}</strong>.</p>
 <p class="note">Replay recordings held, against the replay ids collected for that week.</p>
 <table><thead>{HEAD}</thead><tbody>
 {body("rep")}
