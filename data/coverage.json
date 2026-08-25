@@ -702,7 +702,7 @@
  {
   "week": "2026-07-27",
   "ids": 1892,
-  "replay": 1887,
+  "replay": 1892,
   "record": 1892,
   "rebuilt": 44,
   "missing_ids": 0,
@@ -712,7 +712,7 @@
  {
   "week": "2026-08-03",
   "ids": 1926,
-  "replay": 1911,
+  "replay": 1926,
   "record": 1926,
   "rebuilt": 66,
   "missing_ids": 0,
@@ -732,7 +732,7 @@
  {
   "week": "2026-08-17",
   "ids": 2201,
-  "replay": 919,
+  "replay": 928,
   "record": 2170,
   "rebuilt": 27,
   "missing_ids": 0,
