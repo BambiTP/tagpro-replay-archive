@@ -173,6 +173,11 @@ td.dl{width:104px;text-align:right;white-space:nowrap}
 .bars .track:first-child{height:9px;border-radius:3px}
 .frec span{background:var(--rec)}
 .freb span{background:var(--reb)}
+.track.split{display:flex}
+.seg-rec{background:var(--rec)}
+.seg-reb{background:var(--reb)}
+td.n2{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:96px}
+td.n2 i{font-style:normal;color:var(--faint);margin-left:5px;font-size:11.5px}
 .key{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 12px}
 .key i{display:inline-block;width:18px;height:7px;border-radius:2px;vertical-align:1px;margin-right:6px}
 tfoot td{font-weight:640;background:var(--panel);border-top:2px solid var(--rule);padding:10px 12px}
@@ -182,11 +187,15 @@ a{color:var(--id)}
 footer{padding:26px 0 60px;color:var(--faint);font-size:12.5px;border-top:1px solid var(--rule);margin-top:34px}
 code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em;
 font-family:ui-monospace,Menlo,Consolas,monospace}
-@media(max-width:640px){td.n{width:100px}td.wk{width:80px;font-size:11px}.track,.bars{min-width:40px}td.dl{width:92px}.dl a{padding:2px 3px;margin-left:2px}}
+@media(max-width:640px){td.n{width:76px}td.n2{width:70px}td.n2 i{display:none}td.wk{width:80px;font-size:11px}.track,.bars{min-width:40px}td.dl{width:92px}.dl a{padding:2px 3px;margin-left:2px}}
 """
 
 HEAD = ('<tr><th>Week</th><th></th><th style="text-align:right">Count</th>'
         '<th style="text-align:right">%</th><th></th></tr>')
+
+HEAD_ID = ('<tr><th>Week</th><th></th><th style="text-align:right">Ids</th>'
+           '<th style="text-align:right">Records</th><th style="text-align:right">Rebuilt</th>'
+           '<th></th></tr>')
 
 
 def render(cov, missing=()):
@@ -201,40 +210,43 @@ def render(cov, missing=()):
     def body(kind):
         out = []
         for s in cov:
+            lbl = dt.date.fromisoformat(s["week"]).strftime("%d %b %Y")
+            links = (f'<td class="dl">'
+                     f'<a href="data/weeks/{s["week"]}.eu.json" download title="tagpro.eu match ids">eu</a>'
+                     f'<a href="data/weeks/{s["week"]}.replay.json" download title="replay ids">rep</a>'
+                     f'<a href="data/weeks/{s["week"]}.json" download title="both, with what is held">all</a>'
+                     f'</td>')
             if kind == "id":
                 # The ranked replay listing is the authority on which matches
-                # exist, so a week's collected ids ARE that week's total - no
-                # estimate involved. The handful of tagpro.eu records with no
-                # listing entry are counted as exceptions below, not as gaps.
-                n, d, cls = s["ids"], s["ids"], "fid"
-                approx = False
-            else:
-                n, d, cls = s["replay"], s["ids"], "frep"
-                approx = s["partial"]
-            total = ("~" + f(d)) if approx else f(d)
-            w = pc(n, d)
-            lbl = dt.date.fromisoformat(s["week"]).strftime("%d %b %Y")
-            if kind == "id":
-                # A sliver must stay visible: 281 reconstructed matches across
-                # 123k is 0.2%, which rounds to nothing without a floor.
-                vis = lambda v: max(pc(v, d), 0.7) if v else 0.0
+                # exist, so a week's collected ids ARE that week's total.
+                d = s["ids"]
+                reb = s["rebuilt"]
+                mirror = s["record"] - reb        # records the mirror carried itself
+                # rebuilt is a subset of record, so the two segments compose
+                # into total record coverage on one track. A sliver must stay
+                # visible: 281 rebuilt across 123k rounds to nothing otherwise.
+                w_reb = max(pc(reb, d), 0.7) if reb else 0.0
                 bar = (f'<div class="bars">'
-                       f'<div class="track fid"><span style="width:{w:.2f}%"></span></div>'
-                       f'<div class="track frec"><span style="width:{pc(s["record"],d):.2f}%"></span></div>'
-                       f'<div class="track freb"><span style="width:{vis(s["rebuilt"]):.2f}%"></span></div>'
-                       f'</div>')
+                       f'<div class="track fid"><span style="width:100%"></span></div>'
+                       f'<div class="track split">'
+                       f'<span class="seg-rec" style="width:{pc(mirror,d):.2f}%"></span>'
+                       f'<span class="seg-reb" style="width:{w_reb:.2f}%"></span>'
+                       f'</div></div>')
+                out.append(
+                    f'<tr><td class="wk">{lbl}</td><td>{bar}</td>'
+                    f'<td class="n">{f(d)}</td>'
+                    f'<td class="n2">{f(s["record"])} <i>{pc(s["record"],d):.0f}%</i></td>'
+                    f'<td class="n2">{f(reb) if reb else "&mdash;"}</td>'
+                    f'{links}</tr>')
             else:
-                bar = f'<div class="track {cls}"><span style="width:{w:.2f}%"></span></div>'
-            out.append(
-                f'<tr><td class="wk">{lbl}</td>'
-                f'<td>{bar}</td>'
-                f'<td class="n">{f(n)} <i>/ {total}</i></td>'
-                f'<td class="p">{w:.0f}%</td>'
-                f'<td class="dl">'
-                f'<a href="data/weeks/{s["week"]}.eu.json" download title="tagpro.eu match ids">eu</a>'
-                f'<a href="data/weeks/{s["week"]}.replay.json" download title="replay ids">rep</a>'
-                f'<a href="data/weeks/{s["week"]}.json" download title="both, with what is held">all</a>'
-                f'</td></tr>')
+                n, d = s["replay"], s["ids"]
+                total = ("~" + f(d)) if s["partial"] else f(d)
+                w = pc(n, d)
+                out.append(
+                    f'<tr><td class="wk">{lbl}</td>'
+                    f'<td><div class="track frep"><span style="width:{w:.2f}%"></span></div></td>'
+                    f'<td class="n">{f(n)} <i>/ {total}</i></td>'
+                    f'<td class="p">{w:.0f}%</td>{links}</tr>')
         return "\n".join(out)
 
     def foot(n, d, var, approx):
@@ -244,6 +256,18 @@ def render(cov, missing=()):
                 f'<td class="n">{f(n)} <i>/ {total}</i></td>'
                 f'<td class="p">{pc(n,d):.1f}%</td><td></td></tr></tfoot>')
 
+    reb_all = tot("rebuilt")
+    mirror_all = tot("record") - reb_all
+    id_foot = (
+        '<tfoot><tr><td>Total</td><td><div class="bars">'
+        '<div class="track fid"><span style="width:100%"></span></div>'
+        '<div class="track split">'
+        f'<span class="seg-rec" style="width:{pc(mirror_all,ids):.2f}%"></span>'
+        f'<span class="seg-reb" style="width:{max(pc(reb_all,ids),0.7):.2f}%"></span>'
+        '</div></div></td>'
+        f'<td class="n">{f(ids)}</td>'
+        f'<td class="n2">{f(tot("record"))} <i>{pc(tot("record"),ids):.1f}%</i></td>'
+        f'<td class="n2">{f(reb_all)}</td><td></td></tr></tfoot>')
     exceptions = "\n".join(
         f'<tr><td><a href="https://tagpro.eu/?match={mid}">{mid}</a></td>'
         f'<td class="wk">{t:%Y-%m-%d %H:%M:%S}</td></tr>'
@@ -275,14 +299,14 @@ those matches have a tagpro.eu record, and how many of those records were rebuil
 archived recording rather than carried by the mirror.</p>
 <div class="key">
 <span><i style="background:var(--id)"></i>match ids collected</span>
-<span><i style="background:var(--rec)"></i>has a tagpro.eu record</span>
-<span><i style="background:var(--reb)"></i>record rebuilt from a recording</span>
+<span><i style="background:var(--rec)"></i>record carried by tagpro.eu</span>
+<span><i style="background:var(--reb)"></i>record rebuilt here from a recording</span>
 </div>
 <p class="note">The ranked replay listing is the authority on which matches exist, so these totals
 are exact rather than estimated.</p>
-<table><thead>{HEAD}</thead><tbody>
+<table><thead>{HEAD_ID}</thead><tbody>
 {body("id")}
-</tbody>{foot(ids, ids, "id", False)}</table>
+</tbody>{id_foot}</table>
 </section>
 
 <section>
