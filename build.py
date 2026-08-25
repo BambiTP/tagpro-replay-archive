@@ -185,7 +185,7 @@ td.dl{width:186px;text-align:right;white-space:nowrap}
 .track.split{display:flex}
 .seg-rec{background:var(--rec)}
 .seg-reb{background:var(--reb)}
-td.n2{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:96px}
+td.n2{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:112px}
 td.n2 i{font-style:normal;color:var(--faint);margin-left:5px;font-size:11.5px}
 .key{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 12px}
 .key i{display:inline-block;width:18px;height:7px;border-radius:2px;vertical-align:1px;margin-right:6px}
@@ -247,7 +247,7 @@ def render(cov, missing=()):
                     f'<tr><td class="wk">{lbl}</td><td>{bar}</td>'
                     f'<td class="n">{f(d)}</td>'
                     f'<td class="n2">{f(s["record"])} <i>{pc(s["record"],d):.0f}%</i></td>'
-                    f'<td class="n2">{f(reb) if reb else "&mdash;"}</td>'
+                    f'<td class="n2">{f(reb)} <i>/ {f(s["record"])}</i></td>'
                     f'{links}</tr>')
             else:
                 n, d = s["replay"], s["ids"]
@@ -278,7 +278,8 @@ def render(cov, missing=()):
         '</div></div></td>'
         f'<td class="n">{f(ids)}</td>'
         f'<td class="n2">{f(tot("record"))} <i>{pc(tot("record"),ids):.1f}%</i></td>'
-        f'<td class="n2">{f(reb_all)}</td><td></td></tr></tfoot>')
+        f'<td class="n2">{f(reb_all)} <i>/ {f(tot("record"))}</i></td>'
+        '<td></td></tr></tfoot>')
     exceptions = "\n".join(
         f'<tr><td><a href="https://tagpro.eu/?match={mid}">{mid}</a></td>'
         f'<td class="wk">{t:%Y-%m-%d %H:%M:%S}</td></tr>'
