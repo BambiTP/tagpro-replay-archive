@@ -1,916 +1,235 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Ranked Replay Archive</title>
-<meta name="description" content="Coverage of the community archive of TagPro ranked match replays: what exists, what is held, and what is still missing.">
+<title>Ranked Replay Coverage</title>
+<meta name="description" content="Per-week coverage of collected TagPro ranked match ids and replay recordings.">
 <style>
 :root{--bg:#f7f7f5;--panel:#fff;--ink:#16181d;--muted:#5b6270;--faint:#8a919e;--rule:#e3e5ea;
---have:#2f6fb3;--pend:#c98a2e;--meta:#b9c0cb;--good:#2e7d5b;--warn:#c25b4a;--code:#f0f1f4}
-@media (prefers-color-scheme:dark){:root{--bg:#101215;--panel:#171a1f;--ink:#e8eaee;--muted:#a2aab8;--faint:#78808e;--rule:#282c34;--have:#5b9bdd;--pend:#d9a24e;--meta:#3d434e;--good:#4dae83;--warn:#e07a68;--code:#1e222a}}
+--id:#2f6fb3;--rep:#2e7d5b;--track:#e8eaee;--code:#f0f1f4}
+@media (prefers-color-scheme:dark){:root{--bg:#101215;--panel:#171a1f;--ink:#e8eaee;--muted:#a2aab8;
+--faint:#78808e;--rule:#282c34;--id:#5b9bdd;--rep:#4dae83;--track:#252932;--code:#1e222a}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-.wrap{max-width:900px;margin:0 auto;padding:0 24px}
-header{padding:72px 0 40px;border-bottom:1px solid var(--rule)}
-.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 16px}
-h1{font-size:clamp(30px,5vw,44px);line-height:1.12;letter-spacing:-.02em;margin:0 0 18px;font-weight:650}
-.lede{font-size:19px;color:var(--muted);margin:0;max-width:62ch}
-section{padding:48px 0;border-bottom:1px solid var(--rule)}
-h2{font-size:13px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin:0 0 20px;font-weight:600}
-h3{font-size:18px;margin:28px 0 8px;font-weight:620;letter-spacing:-.01em}
-p{margin:0 0 14px;max-width:68ch} a{color:var(--have)}
-ul{margin:0 0 14px;padding-left:22px;max-width:68ch} li{margin-bottom:8px}
-code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em;font-family:ui-monospace,Menlo,Consolas,monospace}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
-.stat{background:var(--panel);padding:18px}
-.stat b{display:block;font-size:25px;font-weight:640;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.stat span{display:block;font-size:13px;color:var(--muted);margin-top:4px}
-.big{font-size:20px;line-height:1.5;max-width:60ch;margin:26px 0 0;color:var(--ink)}
-.big em{font-style:normal;color:var(--warn);font-weight:620}
-.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:0 0 14px}
-.legend i{display:inline-block;width:22px;height:8px;border-radius:2px;vertical-align:1px;margin-right:6px}
-.list{border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--panel)}
-.row{display:grid;grid-template-columns:120px 1fr 120px 44px;gap:12px;align-items:center;padding:7px 14px;border-bottom:1px solid var(--rule)}
-.row:last-child{border-bottom:0}
-.row.complete{background:color-mix(in srgb,var(--good) 7%,transparent)}
-.row.empty .nums b{color:var(--warn)}
-.wk{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
-.gapdot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--warn);margin-left:6px;vertical-align:2px}
-.bars{display:flex;flex-direction:column;gap:3px;min-width:0}
-.track{position:relative;height:9px;border-radius:3px;background:var(--rule);overflow:hidden;display:flex}
-.track.meta{height:4px;opacity:.85}
-.track.meta span{background:var(--meta)}
-.track.rep .have{background:var(--have)}
-.track.rep .pend{background:var(--pend)}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:0 22px}
+header{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+h1{font-size:23px;font-weight:640;letter-spacing:-.01em;margin:0 0 6px}
+.sub{color:var(--muted);font-size:14px;margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+background:var(--rule);border:1px solid var(--rule);border-radius:9px;overflow:hidden;margin:26px 0 0}
+.stat{background:var(--panel);padding:15px 16px}
+.stat b{display:block;font-size:22px;font-weight:640;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
+section{padding:34px 0 8px}
+h2{font-size:15px;font-weight:620;margin:0 0 3px}
+.note{font-size:13px;color:var(--muted);margin:0 0 16px}
+table{border-collapse:collapse;width:100%;background:var(--panel);
+border:1px solid var(--rule);border-radius:9px;overflow:hidden}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);
+font-weight:600;text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule)}
+td{padding:5px 12px;border-bottom:1px solid var(--rule);font-size:13px}
+tr:last-child td{border-bottom:0}
+td.wk{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;width:104px}
+td.bar{width:auto}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:150px}
+td.n i{font-style:normal;color:var(--faint)}
+td.p{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);width:56px}
+td.dl{width:44px;text-align:right}
+.track{height:9px;border-radius:3px;background:var(--track);overflow:hidden;min-width:90px}
 .track span{display:block;height:100%}
-.nums{text-align:right;font-variant-numeric:tabular-nums;line-height:1.25}
-.nums b{font-size:13.5px;font-weight:620} .nums i{font-style:normal;color:var(--faint);font-weight:400}
-.nums small{display:block;font-size:11px;color:var(--faint)}
-.dl a{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);text-decoration:none;border:1px solid var(--rule);padding:3px 7px;border-radius:5px}
-.dl a:hover{color:var(--have);border-color:var(--have)}
-table{border-collapse:collapse;width:100%;font-size:14.5px}
-th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule)}
-th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600}
-td.n{font-variant-numeric:tabular-nums;text-align:right}
-.callout{background:var(--panel);border:1px solid var(--rule);border-left:3px solid var(--warn);border-radius:8px;padding:16px 18px;margin:0 0 18px}
-.callout p:last-child{margin-bottom:0}
-.ok{border-left-color:var(--good)}
-footer{padding:40px 0 70px;color:var(--muted);font-size:14.5px}
-@media(max-width:640px){.row{grid-template-columns:88px 1fr 92px 40px;gap:8px;padding:6px 10px}
-.wk{font-size:11px} .nums b{font-size:12px}}
+.fid span,.fid{background:var(--id)}
+.frep span{background:var(--rep)}
+tfoot td{font-weight:640;background:var(--panel);border-top:2px solid var(--rule);padding:10px 12px}
+a{color:var(--id)} .dl a{font-size:11px;color:var(--faint);text-decoration:none}
+.dl a:hover{color:var(--id)}
+footer{padding:26px 0 60px;color:var(--faint);font-size:12.5px;border-top:1px solid var(--rule);margin-top:34px}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em;
+font-family:ui-monospace,Menlo,Consolas,monospace}
+@media(max-width:640px){td.n{width:118px}td.wk{width:88px;font-size:12px}.track{min-width:50px}}
 </style></head><body>
-
 <header><div class="wrap">
-<p class="kicker">Community archive &middot; TagPro ranked</p>
-<h1>We know what happened in almost every ranked match. We have the recording for one in sixteen.</h1>
-<p class="lede">Ranked replays stop being reachable a couple of days after a match ends. Everything
-older than that survives only if somebody saved it. This is a running count of what has been saved,
-what has not, and what is still recoverable.</p>
+<h1>Ranked replay coverage</h1>
+<p class="sub">Match ids and replay recordings collected per week, Mar 2025 &ndash; Aug 2026.</p>
+<div class="stats">
+<div class="stat"><b>120,450</b><span>match ids</span></div>
+<div class="stat"><b>96.2%</b><span>id coverage</span></div>
+<div class="stat"><b>7,754</b><span>replays</span></div>
+<div class="stat"><b>6.44%</b><span>replay coverage</span></div>
+</div>
 </div></header>
 
-<section><div class="wrap">
-<h2>Where it stands</h2>
-<div class="stats">
- <div class="stat"><b>120,451</b><span>ranked matches known to exist</span></div>
- <div class="stat"><b>98.1%</b><span>have a match record (118,196)</span></div>
- <div class="stat"><b>6.3%</b><span>have the actual replay (7,566)</span></div>
- <div class="stat"><b>112,885</b><span>recordings still missing</span></div>
-</div>
-<p class="big">Scores, players, maps and event timelines exist for <strong>98%</strong>
-of ranked matches. The replay files &mdash; the full recordings everything else is derived from &mdash;
-exist for <em>6.3%</em>.</p>
-</div></section>
+<div class="wrap">
+<section>
+<h2>ID coverage</h2>
+<p class="note">Match ids collected, against the estimated number of ranked matches that week.
+Totals are marked <code>~</code> because the true count is an estimate: it combines ids found by
+the ranked scan with matches present on tagpro.eu that carry no linked ranked id.</p>
+<table><thead><tr><th>Week</th><th></th><th style="text-align:right">Count</th><th style="text-align:right">%</th><th></th></tr></thead><tbody>
+<tr><td class="wk">24 Mar 2025</td><td class="bar"><div class="track fid"><span style="width:96.77%"></span></div></td><td class="n">1,829 <i>/ ~1,890</i></td><td class="p">97%</td><td class="dl"><a href="data/weeks/2025-03-24.json" download>json</a></td></tr>
+<tr><td class="wk">31 Mar 2025</td><td class="bar"><div class="track fid"><span style="width:97.42%"></span></div></td><td class="n">3,431 <i>/ ~3,522</i></td><td class="p">97%</td><td class="dl"><a href="data/weeks/2025-03-31.json" download>json</a></td></tr>
+<tr><td class="wk">07 Apr 2025</td><td class="bar"><div class="track fid"><span style="width:98.44%"></span></div></td><td class="n">2,832 <i>/ ~2,877</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-04-07.json" download>json</a></td></tr>
+<tr><td class="wk">14 Apr 2025</td><td class="bar"><div class="track fid"><span style="width:98.10%"></span></div></td><td class="n">2,118 <i>/ ~2,159</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-04-14.json" download>json</a></td></tr>
+<tr><td class="wk">21 Apr 2025</td><td class="bar"><div class="track fid"><span style="width:98.93%"></span></div></td><td class="n">1,944 <i>/ ~1,965</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-04-21.json" download>json</a></td></tr>
+<tr><td class="wk">28 Apr 2025</td><td class="bar"><div class="track fid"><span style="width:98.47%"></span></div></td><td class="n">2,321 <i>/ ~2,357</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-04-28.json" download>json</a></td></tr>
+<tr><td class="wk">05 May 2025</td><td class="bar"><div class="track fid"><span style="width:98.90%"></span></div></td><td class="n">2,245 <i>/ ~2,270</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-05-05.json" download>json</a></td></tr>
+<tr><td class="wk">12 May 2025</td><td class="bar"><div class="track fid"><span style="width:98.63%"></span></div></td><td class="n">2,095 <i>/ ~2,124</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-05-12.json" download>json</a></td></tr>
+<tr><td class="wk">19 May 2025</td><td class="bar"><div class="track fid"><span style="width:98.65%"></span></div></td><td class="n">1,904 <i>/ ~1,930</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-05-19.json" download>json</a></td></tr>
+<tr><td class="wk">26 May 2025</td><td class="bar"><div class="track fid"><span style="width:98.48%"></span></div></td><td class="n">2,072 <i>/ ~2,104</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-05-26.json" download>json</a></td></tr>
+<tr><td class="wk">02 Jun 2025</td><td class="bar"><div class="track fid"><span style="width:98.49%"></span></div></td><td class="n">1,633 <i>/ ~1,658</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-06-02.json" download>json</a></td></tr>
+<tr><td class="wk">09 Jun 2025</td><td class="bar"><div class="track fid"><span style="width:99.15%"></span></div></td><td class="n">1,757 <i>/ ~1,772</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-06-09.json" download>json</a></td></tr>
+<tr><td class="wk">16 Jun 2025</td><td class="bar"><div class="track fid"><span style="width:98.62%"></span></div></td><td class="n">1,572 <i>/ ~1,594</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-06-16.json" download>json</a></td></tr>
+<tr><td class="wk">23 Jun 2025</td><td class="bar"><div class="track fid"><span style="width:98.43%"></span></div></td><td class="n">1,318 <i>/ ~1,339</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-06-23.json" download>json</a></td></tr>
+<tr><td class="wk">30 Jun 2025</td><td class="bar"><div class="track fid"><span style="width:98.94%"></span></div></td><td class="n">1,027 <i>/ ~1,038</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-06-30.json" download>json</a></td></tr>
+<tr><td class="wk">07 Jul 2025</td><td class="bar"><div class="track fid"><span style="width:99.05%"></span></div></td><td class="n">1,256 <i>/ ~1,268</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-07-07.json" download>json</a></td></tr>
+<tr><td class="wk">14 Jul 2025</td><td class="bar"><div class="track fid"><span style="width:98.76%"></span></div></td><td class="n">1,274 <i>/ ~1,290</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-07-14.json" download>json</a></td></tr>
+<tr><td class="wk">21 Jul 2025</td><td class="bar"><div class="track fid"><span style="width:98.99%"></span></div></td><td class="n">1,276 <i>/ ~1,289</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-07-21.json" download>json</a></td></tr>
+<tr><td class="wk">28 Jul 2025</td><td class="bar"><div class="track fid"><span style="width:98.47%"></span></div></td><td class="n">1,290 <i>/ ~1,310</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-07-28.json" download>json</a></td></tr>
+<tr><td class="wk">04 Aug 2025</td><td class="bar"><div class="track fid"><span style="width:99.25%"></span></div></td><td class="n">1,192 <i>/ ~1,201</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-08-04.json" download>json</a></td></tr>
+<tr><td class="wk">11 Aug 2025</td><td class="bar"><div class="track fid"><span style="width:98.37%"></span></div></td><td class="n">1,085 <i>/ ~1,103</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-08-11.json" download>json</a></td></tr>
+<tr><td class="wk">18 Aug 2025</td><td class="bar"><div class="track fid"><span style="width:98.02%"></span></div></td><td class="n">1,038 <i>/ ~1,059</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-08-18.json" download>json</a></td></tr>
+<tr><td class="wk">25 Aug 2025</td><td class="bar"><div class="track fid"><span style="width:98.68%"></span></div></td><td class="n">1,198 <i>/ ~1,214</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-08-25.json" download>json</a></td></tr>
+<tr><td class="wk">01 Sep 2025</td><td class="bar"><div class="track fid"><span style="width:98.83%"></span></div></td><td class="n">1,346 <i>/ ~1,362</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-09-01.json" download>json</a></td></tr>
+<tr><td class="wk">08 Sep 2025</td><td class="bar"><div class="track fid"><span style="width:98.40%"></span></div></td><td class="n">1,228 <i>/ ~1,248</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-09-08.json" download>json</a></td></tr>
+<tr><td class="wk">15 Sep 2025</td><td class="bar"><div class="track fid"><span style="width:98.87%"></span></div></td><td class="n">1,139 <i>/ ~1,152</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-09-15.json" download>json</a></td></tr>
+<tr><td class="wk">22 Sep 2025</td><td class="bar"><div class="track fid"><span style="width:98.66%"></span></div></td><td class="n">1,029 <i>/ ~1,043</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-09-22.json" download>json</a></td></tr>
+<tr><td class="wk">29 Sep 2025</td><td class="bar"><div class="track fid"><span style="width:98.53%"></span></div></td><td class="n">1,074 <i>/ ~1,090</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-09-29.json" download>json</a></td></tr>
+<tr><td class="wk">06 Oct 2025</td><td class="bar"><div class="track fid"><span style="width:98.87%"></span></div></td><td class="n">966 <i>/ ~977</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-10-06.json" download>json</a></td></tr>
+<tr><td class="wk">13 Oct 2025</td><td class="bar"><div class="track fid"><span style="width:98.65%"></span></div></td><td class="n">1,169 <i>/ ~1,185</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-10-13.json" download>json</a></td></tr>
+<tr><td class="wk">20 Oct 2025</td><td class="bar"><div class="track fid"><span style="width:98.04%"></span></div></td><td class="n">1,098 <i>/ ~1,120</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-10-20.json" download>json</a></td></tr>
+<tr><td class="wk">27 Oct 2025</td><td class="bar"><div class="track fid"><span style="width:97.54%"></span></div></td><td class="n">993 <i>/ ~1,018</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-10-27.json" download>json</a></td></tr>
+<tr><td class="wk">03 Nov 2025</td><td class="bar"><div class="track fid"><span style="width:98.86%"></span></div></td><td class="n">1,215 <i>/ ~1,229</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-11-03.json" download>json</a></td></tr>
+<tr><td class="wk">10 Nov 2025</td><td class="bar"><div class="track fid"><span style="width:98.46%"></span></div></td><td class="n">1,340 <i>/ ~1,361</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-11-10.json" download>json</a></td></tr>
+<tr><td class="wk">17 Nov 2025</td><td class="bar"><div class="track fid"><span style="width:98.28%"></span></div></td><td class="n">1,598 <i>/ ~1,626</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-11-17.json" download>json</a></td></tr>
+<tr><td class="wk">24 Nov 2025</td><td class="bar"><div class="track fid"><span style="width:97.80%"></span></div></td><td class="n">1,290 <i>/ ~1,319</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-11-24.json" download>json</a></td></tr>
+<tr><td class="wk">01 Dec 2025</td><td class="bar"><div class="track fid"><span style="width:98.40%"></span></div></td><td class="n">1,902 <i>/ ~1,933</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-12-01.json" download>json</a></td></tr>
+<tr><td class="wk">08 Dec 2025</td><td class="bar"><div class="track fid"><span style="width:98.44%"></span></div></td><td class="n">1,075 <i>/ ~1,092</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-12-08.json" download>json</a></td></tr>
+<tr><td class="wk">15 Dec 2025</td><td class="bar"><div class="track fid"><span style="width:98.90%"></span></div></td><td class="n">2,159 <i>/ ~2,183</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-12-15.json" download>json</a></td></tr>
+<tr><td class="wk">22 Dec 2025</td><td class="bar"><div class="track fid"><span style="width:98.92%"></span></div></td><td class="n">1,193 <i>/ ~1,206</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2025-12-22.json" download>json</a></td></tr>
+<tr><td class="wk">29 Dec 2025</td><td class="bar"><div class="track fid"><span style="width:98.25%"></span></div></td><td class="n">1,848 <i>/ ~1,881</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2025-12-29.json" download>json</a></td></tr>
+<tr><td class="wk">05 Jan 2026</td><td class="bar"><div class="track fid"><span style="width:99.11%"></span></div></td><td class="n">2,121 <i>/ ~2,140</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-01-05.json" download>json</a></td></tr>
+<tr><td class="wk">12 Jan 2026</td><td class="bar"><div class="track fid"><span style="width:98.68%"></span></div></td><td class="n">1,943 <i>/ ~1,969</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-01-12.json" download>json</a></td></tr>
+<tr><td class="wk">19 Jan 2026</td><td class="bar"><div class="track fid"><span style="width:99.06%"></span></div></td><td class="n">1,792 <i>/ ~1,809</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-01-19.json" download>json</a></td></tr>
+<tr><td class="wk">26 Jan 2026</td><td class="bar"><div class="track fid"><span style="width:99.02%"></span></div></td><td class="n">2,025 <i>/ ~2,045</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-01-26.json" download>json</a></td></tr>
+<tr><td class="wk">02 Feb 2026</td><td class="bar"><div class="track fid"><span style="width:99.20%"></span></div></td><td class="n">1,856 <i>/ ~1,871</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-02-02.json" download>json</a></td></tr>
+<tr><td class="wk">09 Feb 2026</td><td class="bar"><div class="track fid"><span style="width:99.03%"></span></div></td><td class="n">1,636 <i>/ ~1,652</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-02-09.json" download>json</a></td></tr>
+<tr><td class="wk">16 Feb 2026</td><td class="bar"><div class="track fid"><span style="width:99.00%"></span></div></td><td class="n">1,483 <i>/ ~1,498</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-02-16.json" download>json</a></td></tr>
+<tr><td class="wk">23 Feb 2026</td><td class="bar"><div class="track fid"><span style="width:99.01%"></span></div></td><td class="n">1,891 <i>/ ~1,910</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-02-23.json" download>json</a></td></tr>
+<tr><td class="wk">02 Mar 2026</td><td class="bar"><div class="track fid"><span style="width:98.78%"></span></div></td><td class="n">1,862 <i>/ ~1,885</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-03-02.json" download>json</a></td></tr>
+<tr><td class="wk">09 Mar 2026</td><td class="bar"><div class="track fid"><span style="width:98.33%"></span></div></td><td class="n">1,884 <i>/ ~1,916</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2026-03-09.json" download>json</a></td></tr>
+<tr><td class="wk">16 Mar 2026</td><td class="bar"><div class="track fid"><span style="width:98.95%"></span></div></td><td class="n">1,695 <i>/ ~1,713</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-03-16.json" download>json</a></td></tr>
+<tr><td class="wk">23 Mar 2026</td><td class="bar"><div class="track fid"><span style="width:99.06%"></span></div></td><td class="n">2,001 <i>/ ~2,020</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-03-23.json" download>json</a></td></tr>
+<tr><td class="wk">30 Mar 2026</td><td class="bar"><div class="track fid"><span style="width:98.90%"></span></div></td><td class="n">1,625 <i>/ ~1,643</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-03-30.json" download>json</a></td></tr>
+<tr><td class="wk">06 Apr 2026</td><td class="bar"><div class="track fid"><span style="width:99.57%"></span></div></td><td class="n">1,614 <i>/ ~1,621</i></td><td class="p">100%</td><td class="dl"><a href="data/weeks/2026-04-06.json" download>json</a></td></tr>
+<tr><td class="wk">13 Apr 2026</td><td class="bar"><div class="track fid"><span style="width:99.06%"></span></div></td><td class="n">1,588 <i>/ ~1,603</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-04-13.json" download>json</a></td></tr>
+<tr><td class="wk">20 Apr 2026</td><td class="bar"><div class="track fid"><span style="width:98.42%"></span></div></td><td class="n">1,557 <i>/ ~1,582</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2026-04-20.json" download>json</a></td></tr>
+<tr><td class="wk">27 Apr 2026</td><td class="bar"><div class="track fid"><span style="width:98.56%"></span></div></td><td class="n">1,708 <i>/ ~1,733</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-04-27.json" download>json</a></td></tr>
+<tr><td class="wk">04 May 2026</td><td class="bar"><div class="track fid"><span style="width:99.03%"></span></div></td><td class="n">1,830 <i>/ ~1,848</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-05-04.json" download>json</a></td></tr>
+<tr><td class="wk">11 May 2026</td><td class="bar"><div class="track fid"><span style="width:98.80%"></span></div></td><td class="n">1,808 <i>/ ~1,830</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-05-11.json" download>json</a></td></tr>
+<tr><td class="wk">18 May 2026</td><td class="bar"><div class="track fid"><span style="width:98.70%"></span></div></td><td class="n">1,670 <i>/ ~1,692</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-05-18.json" download>json</a></td></tr>
+<tr><td class="wk">25 May 2026</td><td class="bar"><div class="track fid"><span style="width:99.05%"></span></div></td><td class="n">1,976 <i>/ ~1,995</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-05-25.json" download>json</a></td></tr>
+<tr><td class="wk">01 Jun 2026</td><td class="bar"><div class="track fid"><span style="width:99.38%"></span></div></td><td class="n">1,921 <i>/ ~1,933</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-06-01.json" download>json</a></td></tr>
+<tr><td class="wk">08 Jun 2026</td><td class="bar"><div class="track fid"><span style="width:99.21%"></span></div></td><td class="n">1,506 <i>/ ~1,518</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-06-08.json" download>json</a></td></tr>
+<tr><td class="wk">15 Jun 2026</td><td class="bar"><div class="track fid"><span style="width:99.10%"></span></div></td><td class="n">1,878 <i>/ ~1,895</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-06-15.json" download>json</a></td></tr>
+<tr><td class="wk">22 Jun 2026</td><td class="bar"><div class="track fid"><span style="width:99.45%"></span></div></td><td class="n">1,992 <i>/ ~2,003</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-06-22.json" download>json</a></td></tr>
+<tr><td class="wk">29 Jun 2026</td><td class="bar"><div class="track fid"><span style="width:99.06%"></span></div></td><td class="n">1,681 <i>/ ~1,697</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-06-29.json" download>json</a></td></tr>
+<tr><td class="wk">06 Jul 2026</td><td class="bar"><div class="track fid"><span style="width:99.45%"></span></div></td><td class="n">1,629 <i>/ ~1,638</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-07-06.json" download>json</a></td></tr>
+<tr><td class="wk">13 Jul 2026</td><td class="bar"><div class="track fid"><span style="width:98.07%"></span></div></td><td class="n">1,630 <i>/ ~1,662</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2026-07-13.json" download>json</a></td></tr>
+<tr><td class="wk">20 Jul 2026</td><td class="bar"><div class="track fid"><span style="width:98.94%"></span></div></td><td class="n">1,687 <i>/ ~1,705</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-07-20.json" download>json</a></td></tr>
+<tr><td class="wk">27 Jul 2026</td><td class="bar"><div class="track fid"><span style="width:99.68%"></span></div></td><td class="n">1,892 <i>/ ~1,898</i></td><td class="p">100%</td><td class="dl"><a href="data/weeks/2026-07-27.json" download>json</a></td></tr>
+<tr><td class="wk">03 Aug 2026</td><td class="bar"><div class="track fid"><span style="width:93.68%"></span></div></td><td class="n">1,926 <i>/ ~2,056</i></td><td class="p">94%</td><td class="dl"><a href="data/weeks/2026-08-03.json" download>json</a></td></tr>
+<tr><td class="wk">10 Aug 2026</td><td class="bar"><div class="track fid"><span style="width:12.45%"></span></div></td><td class="n">273 <i>/ ~2,192</i></td><td class="p">12%</td><td class="dl"><a href="data/weeks/2026-08-10.json" download>json</a></td></tr>
+<tr><td class="wk">17 Aug 2026</td><td class="bar"><div class="track fid"><span style="width:44.42%"></span></div></td><td class="n">928 <i>/ ~2,089</i></td><td class="p">44%</td><td class="dl"><a href="data/weeks/2026-08-17.json" download>json</a></td></tr>
+<tr><td class="wk">24 Aug 2026</td><td class="bar"><div class="track fid"><span style="width:99.65%"></span></div></td><td class="n">573 <i>/ ~575</i></td><td class="p">100%</td><td class="dl"><a href="data/weeks/2026-08-24.json" download>json</a></td></tr>
+</tbody><tfoot><tr><td>Total</td><td><div class="track"><span style="width:96.21%;background:var(--id)"></span></div></td><td class="n">120,450 <i>/ ~125,194</i></td><td class="p">96.2%</td><td></td></tr></tfoot></table>
+</section>
 
-<section><div class="wrap">
-<h2>Coverage, week by week</h2>
-<p>Each row is one week. The thick bar is replay files held; the thin bar above it is match records
-held. A week is marked complete only when every known match from that week has its replay.</p>
-<div class="legend">
- <span><i style="background:var(--have)"></i>replay held</span>
- <span><i style="background:var(--pend)"></i>donated, awaiting import</span>
- <span><i style="background:var(--meta)"></i>match record only</span>
- <span><i style="background:var(--warn);width:5px;height:5px;border-radius:50%"></i>incomplete week</span>
- <span><b>~</b> total not yet final (week still running)</span>
-</div>
-<div class="list">
-<div class="row">
- <div class="wk">24 Mar 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:96.282%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.273%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>5<i>/1,829</i></b><small>1,761 records</small></div>
- <div class="dl"><a href="data/weeks/2025-03-24.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">31 Mar 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:96.473%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/3,431</i></b><small>3,310 records</small></div>
- <div class="dl"><a href="data/weeks/2025-03-31.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">07 Apr 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.634%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/2,832</i></b><small>2,765 records</small></div>
- <div class="dl"><a href="data/weeks/2025-04-07.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">14 Apr 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.262%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/2,118</i></b><small>2,060 records</small></div>
- <div class="dl"><a href="data/weeks/2025-04-14.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">21 Apr 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.405%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,944</i></b><small>1,913 records</small></div>
- <div class="dl"><a href="data/weeks/2025-04-21.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">28 Apr 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.234%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/2,321</i></b><small>2,280 records</small></div>
- <div class="dl"><a href="data/weeks/2025-04-28.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">05 May 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.307%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/2,245</i></b><small>2,207 records</small></div>
- <div class="dl"><a href="data/weeks/2025-05-05.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">12 May 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.091%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/2,095</i></b><small>2,055 records</small></div>
- <div class="dl"><a href="data/weeks/2025-05-12.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">19 May 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.319%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,904</i></b><small>1,872 records</small></div>
- <div class="dl"><a href="data/weeks/2025-05-19.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">26 May 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.732%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/2,072</i></b><small>2,025 records</small></div>
- <div class="dl"><a href="data/weeks/2025-05-26.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">02 Jun 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.285%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,633</i></b><small>1,605 records</small></div>
- <div class="dl"><a href="data/weeks/2025-06-02.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">09 Jun 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.520%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,757</i></b><small>1,731 records</small></div>
- <div class="dl"><a href="data/weeks/2025-06-09.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">16 Jun 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.346%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,572</i></b><small>1,546 records</small></div>
- <div class="dl"><a href="data/weeks/2025-06-16.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">23 Jun 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.027%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,318</i></b><small>1,292 records</small></div>
- <div class="dl"><a href="data/weeks/2025-06-23.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">30 Jun 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.832%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,027</i></b><small>1,015 records</small></div>
- <div class="dl"><a href="data/weeks/2025-06-30.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">07 Jul 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.726%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,256</i></b><small>1,240 records</small></div>
- <div class="dl"><a href="data/weeks/2025-07-07.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">14 Jul 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.587%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,274</i></b><small>1,256 records</small></div>
- <div class="dl"><a href="data/weeks/2025-07-14.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">21 Jul 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.354%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,276</i></b><small>1,255 records</small></div>
- <div class="dl"><a href="data/weeks/2025-07-21.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">28 Jul 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.984%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,290</i></b><small>1,264 records</small></div>
- <div class="dl"><a href="data/weeks/2025-07-28.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">04 Aug 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:99.161%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,192</i></b><small>1,182 records</small></div>
- <div class="dl"><a href="data/weeks/2025-08-04.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">11 Aug 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.604%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,085</i></b><small>1,059 records</small></div>
- <div class="dl"><a href="data/weeks/2025-08-11.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">18 Aug 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.073%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,038</i></b><small>1,018 records</small></div>
- <div class="dl"><a href="data/weeks/2025-08-18.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">25 Aug 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.997%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,198</i></b><small>1,174 records</small></div>
- <div class="dl"><a href="data/weeks/2025-08-25.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">01 Sep 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.367%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,347</i></b><small>1,325 records</small></div>
- <div class="dl"><a href="data/weeks/2025-09-01.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">08 Sep 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.290%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,228</i></b><small>1,207 records</small></div>
- <div class="dl"><a href="data/weeks/2025-09-08.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">15 Sep 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.420%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,139</i></b><small>1,121 records</small></div>
- <div class="dl"><a href="data/weeks/2025-09-15.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">22 Sep 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.348%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,029</i></b><small>1,012 records</small></div>
- <div class="dl"><a href="data/weeks/2025-09-22.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">29 Sep 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.045%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,074</i></b><small>1,053 records</small></div>
- <div class="dl"><a href="data/weeks/2025-09-29.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">06 Oct 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.447%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/966</i></b><small>951 records</small></div>
- <div class="dl"><a href="data/weeks/2025-10-06.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">13 Oct 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.861%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,169</i></b><small>1,144 records</small></div>
- <div class="dl"><a href="data/weeks/2025-10-13.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">20 Oct 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.541%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,098</i></b><small>1,071 records</small></div>
- <div class="dl"><a href="data/weeks/2025-10-20.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">27 Oct 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:96.878%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/993</i></b><small>962 records</small></div>
- <div class="dl"><a href="data/weeks/2025-10-27.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">03 Nov 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.025%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,215</i></b><small>1,191 records</small></div>
- <div class="dl"><a href="data/weeks/2025-11-03.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">10 Nov 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.313%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:1.791%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,340</i></b><small>1,304 records</small></div>
- <div class="dl"><a href="data/weeks/2025-11-10.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">17 Nov 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.685%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:95.432%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,598</i></b><small>1,561 records</small></div>
- <div class="dl"><a href="data/weeks/2025-11-17.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">24 Nov 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.054%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:74.884%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,290</i></b><small>1,252 records</small></div>
- <div class="dl"><a href="data/weeks/2025-11-24.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">01 Dec 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.107%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,902</i></b><small>1,866 records</small></div>
- <div class="dl"><a href="data/weeks/2025-12-01.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">08 Dec 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.395%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,075</i></b><small>1,047 records</small></div>
- <div class="dl"><a href="data/weeks/2025-12-08.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">15 Dec 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.147%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/2,159</i></b><small>2,119 records</small></div>
- <div class="dl"><a href="data/weeks/2025-12-15.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">22 Dec 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.659%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,193</i></b><small>1,177 records</small></div>
- <div class="dl"><a href="data/weeks/2025-12-22.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">29 Dec 2025<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.835%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,848</i></b><small>1,808 records</small></div>
- <div class="dl"><a href="data/weeks/2025-12-29.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">05 Jan 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.538%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/2,121</i></b><small>2,090 records</small></div>
- <div class="dl"><a href="data/weeks/2026-01-05.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">12 Jan 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.250%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,943</i></b><small>1,909 records</small></div>
- <div class="dl"><a href="data/weeks/2026-01-12.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">19 Jan 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.438%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,792</i></b><small>1,764 records</small></div>
- <div class="dl"><a href="data/weeks/2026-01-19.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">26 Jan 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.123%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/2,025</i></b><small>1,987 records</small></div>
- <div class="dl"><a href="data/weeks/2026-01-26.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">02 Feb 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.599%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,856</i></b><small>1,830 records</small></div>
- <div class="dl"><a href="data/weeks/2026-02-02.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">09 Feb 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.289%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,636</i></b><small>1,608 records</small></div>
- <div class="dl"><a href="data/weeks/2026-02-09.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">16 Feb 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.786%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,483</i></b><small>1,465 records</small></div>
- <div class="dl"><a href="data/weeks/2026-02-16.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">23 Feb 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.414%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,891</i></b><small>1,861 records</small></div>
- <div class="dl"><a href="data/weeks/2026-02-23.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">02 Mar 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.013%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,862</i></b><small>1,825 records</small></div>
- <div class="dl"><a href="data/weeks/2026-03-02.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">09 Mar 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.930%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,884</i></b><small>1,845 records</small></div>
- <div class="dl"><a href="data/weeks/2026-03-09.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">16 Mar 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.584%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,695</i></b><small>1,671 records</small></div>
- <div class="dl"><a href="data/weeks/2026-03-16.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">23 Mar 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:99.000%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/2,001</i></b><small>1,981 records</small></div>
- <div class="dl"><a href="data/weeks/2026-03-23.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">30 Mar 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.892%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,625</i></b><small>1,607 records</small></div>
- <div class="dl"><a href="data/weeks/2026-03-30.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">06 Apr 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.885%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,614</i></b><small>1,596 records</small></div>
- <div class="dl"><a href="data/weeks/2026-04-06.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">13 Apr 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.363%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,588</i></b><small>1,562 records</small></div>
- <div class="dl"><a href="data/weeks/2026-04-13.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">20 Apr 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.137%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,557</i></b><small>1,528 records</small></div>
- <div class="dl"><a href="data/weeks/2026-04-20.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">27 Apr 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.068%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,708</i></b><small>1,675 records</small></div>
- <div class="dl"><a href="data/weeks/2026-04-27.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">04 May 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.579%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,830</i></b><small>1,804 records</small></div>
- <div class="dl"><a href="data/weeks/2026-05-04.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">11 May 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.898%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,808</i></b><small>1,770 records</small></div>
- <div class="dl"><a href="data/weeks/2026-05-11.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">18 May 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.844%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,670</i></b><small>1,634 records</small></div>
- <div class="dl"><a href="data/weeks/2026-05-18.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">25 May 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.532%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,976</i></b><small>1,947 records</small></div>
- <div class="dl"><a href="data/weeks/2026-05-25.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">01 Jun 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:98.438%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,921</i></b><small>1,891 records</small></div>
- <div class="dl"><a href="data/weeks/2026-06-01.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">08 Jun 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.145%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,506</i></b><small>1,463 records</small></div>
- <div class="dl"><a href="data/weeks/2026-06-08.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">15 Jun 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:96.592%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,878</i></b><small>1,814 records</small></div>
- <div class="dl"><a href="data/weeks/2026-06-15.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">22 Jun 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:96.586%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,992</i></b><small>1,924 records</small></div>
- <div class="dl"><a href="data/weeks/2026-06-22.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">29 Jun 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.383%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,681</i></b><small>1,637 records</small></div>
- <div class="dl"><a href="data/weeks/2026-06-29.csv.gz" download>ids</a></div>
-</div>
-<div class="row empty">
- <div class="wk">06 Jul 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.667%"></span></div>
-  <div class="track rep"><span class="have" style="width:0.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>0<i>/1,629</i></b><small>1,591 records</small></div>
- <div class="dl"><a href="data/weeks/2026-07-06.csv.gz" download>ids</a></div>
-</div>
-<div class="row">
- <div class="wk">13 Jul 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:97.362%"></span></div>
-  <div class="track rep"><span class="have" style="width:31.288%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>510<i>/1,630</i></b><small>1,587 records</small></div>
- <div class="dl"><a href="data/weeks/2026-07-13.csv.gz" download>ids</a></div>
-</div>
-<div class="row complete">
- <div class="wk">20 Jul 2026</div>
- <div class="bars">
-  <div class="track meta"><span style="width:100.000%"></span></div>
-  <div class="track rep"><span class="have" style="width:100.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>1,687<i>/1,687</i></b><small>1,687 records</small></div>
- <div class="dl"><a href="data/weeks/2026-07-20.csv.gz" download>ids</a></div>
-</div>
-<div class="row">
- <div class="wk">27 Jul 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:100.000%"></span></div>
-  <div class="track rep"><span class="have" style="width:99.736%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>1,887<i>/1,892</i></b><small>1,892 records</small></div>
- <div class="dl"><a href="data/weeks/2026-07-27.csv.gz" download>ids</a></div>
-</div>
-<div class="row">
- <div class="wk">03 Aug 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:100.000%"></span></div>
-  <div class="track rep"><span class="have" style="width:99.221%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>1,911<i>/1,926</i></b><small>1,926 records</small></div>
- <div class="dl"><a href="data/weeks/2026-08-03.csv.gz" download>ids</a></div>
-</div>
-<div class="row complete">
- <div class="wk">10 Aug 2026</div>
- <div class="bars">
-  <div class="track meta"><span style="width:100.000%"></span></div>
-  <div class="track rep"><span class="have" style="width:100.000%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>273<i>/273</i></b><small>273 records</small></div>
- <div class="dl"><a href="data/weeks/2026-08-10.csv.gz" download>ids</a></div>
-</div>
-<div class="row">
- <div class="wk">17 Aug 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:100.000%"></span></div>
-  <div class="track rep"><span class="have" style="width:99.030%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>919<i>/928</i></b><small>928 records</small></div>
- <div class="dl"><a href="data/weeks/2026-08-17.csv.gz" download>ids</a></div>
-</div>
-<div class="row">
- <div class="wk">24 Aug 2026<span class="gapdot" title="incomplete"></span></div>
- <div class="bars">
-  <div class="track meta"><span style="width:99.127%"></span></div>
-  <div class="track rep"><span class="have" style="width:65.271%"></span><span class="pend" style="width:0.000%"></span></div>
- </div>
- <div class="nums"><b>374<i>/~573</i></b><small>568 records</small></div>
- <div class="dl"><a href="data/weeks/2026-08-24.csv.gz" download>ids</a></div>
-</div>
-</div>
-<p style="margin-top:16px;font-size:14px;color:var(--muted)">Each <code>ids</code> link downloads that
-week&rsquo;s full match list as gzipped CSV &mdash; every match UUID and game id, with flags for whether
-the replay and the match record are held. The complete inventory is 120,451 rows across
-75 files, about 6&nbsp;MB.</p>
-</div></section>
-
-<section><div class="wrap">
-<h2>Which weeks are short</h2>
-<table>
-<tr><th>Status</th><th class="n">Weeks</th><th>Meaning</th></tr>
-<tr><td>Complete</td><td class="n">2</td><td>every known match from that week has its replay</td></tr>
-<tr><td>Partial</td><td class="n">6</td><td>some replays held, some missing</td></tr>
-<tr><td>Nothing held</td><td class="n">67</td><td>not a single replay from that week survives here</td></tr>
-</table>
-<div class="callout" style="margin-top:20px">
-<p><strong>67 of 75 weeks have no replays at all.</strong> Everything from
-March 2025 through
-July 2026 is
-almost entirely unrecorded. Those matches are past the point where they can be collected by anyone
-outside the people who run the servers.</p>
-</div>
-<h3>Match records are nearly complete</h3>
-<p>70 weeks are missing at least one match record, but the shortfall is small &mdash;
-2,255 matches in total, 1.9% of everything. The scan that
-discovers which ranked matches exist covers the full history from
-24 March 2025 to now with no gaps, so the list of what
-is missing is believed complete rather than merely what has been noticed.</p>
-</div></section>
-
-<section><div class="wrap">
-<h2>How this can be helped</h2>
-<h3>Play and keep your own matches</h3>
-<p>The single thing that needs no permission from anyone: save the replays of matches you play in.
-That is your own game data, downloaded the ordinary way the game already offers. Enough people doing
-that and the archive stops losing ground from today onward, regardless of what happens with the
-backlog.</p>
-<h3>Donate an archive you already have</h3>
-<p>People have been saving replays privately for years. If you have a folder of them, it is likely to
-contain matches nothing else does &mdash; a recent donation of 2,517 files added
-2,515 matches from November 2025 that were not held anywhere in this archive.
-Old and partial collections are still worth having.</p>
-<h3>What is deliberately not here</h3>
-<div class="callout ok">
-<p>There is no scraping tool, endpoint list, or collection script on this page, and there will not be.
-The people who run the ranked servers asked for the crawling to stop, and it stopped. They have since
-allowed this archive to keep what it already had, and allowed recent matches to be collected inside a
-narrow window. That arrangement is worth more than anything a crawl would retrieve, and it is not
-transferable &mdash; it was extended to one person, not handed out.</p>
-<p>The backlog is not something a crowd can collect. It exists in one place, and it is released or it
-is not.</p>
-</div>
-<h3>The ask</h3>
-<p>The 112,885 missing recordings are already itemised &mdash; every id, every date, published
-above and downloadable in full. If bulk access is ever granted, the list of exactly what to send is
-ready and costs nobody any work to produce.</p>
-</div></section>
-
-
-<section><div class="wrap">
-<h2>Finding a specific match</h2>
-<p>The ranked replay browser on the official site is backed by a JSON endpoint that takes the same
-filters its own controls set. Reading it directly is usually the quickest way to locate one particular
-game &mdash; a match you played, a notable final, a game on a specific map.</p>
-
-<p><code>https://tagpro.koalabeast.com/replays/data?page=0&amp;pageSize=50&amp;visibility=ranked&amp;dateStart=&lt;ms&gt;&amp;dateEnd=&lt;ms&gt;</code></p>
-
-<table>
-<tr><th>Filter</th><th>What it does</th><th>Accepted values</th></tr>
-<tr><td><code>visibility</code></td><td>which pool of games to search</td><td><code>ranked</code></td></tr>
-<tr><td><code>dateStart</code></td><td>earliest match start time</td><td>Unix time in <strong>milliseconds</strong></td></tr>
-<tr><td><code>dateEnd</code></td><td>latest match start time</td><td>Unix time in <strong>milliseconds</strong></td></tr>
-<tr><td><code>mapPreset</code></td><td>restrict to a single map</td><td>map name, e.g. <code>Centenaria</code></td></tr>
-<tr><td><code>userId</code></td><td>only one player&rsquo;s games</td><td>a player id; omit for everyone&rsquo;s</td></tr>
-<tr><td><code>winner</code></td><td>filter by outcome</td><td><code>mine</code></td></tr>
-<tr><td><code>myTeam</code></td><td>which side you were on</td><td>appears in the browser&rsquo;s own URLs; exact behaviour not confirmed here</td></tr>
-<tr><td><code>page</code></td><td>which page of results</td><td><code>0</code>&ndash;<code>4</code> &mdash; higher is rejected</td></tr>
-<tr><td><code>pageSize</code></td><td>results per page</td><td>up to <code>50</code> &mdash; higher is rejected</td></tr>
-</table>
-
-<h3>The timestamp format</h3>
-<p>Both date filters are Unix time in <strong>milliseconds</strong> &mdash; thirteen digits, which is
-ordinary Unix seconds multiplied by 1000. A few ways to produce one:</p>
-<ul>
-<li>Shell: <code>date -u -d "2026-08-01" +%s000</code></li>
-<li>Browser console: <code>Date.parse("2026-08-01T00:00:00Z")</code></li>
-<li>Python: <code>int(datetime(2026,8,1,tzinfo=timezone.utc).timestamp()*1000)</code></li>
-</ul>
-<p>A 13-digit number starting with <code>17</code> is somewhere in the 2023&ndash;2026 range; if yours
-has 10 digits you have seconds and need three more zeroes.</p>
-
-<h3>Downloading one recording</h3>
-<p>Once you have a game id, the recording itself comes from:</p>
-<p><code>https://tagpro.koalabeast.com/replays/gameFile?gameId=&lt;game_id&gt;&amp;gameUser=&lt;user&gt;</code></p>
-<p>It returns the entire frame-by-frame recording as newline-delimited JSON, and the files are large
-&mdash; a couple of megabytes each is normal. The first line on its own carries the match metadata,
-including the ranked skill ratings and win probabilities, if that is all you need.</p>
-<div class="callout">
-<p><strong>Recordings older than roughly two days return <code>403 you must be logged in to view that
-replay</code></strong> to anonymous requests. That is why this archive holds almost nothing from before
-mid-2026, and why the 112,765 missing recordings listed here are not something a crowd can go and
-collect. They survive in one place, and they are released or they are not.</p>
-</div>
-
-<h3>The 250-result ceiling</h3>
-<div class="callout">
-<p><code>page</code> stops at 4 and <code>pageSize</code> stops at 50, so <strong>any single query
-returns at most 250 matches</strong>, whatever the filters. There is no way to page deeper. If the
-window you asked for holds more than 250 games, you are seeing a slice of it and the rest is not
-reachable by adding pages &mdash; narrow the date range until the result set fits underneath the cap.</p>
-<p>This is also why the filters are for <em>finding</em> games rather than collecting them in bulk. Please
-keep requests to the pace of a person looking something up. These are volunteer-run servers, and heavy
-automated traffic against them has caused real outages before &mdash; including from this project, which
-is why the crawling stopped.</p>
-</div>
-</div></section>
-
-<section><div class="wrap">
-<h2>Where the data lives</h2>
-<p>Four separate things get called &ldquo;replay data&rdquo; and they are not interchangeable. What is
-scarce is only the last one.</p>
-<table>
-<tr><th>Layer</th><th>What it is</th><th>Coverage</th></tr>
-<tr><td>Match list</td><td>which ranked matches exist at all &mdash; ids, dates, maps, scores</td><td>complete for the whole ranked era</td></tr>
-<tr><td>Match records</td><td>players, scores, event timelines, per-match stats, mirrored on tagpro.eu</td><td>98.1% of known matches</td></tr>
-<tr><td>Ranked metadata</td><td>skill ratings and win probabilities attached to a ranked game</td><td>only where the recording was captured</td></tr>
-<tr><td>Replay recordings</td><td>the full game file everything else is derived from</td><td>6.2% &mdash; the gap this page is about</td></tr>
-</table>
-<p>The first two are broadly available and always have been. The recordings are the part that expires:
-reachable for a couple of days after a match, then effectively gone unless somebody saved a copy. That is
-the whole reason this archive exists, and the reason its coverage before mid-2026 is close to zero.</p>
-<p>Per-week inventories of every known match id are downloadable from the table above. The full list of
-what is missing is published as one file too: <a href="data/missing_replays.csv.gz" download>missing_replays.csv.gz</a>
-&mdash; 112,765 rows, 4.8&nbsp;MB. The <a href="DATA_MAP.md">data map</a> describes every field.</p>
-</div></section>
+<section>
+<h2>Replay coverage</h2>
+<p class="note">Replay recordings held, against the match ids collected for that week.</p>
+<table><thead><tr><th>Week</th><th></th><th style="text-align:right">Count</th><th style="text-align:right">%</th><th></th></tr></thead><tbody>
+<tr><td class="wk">24 Mar 2025</td><td class="bar"><div class="track frep"><span style="width:0.27%"></span></div></td><td class="n">5 <i>/ 1,829</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-03-24.json" download>json</a></td></tr>
+<tr><td class="wk">31 Mar 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 3,431</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-03-31.json" download>json</a></td></tr>
+<tr><td class="wk">07 Apr 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 2,832</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-04-07.json" download>json</a></td></tr>
+<tr><td class="wk">14 Apr 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 2,118</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-04-14.json" download>json</a></td></tr>
+<tr><td class="wk">21 Apr 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,944</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-04-21.json" download>json</a></td></tr>
+<tr><td class="wk">28 Apr 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 2,321</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-04-28.json" download>json</a></td></tr>
+<tr><td class="wk">05 May 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 2,245</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-05-05.json" download>json</a></td></tr>
+<tr><td class="wk">12 May 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 2,095</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-05-12.json" download>json</a></td></tr>
+<tr><td class="wk">19 May 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,904</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-05-19.json" download>json</a></td></tr>
+<tr><td class="wk">26 May 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 2,072</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-05-26.json" download>json</a></td></tr>
+<tr><td class="wk">02 Jun 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,633</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-06-02.json" download>json</a></td></tr>
+<tr><td class="wk">09 Jun 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,757</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-06-09.json" download>json</a></td></tr>
+<tr><td class="wk">16 Jun 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,572</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-06-16.json" download>json</a></td></tr>
+<tr><td class="wk">23 Jun 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,318</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-06-23.json" download>json</a></td></tr>
+<tr><td class="wk">30 Jun 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,027</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-06-30.json" download>json</a></td></tr>
+<tr><td class="wk">07 Jul 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,256</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-07-07.json" download>json</a></td></tr>
+<tr><td class="wk">14 Jul 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,274</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-07-14.json" download>json</a></td></tr>
+<tr><td class="wk">21 Jul 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,276</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-07-21.json" download>json</a></td></tr>
+<tr><td class="wk">28 Jul 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,290</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-07-28.json" download>json</a></td></tr>
+<tr><td class="wk">04 Aug 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,192</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-08-04.json" download>json</a></td></tr>
+<tr><td class="wk">11 Aug 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,085</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-08-11.json" download>json</a></td></tr>
+<tr><td class="wk">18 Aug 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,038</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-08-18.json" download>json</a></td></tr>
+<tr><td class="wk">25 Aug 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,198</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-08-25.json" download>json</a></td></tr>
+<tr><td class="wk">01 Sep 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,346</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-09-01.json" download>json</a></td></tr>
+<tr><td class="wk">08 Sep 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,228</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-09-08.json" download>json</a></td></tr>
+<tr><td class="wk">15 Sep 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,139</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-09-15.json" download>json</a></td></tr>
+<tr><td class="wk">22 Sep 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,029</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-09-22.json" download>json</a></td></tr>
+<tr><td class="wk">29 Sep 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,074</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-09-29.json" download>json</a></td></tr>
+<tr><td class="wk">06 Oct 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 966</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-10-06.json" download>json</a></td></tr>
+<tr><td class="wk">13 Oct 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,169</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-10-13.json" download>json</a></td></tr>
+<tr><td class="wk">20 Oct 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,098</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-10-20.json" download>json</a></td></tr>
+<tr><td class="wk">27 Oct 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 993</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-10-27.json" download>json</a></td></tr>
+<tr><td class="wk">03 Nov 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,215</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-11-03.json" download>json</a></td></tr>
+<tr><td class="wk">10 Nov 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,340</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-11-10.json" download>json</a></td></tr>
+<tr><td class="wk">17 Nov 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,598</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-11-17.json" download>json</a></td></tr>
+<tr><td class="wk">24 Nov 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,290</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-11-24.json" download>json</a></td></tr>
+<tr><td class="wk">01 Dec 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,902</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-12-01.json" download>json</a></td></tr>
+<tr><td class="wk">08 Dec 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,075</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-12-08.json" download>json</a></td></tr>
+<tr><td class="wk">15 Dec 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 2,159</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-12-15.json" download>json</a></td></tr>
+<tr><td class="wk">22 Dec 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,193</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-12-22.json" download>json</a></td></tr>
+<tr><td class="wk">29 Dec 2025</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,848</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2025-12-29.json" download>json</a></td></tr>
+<tr><td class="wk">05 Jan 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 2,121</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-01-05.json" download>json</a></td></tr>
+<tr><td class="wk">12 Jan 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,943</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-01-12.json" download>json</a></td></tr>
+<tr><td class="wk">19 Jan 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,792</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-01-19.json" download>json</a></td></tr>
+<tr><td class="wk">26 Jan 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 2,025</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-01-26.json" download>json</a></td></tr>
+<tr><td class="wk">02 Feb 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,856</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-02-02.json" download>json</a></td></tr>
+<tr><td class="wk">09 Feb 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,636</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-02-09.json" download>json</a></td></tr>
+<tr><td class="wk">16 Feb 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,483</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-02-16.json" download>json</a></td></tr>
+<tr><td class="wk">23 Feb 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,891</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-02-23.json" download>json</a></td></tr>
+<tr><td class="wk">02 Mar 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,862</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-03-02.json" download>json</a></td></tr>
+<tr><td class="wk">09 Mar 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,884</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-03-09.json" download>json</a></td></tr>
+<tr><td class="wk">16 Mar 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,695</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-03-16.json" download>json</a></td></tr>
+<tr><td class="wk">23 Mar 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 2,001</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-03-23.json" download>json</a></td></tr>
+<tr><td class="wk">30 Mar 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,625</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-03-30.json" download>json</a></td></tr>
+<tr><td class="wk">06 Apr 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,614</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-04-06.json" download>json</a></td></tr>
+<tr><td class="wk">13 Apr 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,588</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-04-13.json" download>json</a></td></tr>
+<tr><td class="wk">20 Apr 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,557</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-04-20.json" download>json</a></td></tr>
+<tr><td class="wk">27 Apr 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,708</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-04-27.json" download>json</a></td></tr>
+<tr><td class="wk">04 May 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,830</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-05-04.json" download>json</a></td></tr>
+<tr><td class="wk">11 May 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,808</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-05-11.json" download>json</a></td></tr>
+<tr><td class="wk">18 May 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,670</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-05-18.json" download>json</a></td></tr>
+<tr><td class="wk">25 May 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,976</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-05-25.json" download>json</a></td></tr>
+<tr><td class="wk">01 Jun 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,921</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-06-01.json" download>json</a></td></tr>
+<tr><td class="wk">08 Jun 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,506</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-06-08.json" download>json</a></td></tr>
+<tr><td class="wk">15 Jun 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,878</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-06-15.json" download>json</a></td></tr>
+<tr><td class="wk">22 Jun 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,992</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-06-22.json" download>json</a></td></tr>
+<tr><td class="wk">29 Jun 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,681</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-06-29.json" download>json</a></td></tr>
+<tr><td class="wk">06 Jul 2026</td><td class="bar"><div class="track frep"><span style="width:0.00%"></span></div></td><td class="n">0 <i>/ 1,629</i></td><td class="p">0%</td><td class="dl"><a href="data/weeks/2026-07-06.json" download>json</a></td></tr>
+<tr><td class="wk">13 Jul 2026</td><td class="bar"><div class="track frep"><span style="width:31.29%"></span></div></td><td class="n">510 <i>/ 1,630</i></td><td class="p">31%</td><td class="dl"><a href="data/weeks/2026-07-13.json" download>json</a></td></tr>
+<tr><td class="wk">20 Jul 2026</td><td class="bar"><div class="track frep"><span style="width:100.00%"></span></div></td><td class="n">1,687 <i>/ 1,687</i></td><td class="p">100%</td><td class="dl"><a href="data/weeks/2026-07-20.json" download>json</a></td></tr>
+<tr><td class="wk">27 Jul 2026</td><td class="bar"><div class="track frep"><span style="width:99.74%"></span></div></td><td class="n">1,887 <i>/ 1,892</i></td><td class="p">100%</td><td class="dl"><a href="data/weeks/2026-07-27.json" download>json</a></td></tr>
+<tr><td class="wk">03 Aug 2026</td><td class="bar"><div class="track frep"><span style="width:99.22%"></span></div></td><td class="n">1,911 <i>/ 1,926</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-08-03.json" download>json</a></td></tr>
+<tr><td class="wk">10 Aug 2026</td><td class="bar"><div class="track frep"><span style="width:100.00%"></span></div></td><td class="n">273 <i>/ 273</i></td><td class="p">100%</td><td class="dl"><a href="data/weeks/2026-08-10.json" download>json</a></td></tr>
+<tr><td class="wk">17 Aug 2026</td><td class="bar"><div class="track frep"><span style="width:99.03%"></span></div></td><td class="n">919 <i>/ 928</i></td><td class="p">99%</td><td class="dl"><a href="data/weeks/2026-08-17.json" download>json</a></td></tr>
+<tr><td class="wk">24 Aug 2026</td><td class="bar"><div class="track frep"><span style="width:98.08%"></span></div></td><td class="n">562 <i>/ ~573</i></td><td class="p">98%</td><td class="dl"><a href="data/weeks/2026-08-24.json" download>json</a></td></tr>
+</tbody><tfoot><tr><td>Total</td><td><div class="track"><span style="width:6.44%;background:var(--rep)"></span></div></td><td class="n">7,754 <i>/ 120,450</i></td><td class="p">6.4%</td><td></td></tr></tfoot></table>
+</section>
 
 <footer><div class="wrap">
-<h2>Honesty about how this got here</h2>
-<p>This archive started by crawling the ranked servers without asking. The operators noticed, it cost
-them bandwidth and time, and they asked for it to stop. It stopped. They were within their rights to
-require everything collected be deleted and did not. Anyone weighing whether to trust this project
-should know that, and it is written here rather than left to be discovered.</p>
-<p style="color:var(--faint);font-size:13px;margin-top:24px">Match records come from tagpro.eu;
-ranked match data from the official servers. Figures generated
-25 August 2026. Counts move as collection continues.</p>
+Per-week <code>json</code> links give every match id for that week with flags for what is held.
+Full inventories: <a href="data/missing_replays.json" download>missing_replays.json</a>,
+<a href="data/coverage.json">coverage.json</a>. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.
+Generated 25 Aug 2026.
 </div></footer>
-</body></html>
+</div></body></html>
