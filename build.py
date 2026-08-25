@@ -41,7 +41,7 @@ def load(conn):
     rows = conn.execute("""
         SELECT k.uuid, k.game_id, k.started, k.map_name, k.duration,
                CASE WHEN r.uuid IS NOT NULL THEN 1 ELSE 0 END,
-               CASE WHEN m.match_id IS NOT NULL THEN 1 ELSE 0 END, m.match_id
+               CASE WHEN m.match_id IS NOT NULL THEN 1 ELSE 0 END, m.match_id, m.source
         FROM koala_matches k
         LEFT JOIN replay_files r ON r.uuid = k.uuid AND r.status = 'done'
         LEFT JOIN matches m ON m.koala_uuid = k.uuid
@@ -70,19 +70,27 @@ def build():
     rows, missing = load(conn)
 
     weeks, out_rows = {}, {}
-    for uuid, gid, started, mp, dur, has_rep, has_rec, eu_id in rows:
+    for uuid, gid, started, mp, dur, has_rep, has_rec, eu_id, eu_src in rows:
         t = dt.datetime.fromisoformat(started.replace("Z", "+00:00"))
         w = monday(t.date())
-        c = weeks.setdefault(w, {"ids": 0, "replay": 0, "missing": 0})
+        c = weeks.setdefault(w, {"ids": 0, "replay": 0, "missing": 0,
+                                 "record": 0, "rebuilt": 0})
         c["ids"] += 1
         c["replay"] += has_rep
+        c["record"] += has_rec
+        # a tagpro.eu record we reconstructed ourselves from an archived
+        # recording, rather than one the mirror ever carried (replay_to_eu.py)
+        if eu_src == "replay":
+            c["rebuilt"] += 1
         out_rows.setdefault(w, []).append({
             "uuid": uuid, "game_id": gid, "started": started, "map": mp,
             "duration": dur, "have_replay": bool(has_rep),
             "have_record": bool(has_rec), "eu_match_id": eu_id,
         })
     for t in missing:
-        weeks.setdefault(monday(t.date()), {"ids": 0, "replay": 0, "missing": 0})["missing"] += 1
+        weeks.setdefault(monday(t.date()),
+                         {"ids": 0, "replay": 0, "missing": 0,
+                          "record": 0, "rebuilt": 0})["missing"] += 1
 
     today = dt.datetime.now(dt.timezone.utc).date()
     curwk = monday(today)
@@ -90,6 +98,7 @@ def build():
     for w in sorted(weeks):
         c = weeks[w]
         cov.append({"week": w, "ids": c["ids"], "replay": c["replay"],
+                    "record": c["record"], "rebuilt": c["rebuilt"],
                     "missing_ids": c["missing"], "est": c["ids"] + c["missing"],
                     "partial": w == curwk})
 
@@ -111,9 +120,9 @@ def build():
 
 CSS = """
 :root{--bg:#f7f7f5;--panel:#fff;--ink:#16181d;--muted:#5b6270;--faint:#8a919e;--rule:#e3e5ea;
---id:#2f6fb3;--rep:#2e7d5b;--track:#e8eaee;--code:#f0f1f4}
+--id:#2f6fb3;--rep:#2e7d5b;--rec:#2e9e6b;--reb:#c9772e;--track:#e8eaee;--code:#f0f1f4}
 @media (prefers-color-scheme:dark){:root{--bg:#101215;--panel:#171a1f;--ink:#e8eaee;--muted:#a2aab8;
---faint:#78808e;--rule:#282c34;--id:#5b9bdd;--rep:#4dae83;--track:#252932;--code:#1e222a}}
+--faint:#78808e;--rule:#282c34;--id:#5b9bdd;--rep:#4dae83;--rec:#4fbe8b;--reb:#e08a3c;--track:#252932;--code:#1e222a}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
 font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
@@ -145,6 +154,13 @@ td.dl{width:44px;text-align:right}
 .track span{display:block;height:100%}
 .fid span{background:var(--id)}
 .frep span{background:var(--rep)}
+.bars{display:flex;flex-direction:column;gap:2px;min-width:90px}
+.bars .track{height:5px;border-radius:2px}
+.bars .track:first-child{height:9px;border-radius:3px}
+.frec span{background:var(--rec)}
+.freb span{background:var(--reb)}
+.key{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 12px}
+.key i{display:inline-block;width:18px;height:7px;border-radius:2px;vertical-align:1px;margin-right:6px}
 tfoot td{font-weight:640;background:var(--panel);border-top:2px solid var(--rule);padding:10px 12px}
 a{color:var(--id)} .dl a{font-size:11px;color:var(--faint);text-decoration:none}
 .dl a:hover{color:var(--id)}
@@ -162,6 +178,7 @@ def render(cov):
     f = lambda n: f"{n:,}"
     pc = lambda a, b: (100.0 * a / b) if b else 0.0
     tot = lambda k: sum(r[k] for r in cov)
+    t = tot
     ids, est, rep = tot("ids"), tot("est"), tot("replay")
     uncertain = [r for r in cov if r["missing_ids"] or r["partial"]]
 
@@ -177,9 +194,20 @@ def render(cov):
             total = ("~" + f(d)) if approx else f(d)
             w = pc(n, d)
             lbl = dt.date.fromisoformat(s["week"]).strftime("%d %b %Y")
+            if kind == "id":
+                # A sliver must stay visible: 281 reconstructed matches across
+                # 123k is 0.2%, which rounds to nothing without a floor.
+                vis = lambda v: max(pc(v, d), 0.7) if v else 0.0
+                bar = (f'<div class="bars">'
+                       f'<div class="track fid"><span style="width:{w:.2f}%"></span></div>'
+                       f'<div class="track frec"><span style="width:{pc(s["record"],d):.2f}%"></span></div>'
+                       f'<div class="track freb"><span style="width:{vis(s["rebuilt"]):.2f}%"></span></div>'
+                       f'</div>')
+            else:
+                bar = f'<div class="track {cls}"><span style="width:{w:.2f}%"></span></div>'
             out.append(
                 f'<tr><td class="wk">{lbl}</td>'
-                f'<td><div class="track {cls}"><span style="width:{w:.2f}%"></span></div></td>'
+                f'<td>{bar}</td>'
                 f'<td class="n">{f(n)} <i>/ {total}</i></td>'
                 f'<td class="p">{w:.0f}%</td>'
                 f'<td class="dl"><a href="data/weeks/{s["week"]}.json" download>json</a></td></tr>')
@@ -214,10 +242,17 @@ def render(cov):
 <div class="wrap">
 <section>
 <h2>ID coverage</h2>
-<p class="note">Match ids collected per week. {len(cov)-len(uncertain)} of {len(cov)} weeks are exact:
-every match tagpro.eu lists for that week has its id here. The {len(uncertain)} weeks marked
-<code>~</code> have a known shortfall, counted from tagpro.eu matches with no id at the same
-instant.</p>
+<p class="note">Match ids collected per week, with the two derived layers beneath: how many of
+those matches have a tagpro.eu record, and how many of those records were rebuilt here from an
+archived recording rather than carried by the mirror.</p>
+<div class="key">
+<span><i style="background:var(--id)"></i>match ids collected</span>
+<span><i style="background:var(--rec)"></i>has a tagpro.eu record</span>
+<span><i style="background:var(--reb)"></i>record rebuilt from a recording</span>
+</div>
+<p class="note">{len(cov)-len(uncertain)} of {len(cov)} weeks are exact. A <code>~</code> marks the
+{len(uncertain)} weeks where the total is an estimate rather than a known figure &mdash; see the note
+below the totals.</p>
 <table><thead>{HEAD}</thead><tbody>
 {body("id")}
 </tbody>{foot(ids, est, "id", bool(uncertain))}</table>
@@ -232,6 +267,12 @@ instant.</p>
 </section>
 
 <footer><div class="wrap">
+The ID totals are marked <code>~</code> because no published figure exists for how many ranked
+matches were played in a week. The denominator is estimated as the ids held plus any tagpro.eu match
+with no id at the same instant. At {pc(ids,est):.2f}% coverage the estimate and the real total are
+all but identical, and the {t('missing_ids')} ids still counted as absent are most likely matches whose
+start times disagree between the two sources rather than genuinely missing records.
+<br><br>
 Per-week <code>json</code> links give every match id for that week with flags for what is held.
 Full inventories: <a href="data/missing_replays.json" download>missing_replays.json</a>,
 <a href="data/coverage.json">coverage.json</a>. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.

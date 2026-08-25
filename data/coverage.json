@@ -3,6 +3,8 @@
   "week": "2025-03-24",
   "ids": 1829,
   "replay": 5,
+  "record": 1761,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1829,
   "partial": false
@@ -11,6 +13,8 @@
   "week": "2025-03-31",
   "ids": 3431,
   "replay": 0,
+  "record": 3310,
+  "rebuilt": 0,
   "missing_ids": 1,
   "est": 3432,
   "partial": false
@@ -19,6 +23,8 @@
   "week": "2025-04-07",
   "ids": 2832,
   "replay": 0,
+  "record": 2765,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 2832,
   "partial": false
@@ -27,6 +33,8 @@
   "week": "2025-04-14",
   "ids": 2118,
   "replay": 0,
+  "record": 2060,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 2118,
   "partial": false
@@ -35,6 +43,8 @@
   "week": "2025-04-21",
   "ids": 1944,
   "replay": 0,
+  "record": 1913,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1944,
   "partial": false
@@ -43,6 +53,8 @@
   "week": "2025-04-28",
   "ids": 2321,
   "replay": 0,
+  "record": 2280,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 2321,
   "partial": false
@@ -51,6 +63,8 @@
   "week": "2025-05-05",
   "ids": 2245,
   "replay": 0,
+  "record": 2207,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 2245,
   "partial": false
@@ -59,6 +73,8 @@
   "week": "2025-05-12",
   "ids": 2095,
   "replay": 0,
+  "record": 2055,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 2095,
   "partial": false
@@ -67,6 +83,8 @@
   "week": "2025-05-19",
   "ids": 1904,
   "replay": 0,
+  "record": 1872,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1904,
   "partial": false
@@ -75,6 +93,8 @@
   "week": "2025-05-26",
   "ids": 2072,
   "replay": 0,
+  "record": 2025,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 2072,
   "partial": false
@@ -83,6 +103,8 @@
   "week": "2025-06-02",
   "ids": 1633,
   "replay": 0,
+  "record": 1605,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1633,
   "partial": false
@@ -91,6 +113,8 @@
   "week": "2025-06-09",
   "ids": 1757,
   "replay": 0,
+  "record": 1731,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1757,
   "partial": false
@@ -99,6 +123,8 @@
   "week": "2025-06-16",
   "ids": 1572,
   "replay": 0,
+  "record": 1546,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1572,
   "partial": false
@@ -107,6 +133,8 @@
   "week": "2025-06-23",
   "ids": 1318,
   "replay": 0,
+  "record": 1292,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1318,
   "partial": false
@@ -115,6 +143,8 @@
   "week": "2025-06-30",
   "ids": 1027,
   "replay": 0,
+  "record": 1015,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1027,
   "partial": false
@@ -123,6 +153,8 @@
   "week": "2025-07-07",
   "ids": 1256,
   "replay": 0,
+  "record": 1240,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1256,
   "partial": false
@@ -131,6 +163,8 @@
   "week": "2025-07-14",
   "ids": 1274,
   "replay": 0,
+  "record": 1256,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1274,
   "partial": false
@@ -139,6 +173,8 @@
   "week": "2025-07-21",
   "ids": 1276,
   "replay": 0,
+  "record": 1255,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1276,
   "partial": false
@@ -147,6 +183,8 @@
   "week": "2025-07-28",
   "ids": 1290,
   "replay": 0,
+  "record": 1264,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1290,
   "partial": false
@@ -155,6 +193,8 @@
   "week": "2025-08-04",
   "ids": 1192,
   "replay": 0,
+  "record": 1182,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1192,
   "partial": false
@@ -163,6 +203,8 @@
   "week": "2025-08-11",
   "ids": 1085,
   "replay": 0,
+  "record": 1059,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1085,
   "partial": false
@@ -171,6 +213,8 @@
   "week": "2025-08-18",
   "ids": 1038,
   "replay": 0,
+  "record": 1018,
+  "rebuilt": 0,
   "missing_ids": 1,
   "est": 1039,
   "partial": false
@@ -179,6 +223,8 @@
   "week": "2025-08-25",
   "ids": 1198,
   "replay": 0,
+  "record": 1174,
+  "rebuilt": 0,
   "missing_ids": 1,
   "est": 1199,
   "partial": false
@@ -187,6 +233,8 @@
   "week": "2025-09-01",
   "ids": 1347,
   "replay": 0,
+  "record": 1325,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1347,
   "partial": false
@@ -195,6 +243,8 @@
   "week": "2025-09-08",
   "ids": 1228,
   "replay": 0,
+  "record": 1207,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1228,
   "partial": false
@@ -203,6 +253,8 @@
   "week": "2025-09-15",
   "ids": 1139,
   "replay": 0,
+  "record": 1121,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1139,
   "partial": false
@@ -211,6 +263,8 @@
   "week": "2025-09-22",
   "ids": 1029,
   "replay": 0,
+  "record": 1012,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1029,
   "partial": false
@@ -219,6 +273,8 @@
   "week": "2025-09-29",
   "ids": 1074,
   "replay": 0,
+  "record": 1053,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1074,
   "partial": false
@@ -227,6 +283,8 @@
   "week": "2025-10-06",
   "ids": 966,
   "replay": 0,
+  "record": 951,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 966,
   "partial": false
@@ -235,6 +293,8 @@
   "week": "2025-10-13",
   "ids": 1169,
   "replay": 0,
+  "record": 1144,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1169,
   "partial": false
@@ -243,6 +303,8 @@
   "week": "2025-10-20",
   "ids": 1098,
   "replay": 0,
+  "record": 1071,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1098,
   "partial": false
@@ -251,6 +313,8 @@
   "week": "2025-10-27",
   "ids": 993,
   "replay": 0,
+  "record": 962,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 993,
   "partial": false
@@ -259,6 +323,8 @@
   "week": "2025-11-03",
   "ids": 1215,
   "replay": 0,
+  "record": 1191,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1215,
   "partial": false
@@ -267,6 +333,8 @@
   "week": "2025-11-10",
   "ids": 1340,
   "replay": 24,
+  "record": 1305,
+  "rebuilt": 1,
   "missing_ids": 0,
   "est": 1340,
   "partial": false
@@ -275,6 +343,8 @@
   "week": "2025-11-17",
   "ids": 1598,
   "replay": 1525,
+  "record": 1597,
+  "rebuilt": 36,
   "missing_ids": 3,
   "est": 1601,
   "partial": false
@@ -283,6 +353,8 @@
   "week": "2025-11-24",
   "ids": 1290,
   "replay": 966,
+  "record": 1282,
+  "rebuilt": 30,
   "missing_ids": 0,
   "est": 1290,
   "partial": false
@@ -291,6 +363,8 @@
   "week": "2025-12-01",
   "ids": 1902,
   "replay": 0,
+  "record": 1866,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1902,
   "partial": false
@@ -299,6 +373,8 @@
   "week": "2025-12-08",
   "ids": 1075,
   "replay": 0,
+  "record": 1047,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1075,
   "partial": false
@@ -307,6 +383,8 @@
   "week": "2025-12-15",
   "ids": 2159,
   "replay": 0,
+  "record": 2119,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 2159,
   "partial": false
@@ -315,6 +393,8 @@
   "week": "2025-12-22",
   "ids": 1193,
   "replay": 0,
+  "record": 1177,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1193,
   "partial": false
@@ -323,6 +403,8 @@
   "week": "2025-12-29",
   "ids": 1848,
   "replay": 0,
+  "record": 1808,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1848,
   "partial": false
@@ -331,6 +413,8 @@
   "week": "2026-01-05",
   "ids": 2121,
   "replay": 0,
+  "record": 2090,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 2121,
   "partial": false
@@ -339,6 +423,8 @@
   "week": "2026-01-12",
   "ids": 1943,
   "replay": 0,
+  "record": 1909,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1943,
   "partial": false
@@ -347,6 +433,8 @@
   "week": "2026-01-19",
   "ids": 1792,
   "replay": 0,
+  "record": 1764,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1792,
   "partial": false
@@ -355,6 +443,8 @@
   "week": "2026-01-26",
   "ids": 2025,
   "replay": 0,
+  "record": 1987,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 2025,
   "partial": false
@@ -363,6 +453,8 @@
   "week": "2026-02-02",
   "ids": 1856,
   "replay": 0,
+  "record": 1830,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1856,
   "partial": false
@@ -371,6 +463,8 @@
   "week": "2026-02-09",
   "ids": 1636,
   "replay": 0,
+  "record": 1608,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1636,
   "partial": false
@@ -379,6 +473,8 @@
   "week": "2026-02-16",
   "ids": 1483,
   "replay": 0,
+  "record": 1465,
+  "rebuilt": 0,
   "missing_ids": 1,
   "est": 1484,
   "partial": false
@@ -387,6 +483,8 @@
   "week": "2026-02-23",
   "ids": 1891,
   "replay": 0,
+  "record": 1861,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1891,
   "partial": false
@@ -395,6 +493,8 @@
   "week": "2026-03-02",
   "ids": 1862,
   "replay": 0,
+  "record": 1825,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1862,
   "partial": false
@@ -403,6 +503,8 @@
   "week": "2026-03-09",
   "ids": 1884,
   "replay": 0,
+  "record": 1845,
+  "rebuilt": 0,
   "missing_ids": 1,
   "est": 1885,
   "partial": false
@@ -411,6 +513,8 @@
   "week": "2026-03-16",
   "ids": 1695,
   "replay": 0,
+  "record": 1671,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1695,
   "partial": false
@@ -419,6 +523,8 @@
   "week": "2026-03-23",
   "ids": 2001,
   "replay": 0,
+  "record": 1981,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 2001,
   "partial": false
@@ -427,6 +533,8 @@
   "week": "2026-03-30",
   "ids": 1625,
   "replay": 0,
+  "record": 1607,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1625,
   "partial": false
@@ -435,6 +543,8 @@
   "week": "2026-04-06",
   "ids": 1614,
   "replay": 0,
+  "record": 1596,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1614,
   "partial": false
@@ -443,6 +553,8 @@
   "week": "2026-04-13",
   "ids": 1588,
   "replay": 0,
+  "record": 1562,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1588,
   "partial": false
@@ -451,6 +563,8 @@
   "week": "2026-04-20",
   "ids": 1557,
   "replay": 0,
+  "record": 1528,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1557,
   "partial": false
@@ -459,6 +573,8 @@
   "week": "2026-04-27",
   "ids": 1708,
   "replay": 0,
+  "record": 1675,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1708,
   "partial": false
@@ -467,6 +583,8 @@
   "week": "2026-05-04",
   "ids": 1830,
   "replay": 0,
+  "record": 1804,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1830,
   "partial": false
@@ -475,6 +593,8 @@
   "week": "2026-05-11",
   "ids": 1808,
   "replay": 0,
+  "record": 1770,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1808,
   "partial": false
@@ -483,6 +603,8 @@
   "week": "2026-05-18",
   "ids": 1670,
   "replay": 0,
+  "record": 1634,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1670,
   "partial": false
@@ -491,6 +613,8 @@
   "week": "2026-05-25",
   "ids": 1976,
   "replay": 0,
+  "record": 1947,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1976,
   "partial": false
@@ -499,6 +623,8 @@
   "week": "2026-06-01",
   "ids": 1921,
   "replay": 0,
+  "record": 1891,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1921,
   "partial": false
@@ -507,6 +633,8 @@
   "week": "2026-06-08",
   "ids": 1506,
   "replay": 0,
+  "record": 1463,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1506,
   "partial": false
@@ -515,6 +643,8 @@
   "week": "2026-06-15",
   "ids": 1878,
   "replay": 0,
+  "record": 1814,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1878,
   "partial": false
@@ -523,6 +653,8 @@
   "week": "2026-06-22",
   "ids": 1992,
   "replay": 0,
+  "record": 1924,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1992,
   "partial": false
@@ -531,6 +663,8 @@
   "week": "2026-06-29",
   "ids": 1681,
   "replay": 0,
+  "record": 1637,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1681,
   "partial": false
@@ -539,6 +673,8 @@
   "week": "2026-07-06",
   "ids": 1629,
   "replay": 0,
+  "record": 1591,
+  "rebuilt": 0,
   "missing_ids": 0,
   "est": 1629,
   "partial": false
@@ -547,6 +683,8 @@
   "week": "2026-07-13",
   "ids": 1630,
   "replay": 510,
+  "record": 1587,
+  "rebuilt": 14,
   "missing_ids": 0,
   "est": 1630,
   "partial": false
@@ -555,6 +693,8 @@
   "week": "2026-07-20",
   "ids": 1687,
   "replay": 1687,
+  "record": 1687,
+  "rebuilt": 50,
   "missing_ids": 0,
   "est": 1687,
   "partial": false
@@ -563,6 +703,8 @@
   "week": "2026-07-27",
   "ids": 1892,
   "replay": 1887,
+  "record": 1892,
+  "rebuilt": 44,
   "missing_ids": 0,
   "est": 1892,
   "partial": false
@@ -571,6 +713,8 @@
   "week": "2026-08-03",
   "ids": 1926,
   "replay": 1911,
+  "record": 1926,
+  "rebuilt": 66,
   "missing_ids": 0,
   "est": 1926,
   "partial": false
@@ -579,6 +723,8 @@
   "week": "2026-08-10",
   "ids": 2238,
   "replay": 273,
+  "record": 2178,
+  "rebuilt": 7,
   "missing_ids": 0,
   "est": 2238,
   "partial": false
@@ -587,16 +733,20 @@
   "week": "2026-08-17",
   "ids": 2201,
   "replay": 919,
+  "record": 2170,
+  "rebuilt": 27,
   "missing_ids": 0,
   "est": 2201,
   "partial": false
  },
  {
   "week": "2026-08-24",
-  "ids": 601,
-  "replay": 562,
+  "ids": 628,
+  "replay": 628,
+  "record": 626,
+  "rebuilt": 6,
   "missing_ids": 0,
-  "est": 601,
+  "est": 628,
   "partial": true
  }
 ]
