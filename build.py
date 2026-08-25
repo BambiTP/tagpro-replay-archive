@@ -247,7 +247,7 @@ def render(cov, missing=()):
                     f'<tr><td class="wk">{lbl}</td><td>{bar}</td>'
                     f'<td class="n">{f(d)}</td>'
                     f'<td class="n2">{f(s["record"])} <i>{pc(s["record"],d):.0f}%</i></td>'
-                    f'<td class="n2">{f(reb)} <i>/ {f(s["record"])}</i></td>'
+                    f'<td class="n2">{f(reb)} <i>/ {f(d - mirror)}</i></td>'
                     f'{links}</tr>')
             else:
                 n, d = s["replay"], s["ids"]
@@ -278,7 +278,7 @@ def render(cov, missing=()):
         '</div></div></td>'
         f'<td class="n">{f(ids)}</td>'
         f'<td class="n2">{f(tot("record"))} <i>{pc(tot("record"),ids):.1f}%</i></td>'
-        f'<td class="n2">{f(reb_all)} <i>/ {f(tot("record"))}</i></td>'
+        f'<td class="n2">{f(reb_all)} <i>/ {f(ids - mirror_all)}</i></td>'
         '<td></td></tr></tfoot>')
     exceptions = "\n".join(
         f'<tr><td><a href="https://tagpro.eu/?match={mid}">{mid}</a></td>'
@@ -308,13 +308,14 @@ def render(cov, missing=()):
 <h2>Replay ids &mdash; complete</h2>
 <p class="lead">Every ranked match the replay listing returns has its id here: <strong>{f(ids)} of
 {f(ids)}, 100%</strong>. Nothing is outstanding.</p>
-<p class="note">Replay ids collected per week, with the tagpro.eu layer beneath: how many of those
-matches have a tagpro.eu id, and how many of those were rebuilt here from an archived recording
-rather than carried by the mirror.</p>
+<p class="note">Replay ids collected per week, with the tagpro.eu layer beneath. The third column
+counts records rebuilt here from an archived recording, against the number the mirror never carried
+in the first place &mdash; so it reads as progress closing that shortfall, not as a share of all
+tagpro.eu ids.</p>
 <div class="key">
 <span><i style="background:var(--id)"></i>replay ids collected</span>
 <span><i style="background:var(--rec)"></i>tagpro.eu id carried by the mirror</span>
-<span><i style="background:var(--reb)"></i>tagpro.eu id rebuilt here from a recording</span>
+<span><i style="background:var(--reb)"></i>rebuilt here from a recording</span>
 </div>
 <p class="note">The ranked replay listing is the authority on which matches exist, so these totals
 are exact rather than estimated.</p>
