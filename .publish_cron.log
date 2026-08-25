@@ -1,0 +1,6 @@
+2026-08-25T12:20:53-07:00 build failed:
+  File "/home/metjr/tagpro-archive/build.py", line 99, in build
+    f.unlink()
+  File "/usr/lib/python3.12/pathlib.py", line 1344, in unlink
+    os.unlink(self)
+FileNotFoundError: [Errno 2] No such file or directory: '/home/metjr/tagpro-archive/data/weeks/2025-12-29.json'

@@ -274,7 +274,7 @@
  {
   "week": "2025-11-17",
   "ids": 1598,
-  "replay": 37,
+  "replay": 1525,
   "missing_ids": 3,
   "est": 1601,
   "partial": false
@@ -282,7 +282,7 @@
  {
   "week": "2025-11-24",
   "ids": 1290,
-  "replay": 0,
+  "replay": 966,
   "missing_ids": 0,
   "est": 1290,
   "partial": false
@@ -577,26 +577,26 @@
  },
  {
   "week": "2026-08-10",
-  "ids": 273,
+  "ids": 2238,
   "replay": 273,
-  "missing_ids": 1928,
-  "est": 2201,
+  "missing_ids": 0,
+  "est": 2238,
   "partial": false
  },
  {
   "week": "2026-08-17",
-  "ids": 1272,
+  "ids": 2201,
   "replay": 919,
-  "missing_ids": 915,
-  "est": 2187,
+  "missing_ids": 0,
+  "est": 2201,
   "partial": false
  },
  {
   "week": "2026-08-24",
-  "ids": 594,
+  "ids": 601,
   "replay": 562,
   "missing_ids": 0,
-  "est": 594,
+  "est": 601,
   "partial": true
  }
 ]
