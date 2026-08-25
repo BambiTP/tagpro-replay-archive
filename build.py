@@ -111,9 +111,12 @@ def build():
                                            separators=(",", ":"))
         # tagpro.eu ids only - a plain list, for looking matches up on the mirror
         dump("eu", [r["eu_match_id"] for r in recs if r["eu_match_id"] is not None])
-        # replay ids only - uuid identifies the replay, game_id addresses the
+        # replay ids - uuid identifies the replay, game_id addresses the
         # recording itself, and you need the latter to request one
-        dump("replay", [{"uuid": r["uuid"], "game_id": r["game_id"]} for r in recs])
+        rid = lambda r: {"uuid": r["uuid"], "game_id": r["game_id"]}
+        dump("replay", [rid(r) for r in recs])
+        # the subset with no recording held here - this is the wanted list
+        dump("missing", [rid(r) for r in recs if not r["have_replay"]])
         # everything, including which of the two are actually held
         json.dump(recs, open(wdir / f"{w}.json", "w"), separators=(",", ":"))
 
@@ -127,6 +130,9 @@ def build():
     dump("missing_replays.json",
          [{"uuid": r[0], "game_id": r[1], "started": r[2], "map": r[3]}
           for r in rows if not r[5]])
+    dump("all.json", [{"uuid": r[0], "game_id": r[1], "started": r[2], "map": r[3],
+                       "duration": r[4], "have_replay": bool(r[5]),
+                       "have_record": bool(r[6]), "eu_match_id": r[7]} for r in rows])
 
     render(cov, missing)
     return cov
@@ -163,7 +169,7 @@ td.wk{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;wi
 td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:150px}
 td.n i{font-style:normal;color:var(--faint)}
 td.p{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);width:56px}
-td.dl{width:104px;text-align:right;white-space:nowrap}
+td.dl{width:186px;text-align:right;white-space:nowrap}
 .track{height:9px;border-radius:3px;background:var(--track);overflow:hidden;min-width:90px}
 .track span{display:block;height:100%}
 .fid span{background:var(--id)}
@@ -187,7 +193,7 @@ a{color:var(--id)}
 footer{padding:26px 0 60px;color:var(--faint);font-size:12.5px;border-top:1px solid var(--rule);margin-top:34px}
 code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em;
 font-family:ui-monospace,Menlo,Consolas,monospace}
-@media(max-width:640px){td.n{width:76px}td.n2{width:70px}td.n2 i{display:none}td.wk{width:80px;font-size:11px}.track,.bars{min-width:40px}td.dl{width:92px}.dl a{padding:2px 3px;margin-left:2px}}
+@media(max-width:640px){td.n{width:76px}td.n2{width:64px}td.n2 i{display:none}td.dl{width:150px}td.wk{width:80px;font-size:11px}.track,.bars{min-width:40px}td.dl{width:92px}.dl a{padding:2px 3px;margin-left:2px}}
 """
 
 HEAD = ('<tr><th>Week</th><th></th><th style="text-align:right">Count</th>'
@@ -211,10 +217,12 @@ def render(cov, missing=()):
         out = []
         for s in cov:
             lbl = dt.date.fromisoformat(s["week"]).strftime("%d %b %Y")
+            wk_ = s["week"]
             links = (f'<td class="dl">'
-                     f'<a href="data/weeks/{s["week"]}.eu.json" download title="tagpro.eu match ids">eu</a>'
-                     f'<a href="data/weeks/{s["week"]}.replay.json" download title="replay ids">rep</a>'
-                     f'<a href="data/weeks/{s["week"]}.json" download title="both, with what is held">all</a>'
+                     f'<a href="data/weeks/{wk_}.replay.json" download title="every replay id">rep</a>'
+                     f'<a href="data/weeks/{wk_}.missing.json" download title="replay ids with no recording held">missing</a>'
+                     f'<a href="data/weeks/{wk_}.eu.json" download title="tagpro.eu ids">eu</a>'
+                     f'<a href="data/weeks/{wk_}.json" download title="everything, with what is held">all</a>'
                      f'</td>')
             if kind == "id":
                 # The ranked replay listing is the authority on which matches
@@ -329,13 +337,14 @@ counted here rather than as missing ids.</p>
 </section>
 
 <footer><div class="wrap">
-Each week offers three downloads: <code>eu</code> is the tagpro.eu match ids, <code>rep</code> is the
-replay ids (uuid plus the game id a recording is requested by), and <code>all</code> is both together
-with flags for which are actually held.
+Each week offers four downloads. <code>rep</code> is every replay id (uuid plus the game id a
+recording is requested by), <code>missing</code> is the subset with no recording held here,
+<code>eu</code> is the tagpro.eu ids, and <code>all</code> is everything with flags for what is held.
 <br><br>
-Whole archive: <a href="data/all.eu.json" download>all.eu.json</a> &middot;
-<a href="data/all.replay.json" download>all.replay.json</a> &middot;
+Whole archive: <a href="data/all.replay.json" download>all.replay.json</a> &middot;
 <a href="data/missing_replays.json" download>missing_replays.json</a> &middot;
+<a href="data/all.eu.json" download>all.eu.json</a> &middot;
+<a href="data/all.json" download>all.json</a> &middot;
 <a href="data/coverage.json">coverage.json</a>. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.
 Generated {dt.datetime.now(dt.timezone.utc):%d %b %Y}.
 </div></footer>

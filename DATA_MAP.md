@@ -10,9 +10,10 @@ Files are keyed by the Monday of the week, UTC.
 
 | File | Contents |
 | --- | --- |
-| `data/weeks/YYYY-MM-DD.eu.json` | tagpro.eu match ids — a plain list of integers |
-| `data/weeks/YYYY-MM-DD.replay.json` | replay ids — objects with `uuid` and `game_id` |
-| `data/weeks/YYYY-MM-DD.json` | both, plus what is actually held |
+| `data/weeks/YYYY-MM-DD.replay.json` | every replay id — objects with `uuid` and `game_id` |
+| `data/weeks/YYYY-MM-DD.missing.json` | replay ids with no recording held here — same shape |
+| `data/weeks/YYYY-MM-DD.eu.json` | tagpro.eu ids — a plain list of integers |
+| `data/weeks/YYYY-MM-DD.json` | everything, plus what is actually held |
 
 Fields in the combined file:
 
@@ -31,8 +32,9 @@ Fields in the combined file:
 
 | File | Contents |
 | --- | --- |
-| `data/all.eu.json` | every tagpro.eu match id |
 | `data/all.replay.json` | every `uuid` + `game_id` |
+| `data/all.eu.json` | every tagpro.eu match id |
+| `data/all.json` | every match with all fields and held-flags |
 | `data/missing_replays.json` | matches whose recording is not held — `uuid`, `game_id`, `started`, `map` |
 | `data/coverage.json` | per-week totals behind the tables |
 
