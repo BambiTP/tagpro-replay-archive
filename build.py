@@ -193,9 +193,9 @@ font-family:ui-monospace,Menlo,Consolas,monospace}
 HEAD = ('<tr><th>Week</th><th></th><th style="text-align:right">Count</th>'
         '<th style="text-align:right">%</th><th></th></tr>')
 
-HEAD_ID = ('<tr><th>Week</th><th></th><th style="text-align:right">Ids</th>'
-           '<th style="text-align:right">Records</th><th style="text-align:right">Rebuilt</th>'
-           '<th></th></tr>')
+HEAD_ID = ('<tr><th>Week</th><th></th><th style="text-align:right">Replay ids</th>'
+           '<th style="text-align:right">tagpro.eu ids</th>'
+           '<th style="text-align:right">tagpro.eu rebuilt</th><th></th></tr>')
 
 
 def render(cov, missing=()):
@@ -240,7 +240,7 @@ def render(cov, missing=()):
                     f'{links}</tr>')
             else:
                 n, d = s["replay"], s["ids"]
-                total = ("~" + f(d)) if s["partial"] else f(d)
+                total = f(d)
                 w = pc(n, d)
                 out.append(
                     f'<tr><td class="wk">{lbl}</td>'
@@ -284,8 +284,8 @@ def render(cov, missing=()):
 <h1>Ranked replay coverage</h1>
 <p class="sub">Match ids and replay recordings collected per week, {span[0]} &ndash; {span[1]}.</p>
 <div class="stats">
-<div class="stat"><b>{f(ids)}</b><span>match ids</span></div>
-<div class="stat"><b>100%</b><span>id coverage</span></div>
+<div class="stat"><b>{f(ids)}</b><span>replay ids</span></div>
+<div class="stat"><b>100%</b><span>replay id coverage</span></div>
 <div class="stat"><b>{f(rep)}</b><span>replays</span></div>
 <div class="stat"><b>{pc(rep,ids):.2f}%</b><span>replay coverage</span></div>
 </div>
@@ -294,13 +294,13 @@ def render(cov, missing=()):
 <div class="wrap">
 <section>
 <h2>ID coverage</h2>
-<p class="note">Match ids collected per week, with the two derived layers beneath: how many of
-those matches have a tagpro.eu record, and how many of those records were rebuilt here from an
-archived recording rather than carried by the mirror.</p>
+<p class="note">Replay ids collected per week, with the tagpro.eu layer beneath: how many of those
+matches have a tagpro.eu id, and how many of those were rebuilt here from an archived recording
+rather than carried by the mirror.</p>
 <div class="key">
-<span><i style="background:var(--id)"></i>match ids collected</span>
-<span><i style="background:var(--rec)"></i>record carried by tagpro.eu</span>
-<span><i style="background:var(--reb)"></i>record rebuilt here from a recording</span>
+<span><i style="background:var(--id)"></i>replay ids collected</span>
+<span><i style="background:var(--rec)"></i>tagpro.eu id carried by the mirror</span>
+<span><i style="background:var(--reb)"></i>tagpro.eu id rebuilt here from a recording</span>
 </div>
 <p class="note">The ranked replay listing is the authority on which matches exist, so these totals
 are exact rather than estimated.</p>
@@ -311,8 +311,7 @@ are exact rather than estimated.</p>
 
 <section>
 <h2>Replay coverage</h2>
-<p class="note">Replay recordings held, against the match ids collected for that week. A
-<code>~</code> marks the week still in progress, whose total is not final yet.</p>
+<p class="note">Replay recordings held, against the replay ids collected for that week.</p>
 <table><thead>{HEAD}</thead><tbody>
 {body("rep")}
 </tbody>{foot(rep, ids, "rep", False)}</table>
