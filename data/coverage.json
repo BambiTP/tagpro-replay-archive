@@ -741,12 +741,12 @@
  },
  {
   "week": "2026-08-24",
-  "ids": 628,
-  "replay": 628,
-  "record": 626,
-  "rebuilt": 6,
+  "ids": 653,
+  "replay": 653,
+  "record": 653,
+  "rebuilt": 9,
   "missing_ids": 0,
-  "est": 628,
+  "est": 653,
   "partial": true
  }
 ]
