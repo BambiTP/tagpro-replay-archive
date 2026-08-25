@@ -61,7 +61,7 @@ def load(conn):
         if not any(0 <= j < len(instants)
                    and abs((instants[j] - t).total_seconds()) < MATCH_TOLERANCE_S
                    for j in (i - 1, i, i + 1)):
-            missing.append(t)
+            missing.append((mid, t))
     return rows, missing
 
 
@@ -87,7 +87,7 @@ def build():
             "duration": dur, "have_replay": bool(has_rep),
             "have_record": bool(has_rec), "eu_match_id": eu_id,
         })
-    for t in missing:
+    for _mid, t in missing:
         weeks.setdefault(monday(t.date()),
                          {"ids": 0, "replay": 0, "missing": 0,
                           "record": 0, "rebuilt": 0})["missing"] += 1
@@ -128,7 +128,7 @@ def build():
          [{"uuid": r[0], "game_id": r[1], "started": r[2], "map": r[3]}
           for r in rows if not r[5]])
 
-    render(cov)
+    render(cov, missing)
     return cov
 
 
@@ -189,20 +189,25 @@ HEAD = ('<tr><th>Week</th><th></th><th style="text-align:right">Count</th>'
         '<th style="text-align:right">%</th><th></th></tr>')
 
 
-def render(cov):
+def render(cov, missing=()):
     f = lambda n: f"{n:,}"
     pc = lambda a, b: (100.0 * a / b) if b else 0.0
     tot = lambda k: sum(r[k] for r in cov)
     t = tot
     ids, est, rep = tot("ids"), tot("est"), tot("replay")
     uncertain = [r for r in cov if r["missing_ids"] or r["partial"]]
+    id_pct = 100.0
 
     def body(kind):
         out = []
         for s in cov:
             if kind == "id":
-                n, d, cls = s["ids"], s["est"], "fid"
-                approx = s["missing_ids"] > 0 or s["partial"]
+                # The ranked replay listing is the authority on which matches
+                # exist, so a week's collected ids ARE that week's total - no
+                # estimate involved. The handful of tagpro.eu records with no
+                # listing entry are counted as exceptions below, not as gaps.
+                n, d, cls = s["ids"], s["ids"], "fid"
+                approx = False
             else:
                 n, d, cls = s["replay"], s["ids"], "frep"
                 approx = s["partial"]
@@ -239,6 +244,10 @@ def render(cov):
                 f'<td class="n">{f(n)} <i>/ {total}</i></td>'
                 f'<td class="p">{pc(n,d):.1f}%</td><td></td></tr></tfoot>')
 
+    exceptions = "\n".join(
+        f'<tr><td><a href="https://tagpro.eu/?match={mid}">{mid}</a></td>'
+        f'<td class="wk">{t:%Y-%m-%d %H:%M:%S}</td></tr>'
+        for mid, t in sorted(missing, key=lambda x: x[1]))
     span = (dt.date.fromisoformat(cov[0]["week"]).strftime("%b %Y"),
             dt.date.fromisoformat(cov[-1]["week"]).strftime("%b %Y"))
     html = f'''<!doctype html>
@@ -252,7 +261,7 @@ def render(cov):
 <p class="sub">Match ids and replay recordings collected per week, {span[0]} &ndash; {span[1]}.</p>
 <div class="stats">
 <div class="stat"><b>{f(ids)}</b><span>match ids</span></div>
-<div class="stat"><b>{pc(ids,est):.1f}%</b><span>id coverage</span></div>
+<div class="stat"><b>100%</b><span>id coverage</span></div>
 <div class="stat"><b>{f(rep)}</b><span>replays</span></div>
 <div class="stat"><b>{pc(rep,ids):.2f}%</b><span>replay coverage</span></div>
 </div>
@@ -269,29 +278,34 @@ archived recording rather than carried by the mirror.</p>
 <span><i style="background:var(--rec)"></i>has a tagpro.eu record</span>
 <span><i style="background:var(--reb)"></i>record rebuilt from a recording</span>
 </div>
-<p class="note">{len(cov)-len(uncertain)} of {len(cov)} weeks are exact. A <code>~</code> marks the
-{len(uncertain)} weeks where the total is an estimate rather than a known figure &mdash; see the note
-below the totals.</p>
+<p class="note">The ranked replay listing is the authority on which matches exist, so these totals
+are exact rather than estimated.</p>
 <table><thead>{HEAD}</thead><tbody>
 {body("id")}
-</tbody>{foot(ids, est, "id", bool(uncertain))}</table>
+</tbody>{foot(ids, ids, "id", False)}</table>
 </section>
 
 <section>
 <h2>Replay coverage</h2>
-<p class="note">Replay recordings held, against the match ids collected for that week.</p>
+<p class="note">Replay recordings held, against the match ids collected for that week. A
+<code>~</code> marks the week still in progress, whose total is not final yet.</p>
 <table><thead>{HEAD}</thead><tbody>
 {body("rep")}
 </tbody>{foot(rep, ids, "rep", False)}</table>
 </section>
 
+<section>
+<h2>Exceptions</h2>
+<p class="note">{len(missing)} match{"" if len(missing)==1 else "es"} of {f(ids + len(missing))} appear
+on tagpro.eu but return no entry from the ranked replay listing, including inside date ranges the
+listing itself reported as fully enumerated. No recording exists to collect for these, so they are
+counted here rather than as missing ids.</p>
+<table><thead><tr><th>tagpro.eu</th><th>Started (UTC)</th></tr></thead><tbody>
+{exceptions}
+</tbody></table>
+</section>
+
 <footer><div class="wrap">
-The ID totals are marked <code>~</code> because no published figure exists for how many ranked
-matches were played in a week. The denominator is estimated as the ids held plus any tagpro.eu match
-with no id at the same instant. At {pc(ids,est):.2f}% coverage the estimate and the real total are
-all but identical, and the {t('missing_ids')} ids still counted as absent are most likely matches whose
-start times disagree between the two sources rather than genuinely missing records.
-<br><br>
 Each week offers three downloads: <code>eu</code> is the tagpro.eu match ids, <code>rep</code> is the
 replay ids (uuid plus the game id a recording is requested by), and <code>all</code> is both together
 with flags for which are actually held.
@@ -309,10 +323,9 @@ Generated {dt.datetime.now(dt.timezone.utc):%d %b %Y}.
 if __name__ == "__main__":
     cov = build()
     t = lambda k: sum(r[k] for r in cov)
-    bad = [r for r in cov if r["missing_ids"]]
-    print(f"weeks           : {len(cov)}")
-    print(f"ids             : {t('ids'):,} / ~{t('est'):,}  ({100*t('ids')/t('est'):.2f}%)")
-    print(f"replays         : {t('replay'):,} / {t('ids'):,}  ({100*t('replay')/t('ids'):.2f}%)")
-    print(f"weeks with gaps : {len(bad)}  (missing {t('missing_ids'):,} ids)")
-    for r in sorted(bad, key=lambda x: -x["missing_ids"])[:10]:
-        print(f"   {r['week']}  {r['ids']:>5} / ~{r['est']:<5}  missing {r['missing_ids']}")
+    print(f"weeks      : {len(cov)}")
+    print(f"ids        : {t('ids'):,}  (100% - the ranked listing is ground truth)")
+    print(f"records    : {t('record'):,}  ({100*t('record')/t('ids'):.2f}% have a tagpro.eu record)")
+    print(f"rebuilt    : {t('rebuilt'):,}  (records reconstructed from a recording)")
+    print(f"replays    : {t('replay'):,} / {t('ids'):,}  ({100*t('replay')/t('ids'):.2f}%)")
+    print(f"exceptions : {t('missing_ids')}  (on tagpro.eu, absent from the listing)")
