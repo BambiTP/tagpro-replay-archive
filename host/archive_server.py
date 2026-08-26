@@ -390,12 +390,13 @@ class Handler(BaseHTTPRequestHandler):
         with transfer_slot(self.ip()):
             self._sendfile(p, "application/gzip", f"{uuid}.ndjson.gz")
 
-    def range_rows(self, lo, hi):
+    def range_rows(self, lo, hi, who=""):
         """Recordings held for matches started in [lo, hi)."""
         return db().execute(
             "SELECT k.uuid, k.game_id, k.started, k.map_name, r.path, r.bytes_stored "
             "FROM koala_matches k JOIN replay_files r ON r.uuid = k.uuid AND r.status = 'done' "
-            "WHERE k.started >= ? AND k.started < ? ORDER BY k.started", (lo, hi)).fetchall()
+            "WHERE k.started >= ? AND k.started < ?" + who + " ORDER BY k.started",
+            (lo, hi)).fetchall()
 
     def week_rows(self, week):
         return self.range_rows(*week_bounds(week))
@@ -488,6 +489,44 @@ class Handler(BaseHTTPRequestHandler):
         want = {x.strip() for x in raw.split(",") if x.strip()}
         return [x for x in allowed if x in want]
 
+    # Cap the list so one request cannot turn into a hundred index lookups.
+    MAX_PLAYERS = 10
+
+    def player_filter(self):
+        """
+        ?player=Name or ?player=A,B,C - matches that any of them played in.
+
+        Both sources are consulted: tagpro.eu's player rows, and the names in
+        the recordings themselves, which is the only place a name appears for
+        a match the mirror never carried. The uuids land in a temp table
+        because a player with a thousand games would otherwise blow past
+        SQLite's parameter limit.
+
+        Returns "" when no filter was asked for, or a SQL fragment to append
+        to a WHERE clause that already has koala_matches aliased as k.
+        """
+        raw = (self.query().get("player") or [""])[0]
+        names = []
+        for n in raw.split(","):
+            n = n.strip()
+            if n and n not in names:
+                names.append(n)
+        if not names:
+            return ""
+        names = names[:self.MAX_PLAYERS]
+        marks = ",".join("?" * len(names))
+        conn = db()
+        conn.execute("CREATE TEMP TABLE IF NOT EXISTS pick (uuid TEXT PRIMARY KEY)")
+        conn.execute("DELETE FROM pick")
+        conn.execute(
+            f"INSERT OR IGNORE INTO pick (uuid) "
+            f"SELECT m.koala_uuid FROM matches m JOIN match_players mp ON mp.match_id = m.match_id "
+            f"WHERE m.koala_uuid IS NOT NULL AND mp.player_name COLLATE NOCASE IN ({marks})", names)
+        conn.execute(
+            f"INSERT OR IGNORE INTO pick (uuid) SELECT uuid FROM replay_players "
+            f"WHERE display_name COLLATE NOCASE IN ({marks})", names)
+        return " AND k.uuid IN (SELECT uuid FROM pick)"
+
     def bounds(self):
         """
         The slice of the archive being asked for, as [lo, hi) start times.
@@ -536,11 +575,11 @@ class Handler(BaseHTTPRequestHandler):
             "SELECT COUNT(*) FROM koala_matches WHERE started < ?", (hi,)).fetchone()[0]
         return lo, hi, first, max(first, last)
 
-    def weeks_in(self, lo, hi):
+    def weeks_in(self, lo, hi, who=""):
         """Weeks the range touches, with each week's own clamped bounds."""
         rows = db().execute(
-            "SELECT DISTINCT substr(started,1,10) FROM koala_matches "
-            "WHERE started >= ? AND started < ?", (lo, hi)).fetchall()
+            "SELECT DISTINCT substr(k.started,1,10) FROM koala_matches k "
+            "WHERE k.started >= ? AND k.started < ?" + who, (lo, hi)).fetchall()
         out = {}
         for (d,) in rows:
             w = monday(d)
@@ -550,7 +589,7 @@ class Handler(BaseHTTPRequestHandler):
 
     # ------------------------------------------------------------------ results
 
-    def results_records(self, lo, hi, with_map, with_rebuilt, fields, stats):
+    def results_records(self, lo, hi, with_map, with_rebuilt, fields, stats, who=""):
         """
         How every match in the range ended, and what each player did in it.
 
@@ -566,7 +605,8 @@ class Handler(BaseHTTPRequestHandler):
             "       m.mode, m.season, m.red_score, m.blue_score, m.outcome, m.overtime, "
             "       m.mercy, m.void_reason, m.map_id, m.source "
             "FROM koala_matches k LEFT JOIN matches m ON m.koala_uuid = k.uuid "
-            "WHERE k.started >= ? AND k.started < ? ORDER BY k.started", (lo, hi)).fetchall()
+            "WHERE k.started >= ? AND k.started < ?" + who + " ORDER BY k.started",
+            (lo, hi)).fetchall()
 
         want = set(fields)
         maps = {}
@@ -629,8 +669,8 @@ class Handler(BaseHTTPRequestHandler):
             out.append(rec)
         return out
 
-    def results_blob(self, lo, hi, with_map, with_rebuilt, fields, stats):
-        recs = self.results_records(lo, hi, with_map, with_rebuilt, fields, stats)
+    def results_blob(self, lo, hi, with_map, with_rebuilt, fields, stats, who=""):
+        recs = self.results_records(lo, hi, with_map, with_rebuilt, fields, stats, who)
         if not recs:
             return None
         return gzip.compress(json.dumps(recs, separators=(",", ":")).encode(), 6)
@@ -647,15 +687,15 @@ class Handler(BaseHTTPRequestHandler):
 
     # ----------------------------------------------------------- tagpro.eu bulk
 
-    def eu_rows(self, lo, hi, rebuilt):
+    def eu_rows(self, lo, hi, rebuilt, who=""):
         return db().execute(
             "SELECT m.* FROM koala_matches k JOIN matches m ON m.koala_uuid = k.uuid "
-            "WHERE k.started >= ? AND k.started < ? "
+            "WHERE k.started >= ? AND k.started < ? " + who + " "
             + ("" if rebuilt else "AND m.raw_json IS NOT NULL ")
             + "ORDER BY k.started", (lo, hi)).fetchall()
 
-    def eu_blob(self, lo, hi, rebuilt):
-        rows = self.eu_rows(lo, hi, rebuilt)
+    def eu_blob(self, lo, hi, rebuilt, who=""):
+        rows = self.eu_rows(lo, hi, rebuilt, who)
         if not rows:
             return None
         conn = db()
@@ -730,6 +770,7 @@ class Handler(BaseHTTPRequestHandler):
         sel = self.custom_selection()
         fields = self.picked("fields", self.MATCH_FIELDS)
         stats = self.picked("stats", self.PLAYER_FIELDS)
+        who = self.player_filter()
         row = db().execute(
             "SELECT COUNT(*) AS ids, "
             "  SUM(CASE WHEN r.uuid IS NOT NULL THEN 1 ELSE 0 END) AS held, "
@@ -737,7 +778,7 @@ class Handler(BaseHTTPRequestHandler):
             "  MIN(k.started) AS first, MAX(k.started) AS last "
             "FROM koala_matches k LEFT JOIN replay_files r "
             "  ON r.uuid = k.uuid AND r.status = 'done' "
-            "WHERE k.started >= ? AND k.started < ?", (lo, hi)).fetchone()
+            "WHERE k.started >= ? AND k.started < ?" + who, (lo, hi)).fetchone()
         ids, held, rbytes = row["ids"], row["held"] or 0, row["bytes"] or 0
         # Fewer fields, smaller file - scale the per-match average by how much
         # of the record was actually asked for.
@@ -754,13 +795,15 @@ class Handler(BaseHTTPRequestHandler):
         self._json({
             "matches": ids, "first_match": first_n, "last_match": last_n,
             "first_started": row["first"], "last_started": row["last"],
-            "weeks": len(self.weeks_in(lo, hi)),
+            "weeks": len(self.weeks_in(lo, hi, who)),
             "recordings": held, "recordings_bytes": rbytes, "bytes": int(total),
             # Recording bytes come off disk; the JSON parts are per-match
             # averages, so the total is only exact for recordings alone.
             "exact": sel["replays"] and not (sel["results"] or sel["eu"]),
             "total_matches": db().execute("SELECT COUNT(*) FROM koala_matches").fetchone()[0],
             "selection": sel, "fields": fields, "stats": stats,
+            "players": [n.strip() for n in
+                        (self.query().get("player") or [""])[0].split(",") if n.strip()],
         })
 
     def custom_tar(self):
@@ -773,7 +816,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._error(400, "pick at least one of replays, results, eu")
         fields = self.picked("fields", self.MATCH_FIELDS)
         stats = self.picked("stats", self.PLAYER_FIELDS)
-        weeks = self.weeks_in(lo, hi)
+        who = self.player_filter()
+        players = [n.strip() for n in (self.query().get("player") or [""])[0].split(",") if n.strip()]
+        weeks = self.weeks_in(lo, hi, who)
         if not weeks:
             return self._error(404, "nothing in that range")
 
@@ -798,19 +843,20 @@ class Handler(BaseHTTPRequestHandler):
                     "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
                     "matches": [first_n, last_n], "weeks": [w for w, _ in weeks],
                     "selection": sel, "fields": fields, "stats": stats,
+                    "players": players,
                 }, indent=1).encode())
 
                 for week, (wlo, whi) in weeks:
                     if sel["results"]:
-                        blob = self.results_blob(wlo, whi, sel["map"], sel["rebuilt"], fields, stats)
+                        blob = self.results_blob(wlo, whi, sel["map"], sel["rebuilt"], fields, stats, who)
                         if blob:
                             add_bytes(f"results/{week}.json.gz", blob)
                     if sel["eu"]:
-                        blob = self.eu_blob(wlo, whi, sel["rebuilt"])
+                        blob = self.eu_blob(wlo, whi, sel["rebuilt"], who)
                         if blob:
                             add_bytes(f"eu/{week}.json.gz", blob)
                     if sel["replays"]:
-                        for r in self.range_rows(wlo, whi):
+                        for r in self.range_rows(wlo, whi, who):
                             p = replay_path(r)
                             if not p:
                                 continue
@@ -891,7 +937,7 @@ font-family:ui-monospace,Menlo,Consolas,monospace}}
 <tr><td>/week/&lt;YYYY-MM-DD&gt;/results.json.gz</td><td>how every match that week ended, with per-player stats and the map; <code>?map=0</code>, <code>?rebuilt=0</code></td></tr>
 <tr><td>/week/&lt;YYYY-MM-DD&gt;/replays.tar</td><td>every recording that week, streamed as one tar</td></tr>
 <tr><td>/all/replays.tar</td><td>every recording held, {gb:.1f} GB, foldered by week</td></tr>
-<tr><td>/custom.tar</td><td>pick a date range and what to include: <code>?from=&amp;to=&amp;replays=1&amp;results=1&amp;eu=1&amp;map=1&amp;rebuilt=1</code></td></tr>
+<tr><td>/custom.tar</td><td>pick a range and what to include: <code>?start=1&amp;end=5000&amp;replays=1&amp;results=1&amp;eu=1&amp;player=Name&amp;fields=&hellip;&amp;stats=&hellip;</code></td></tr>
 <tr><td>/custom/estimate</td><td>same query, returns counts and a size estimate first</td></tr>
 <tr><td>/eu/week/&lt;YYYY-MM-DD&gt;.json.gz</td><td>that week's tagpro.eu records, in tagpro.eu bulk shape</td></tr>
 <tr><td>/bulk/ranked_matches_bulk.json.gz</td><td>the whole tagpro.eu export in one file</td></tr>

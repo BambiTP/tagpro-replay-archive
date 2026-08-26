@@ -97,6 +97,8 @@ white-space:nowrap;width:1%}
 .pick input[type=date]{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);
 border-radius:6px;background:var(--bg);color:var(--ink)}
 .pick .sep{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+.pick input[type=text]{font:inherit;font-size:13px;padding:5px 9px;border:1px solid var(--rule);
+border-radius:6px;background:var(--bg);color:var(--ink);width:190px}
 .pick input[type=number]{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);
 border-radius:6px;background:var(--bg);color:var(--ink);width:104px;font-variant-numeric:tabular-nums}
 .pick.fields{gap:9px 18px;margin:10px 0 4px}
@@ -142,9 +144,9 @@ they need the host to be up.</p>
 </div>
 <table class="files"><tbody>
 <tr><td><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/all/replays.tar">all/replays.tar</a></td>
-<td>every recording held, 10,530 files, 3.92 GB, one folder per week</td></tr>
+<td>every recording held, 10,563 files, 3.93 GB, one folder per week</td></tr>
 <tr><td><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/bulk/ranked_matches_bulk.json.gz">ranked_matches_bulk.json.gz</a></td>
-<td>every tagpro.eu record, 121,636 matches, in
+<td>every tagpro.eu record, 121,669 matches, in
 <a href="https://tagpro.eu/?science" target="_blank" rel="noopener">tagpro.eu's own bulk shape</a></td></tr>
 </tbody></table>
 <p class="note">The bulk file is the mirror's records only. Add <code>?rebuilt=1</code> to mix in
@@ -159,12 +161,17 @@ the weeks your range covers, and nothing else.</p>
 <div class="card">
 <div class="pick">
 <span class="sep">Matches</span>
-<label>from <input type="number" id="start" min="1" max="123909" value="1" step="1"></label>
-<label>to <input type="number" id="end" min="1" max="123909" value="123909" step="1"></label>
+<label>from <input type="number" id="start" min="1" max="123942" value="1" step="1"></label>
+<label>to <input type="number" id="end" min="1" max="123942" value="123942" step="1"></label>
 <span class="n" id="span"></span>
 </div>
-<p class="note" style="margin:-4px 0 14px">Match 1 is the oldest in the archive, 123,909 is the
+<p class="note" style="margin:-4px 0 14px">Match 1 is the oldest in the archive, 123,942 is the
 newest. Ordered by start time.</p>
+<div class="pick">
+<span class="sep">Player</span>
+<label><input type="text" id="player" placeholder="any player" autocomplete="off" spellcheck="false"></label>
+<span class="n">only matches this player was in &mdash; comma-separate for several</span>
+</div>
 <div class="pick">
 <span class="sep">Include</span>
 <label><input type="checkbox" id="c-results" checked> Match results</label>
@@ -192,7 +199,7 @@ newest. Ordered by start time.</p>
 into a terminal, a script, or a message. This page&rsquo;s own address tracks your picks too, so
 bookmarking or sending it hands over the same selection.</p>
 <p class="note">Every match carries its <code>uuid</code> and every player their name, whatever
-else you untick. Recordings are the heavy part &mdash; the whole archive is 3.92 GB of
+else you untick. Recordings are the heavy part &mdash; the whole archive is 3.93 GB of
 them, against roughly 66 MB for every match result ever. Sizes are exact for recordings
 and an estimate for the rest, since those are built as they are sent.</p>
 </section>
@@ -209,7 +216,7 @@ recordings, <strong>results</strong> is how every match ended with per-player st
 <table><thead><tr><th>Week</th><th style="text-align:right">Matches</th>
 <th style="text-align:right">Recordings</th><th style="text-align:right">Size</th>
 <th></th></tr></thead><tbody>
-<tr><td class="wk">24 Aug 2026</td><td class="n">793</td><td class="n">793</td><td class="n">297 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-24.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">24 Aug 2026</td><td class="n">826</td><td class="n">826</td><td class="n">309 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-24.json.gz">tagpro.eu</a></td></tr>
 <tr><td class="wk">17 Aug 2026</td><td class="n">2,201</td><td class="n">928</td><td class="n">347 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-17/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-17/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-17.json.gz">tagpro.eu</a></td></tr>
 <tr><td class="wk">10 Aug 2026</td><td class="n">2,238</td><td class="n">273</td><td class="n">101 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-10/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-10/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-10.json.gz">tagpro.eu</a></td></tr>
 <tr><td class="wk">03 Aug 2026</td><td class="n">1,926</td><td class="n">1,926</td><td class="n">715 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-03/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-03/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-03.json.gz">tagpro.eu</a></td></tr>
@@ -297,7 +304,7 @@ these links always work, host up or down.</p>
 <tr><td><a href="data/missing_replays.json" download>missing_replays.json</a></td>
 <td>the 113,379 matches with no recording held &mdash; the wanted list</td></tr>
 <tr><td><a href="data/all.eu.json" download>all.eu.json</a></td>
-<td>every linked tagpro.eu match id (121,636 of them)</td></tr>
+<td>every linked tagpro.eu match id (121,669 of them)</td></tr>
 <tr><td><a href="data/coverage.json">coverage.json</a></td>
 <td>the per-week totals behind the tables on the Coverage tab</td></tr>
 <tr><td><a href="DATA_MAP.md">DATA_MAP.md</a></td>
@@ -372,7 +379,7 @@ Generated 26 Aug 2026.
 
 (function () {
   var W = "https://tagpro-archive-tunnel.bambitagpro.workers.dev";
-  var TOTAL = 123909;
+  var TOTAL = 123942;
   var el = function (id) { return document.getElementById(id); };
   var flags = ["replays", "results", "eu", "map", "rebuilt"];
   var est = el("est"), btn = el("build"), urlOut = el("url"), span = el("span");
@@ -402,6 +409,8 @@ Generated 26 Aug 2026.
   function query() {
     var r = clampRange();
     var q = ["start=" + r[0], "end=" + r[1]];
+    var who = el("player").value.trim();
+    if (who) q.push("player=" + encodeURIComponent(who));
     flags.forEach(function (b) { q.push(b + "=" + (el("c-" + b).checked ? "1" : "0")); });
     // Only name fields when it is a real subset - a full list just makes the url long.
     var f = checked("f"), s = checked("s");
@@ -439,7 +448,9 @@ Generated 26 Aug 2026.
         .then(function (r) { return r.json(); })
         .then(function (d) {
           if (!d.matches) { est.textContent = "Nothing in that range."; return; }
-          est.textContent = d.matches.toLocaleString() + " matches across "
+          est.textContent = d.matches.toLocaleString()
+            + (d.players.length ? " matches with " + d.players.join(" or ") + " across "
+                                : " matches across ")
             + d.weeks + (d.weeks === 1 ? " week, " : " weeks, ")
             + (d.exact ? "" : "about ") + size(d.bytes)
             + (d.selection.replays ? " (" + d.recordings.toLocaleString() + " recordings)" : "");
@@ -459,6 +470,7 @@ Generated 26 Aug 2026.
     try { q = new URLSearchParams(location.search); } catch (e) { return; }
     if (!q.toString()) return;
     if (q.has("start")) el("start").value = q.get("start");
+    if (q.has("player")) el("player").value = q.get("player");
     if (q.has("end")) el("end").value = q.get("end");
     flags.forEach(function (b) {
       if (q.has(b)) el("c-" + b).checked = q.get(b) === "1";
@@ -503,6 +515,9 @@ Generated 26 Aug 2026.
   });
   ["start", "end"].concat(flags.map(function (b) { return "c-" + b; }))
     .forEach(function (id) { el(id).addEventListener("change", refresh); });
+  // input, not change - the estimate should follow along as the name is typed,
+  // and refresh already debounces the request it makes.
+  el("player").addEventListener("input", refresh);
   document.querySelectorAll("input[data-g]").forEach(function (i) {
     i.addEventListener("change", refresh);
   });

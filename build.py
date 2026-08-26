@@ -233,6 +233,8 @@ white-space:nowrap;width:1%}
 .pick input[type=date]{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);
 border-radius:6px;background:var(--bg);color:var(--ink)}
 .pick .sep{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+.pick input[type=text]{font:inherit;font-size:13px;padding:5px 9px;border:1px solid var(--rule);
+border-radius:6px;background:var(--bg);color:var(--ink);width:190px}
 .pick input[type=number]{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);
 border-radius:6px;background:var(--bg);color:var(--ink);width:104px;font-variant-numeric:tabular-nums}
 .pick.fields{gap:9px 18px;margin:10px 0 4px}
@@ -363,6 +365,8 @@ CUSTOM_JS = """
   function query() {
     var r = clampRange();
     var q = ["start=" + r[0], "end=" + r[1]];
+    var who = el("player").value.trim();
+    if (who) q.push("player=" + encodeURIComponent(who));
     flags.forEach(function (b) { q.push(b + "=" + (el("c-" + b).checked ? "1" : "0")); });
     // Only name fields when it is a real subset - a full list just makes the url long.
     var f = checked("f"), s = checked("s");
@@ -400,7 +404,9 @@ CUSTOM_JS = """
         .then(function (r) { return r.json(); })
         .then(function (d) {
           if (!d.matches) { est.textContent = "Nothing in that range."; return; }
-          est.textContent = d.matches.toLocaleString() + " matches across "
+          est.textContent = d.matches.toLocaleString()
+            + (d.players.length ? " matches with " + d.players.join(" or ") + " across "
+                                : " matches across ")
             + d.weeks + (d.weeks === 1 ? " week, " : " weeks, ")
             + (d.exact ? "" : "about ") + size(d.bytes)
             + (d.selection.replays ? " (" + d.recordings.toLocaleString() + " recordings)" : "");
@@ -420,6 +426,7 @@ CUSTOM_JS = """
     try { q = new URLSearchParams(location.search); } catch (e) { return; }
     if (!q.toString()) return;
     if (q.has("start")) el("start").value = q.get("start");
+    if (q.has("player")) el("player").value = q.get("player");
     if (q.has("end")) el("end").value = q.get("end");
     flags.forEach(function (b) {
       if (q.has(b)) el("c-" + b).checked = q.get(b) === "1";
@@ -464,6 +471,9 @@ CUSTOM_JS = """
   });
   ["start", "end"].concat(flags.map(function (b) { return "c-" + b; }))
     .forEach(function (id) { el(id).addEventListener("change", refresh); });
+  // input, not change - the estimate should follow along as the name is typed,
+  // and refresh already debounces the request it makes.
+  el("player").addEventListener("input", refresh);
   document.querySelectorAll("input[data-g]").forEach(function (i) {
     i.addEventListener("change", refresh);
   });
@@ -631,6 +641,11 @@ the weeks your range covers, and nothing else.</p>
 </div>
 <p class="note" style="margin:-4px 0 14px">Match 1 is the oldest in the archive, {f(ids)} is the
 newest. Ordered by start time.</p>
+<div class="pick">
+<span class="sep">Player</span>
+<label><input type="text" id="player" placeholder="any player" autocomplete="off" spellcheck="false"></label>
+<span class="n">only matches this player was in &mdash; comma-separate for several</span>
+</div>
 <div class="pick">
 <span class="sep">Include</span>
 <label><input type="checkbox" id="c-results" checked> Match results</label>
