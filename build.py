@@ -233,6 +233,14 @@ white-space:nowrap;width:1%}
 .pick input[type=date]{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);
 border-radius:6px;background:var(--bg);color:var(--ink)}
 .pick .sep{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+.pick input[type=number]{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);
+border-radius:6px;background:var(--bg);color:var(--ink);width:104px;font-variant-numeric:tabular-nums}
+.pick.fields{gap:9px 18px;margin:10px 0 4px}
+.pick.fields label{font-size:13px;color:var(--muted)}
+details{margin:0 0 12px}
+summary{font-size:13px;color:var(--ink);cursor:pointer;padding:4px 0}
+summary a{font-size:12.5px}
+.n{font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums}
 """
 
 HEAD = ('<tr><th>Week</th><th></th><th style="text-align:right">Count</th>'
@@ -294,17 +302,63 @@ STATUS_JS = """
 """
 
 
+# Field lists here must match Handler.MATCH_FIELDS / PLAYER_FIELDS in
+# host/archive_server.py - the page offers exactly what the host will honour.
+MATCH_FIELDS = [
+    ("started", "start time"), ("game_id", "game id"), ("eu_match_id", "tagpro.eu id"),
+    ("record_source", "record source"), ("duration_ms", "duration (ms)"),
+    ("duration_frames", "duration (frames)"), ("mode", "mode"), ("season", "season"),
+    ("finished", "finished"), ("outcome", "outcome"), ("void_reason", "void reason"),
+    ("overtime", "overtime"), ("mercy", "mercy"), ("score", "score"), ("winner", "winner"),
+    ("server", "server"), ("map", "map"), ("ranked", "ranked skill"),
+    ("ranked_players", "ranked per player"), ("players", "players"),
+]
+PLAYER_FIELDS = [
+    ("team", "team"), ("auth", "auth"), ("score", "score"), ("points", "points"),
+    ("grabs", "grabs"), ("captures", "captures"), ("drops", "drops"), ("hold", "hold"),
+    ("tags", "tags"), ("returns", "returns"), ("pops", "pops"), ("prevent", "prevent"),
+    ("button", "button"), ("block", "block"), ("pups_total", "powerups"),
+    ("time_played", "time played"), ("caps_for", "caps for"),
+    ("caps_against", "caps against"), ("disconnected", "disconnected"),
+]
+
 CUSTOM_JS = """
 (function () {
   var W = "__WORKER__";
+  var TOTAL = __TOTAL__;
   var el = function (id) { return document.getElementById(id); };
-  var boxes = ["replays", "results", "eu", "map", "rebuilt"];
-  var est = el("est"), btn = el("build"), urlOut = el("url");
+  var flags = ["replays", "results", "eu", "map", "rebuilt"];
+  var est = el("est"), btn = el("build"), urlOut = el("url"), span = el("span");
   var timer = null;
 
+  function checked(group) {
+    return Array.prototype.slice
+      .call(document.querySelectorAll("input[data-g=" + group + "]"))
+      .filter(function (i) { return i.checked; })
+      .map(function (i) { return i.value; });
+  }
+
+  function total(group) {
+    return document.querySelectorAll("input[data-g=" + group + "]").length;
+  }
+
+  function clampRange() {
+    var a = parseInt(el("start").value, 10), b = parseInt(el("end").value, 10);
+    if (isNaN(a) || a < 1) a = 1;
+    if (isNaN(b) || b > TOTAL) b = TOTAL;
+    if (a > b) { var t = a; a = b; b = t; }
+    el("start").value = a; el("end").value = b;
+    return [a, b];
+  }
+
   function query() {
-    var q = ["from=" + el("from").value, "to=" + el("to").value];
-    boxes.forEach(function (b) { q.push(b + "=" + (el("c-" + b).checked ? "1" : "0")); });
+    var r = clampRange();
+    var q = ["start=" + r[0], "end=" + r[1]];
+    flags.forEach(function (b) { q.push(b + "=" + (el("c-" + b).checked ? "1" : "0")); });
+    // Only name fields when it is a real subset - a full list just makes the url long.
+    var f = checked("f"), s = checked("s");
+    if (f.length < total("f")) q.push("fields=" + f.join(","));
+    if (s.length < total("s")) q.push("stats=" + s.join(","));
     return q.join("&");
   }
 
@@ -321,7 +375,7 @@ CUSTOM_JS = """
     urlOut.textContent = href;
     if (!picked) {
       btn.setAttribute("aria-disabled", "true");
-      est.textContent = "Pick at least one of recordings, results, or tagpro.eu records.";
+      est.textContent = "Pick at least one of match results, tagpro.eu records, or recordings.";
       return;
     }
     btn.setAttribute("href", href);
@@ -332,11 +386,14 @@ CUSTOM_JS = """
       fetch(W + "/go/custom/estimate?" + q, { cache: "no-store" })
         .then(function (r) { return r.json(); })
         .then(function (d) {
-          if (!d.weeks) { est.textContent = "Nothing in that range."; return; }
-          est.textContent = d.weeks + (d.weeks === 1 ? " week, " : " weeks, ")
-            + d.matches.toLocaleString() + " matches, "
+          if (!d.matches) { est.textContent = "Nothing in that range."; return; }
+          est.textContent = d.matches.toLocaleString() + " matches across "
+            + d.weeks + (d.weeks === 1 ? " week, " : " weeks, ")
             + (d.exact ? "" : "about ") + size(d.bytes)
             + (d.selection.replays ? " (" + d.recordings.toLocaleString() + " recordings)" : "");
+          if (d.first_started && span) {
+            span.textContent = d.first_started.slice(0, 10) + " to " + d.last_started.slice(0, 10);
+          }
         })
         .catch(function () {
           est.textContent = "Cannot reach the host, so no size estimate. The link still works "
@@ -345,8 +402,20 @@ CUSTOM_JS = """
     }, 250);
   }
 
-  ["from", "to"].concat(boxes.map(function (b) { return "c-" + b; }))
+  document.querySelectorAll("[data-all]").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      var on = a.getAttribute("data-all") === "on";
+      document.querySelectorAll("input[data-g=" + a.getAttribute("data-for") + "]")
+        .forEach(function (i) { i.checked = on; });
+      refresh();
+    });
+  });
+  ["start", "end"].concat(flags.map(function (b) { return "c-" + b; }))
     .forEach(function (id) { el(id).addEventListener("change", refresh); });
+  document.querySelectorAll("input[data-g]").forEach(function (i) {
+    i.addEventListener("change", refresh);
+  });
   refresh();
 })();
 """
@@ -449,7 +518,10 @@ def download_page(cov, ids, rep, held_bytes, span):
     record = sum(r["record"] for r in cov)
     rebuilt = sum(r["rebuilt"] for r in cov)
     latest = cov[-1]["week"]
-    first, last = cov[0]["week"], cov[-1]["week"]
+    box = lambda g, k, lbl: (f'<label><input type="checkbox" data-g="{g}" value="{k}" checked> '
+                             f'{lbl}</label>')
+    match_boxes = "".join(box("f", k, lbl) for k, lbl in MATCH_FIELDS)
+    stat_boxes = "".join(box("s", k, lbl) for k, lbl in PLAYER_FIELDS)
     rows = []
     for c in reversed(cov):
         lbl = dt.date.fromisoformat(c["week"]).strftime("%d %b %Y")
@@ -496,31 +568,43 @@ the {f(rebuilt)} records <a href="rebuilt.html">rebuilt here from recordings</a>
 
 <section>
 <h2>Build a download</h2>
-<p class="lead">Pick a range and what to include. You get one tar with a manifest, the weeks you
-asked for, and nothing you did not.</p>
+<p class="lead">Pick a range and exactly which fields you want. You get one tar holding a manifest,
+the weeks your range covers, and nothing else.</p>
 <div class="card">
 <div class="pick">
-<label>From <input type="date" id="from" min="{first}" max="{last}" value="{first}"></label>
-<label>To <input type="date" id="to" min="{first}" max="{last}" value="{last}"></label>
+<span class="sep">Matches</span>
+<label>from <input type="number" id="start" min="1" max="{ids}" value="1" step="1"></label>
+<label>to <input type="number" id="end" min="1" max="{ids}" value="{ids}" step="1"></label>
+<span class="n" id="span"></span>
 </div>
+<p class="note" style="margin:-4px 0 14px">Match 1 is the oldest in the archive, {f(ids)} is the
+newest. Ordered by start time.</p>
 <div class="pick">
 <span class="sep">Include</span>
 <label><input type="checkbox" id="c-results" checked> Match results</label>
 <label><input type="checkbox" id="c-eu"> tagpro.eu records</label>
 <label><input type="checkbox" id="c-replays"> Recordings</label>
-</div>
-<div class="pick">
-<span class="sep">Options</span>
-<label><input type="checkbox" id="c-map" checked> Map and its tagpro.eu map id</label>
 <label><input type="checkbox" id="c-rebuilt" checked> <a href="rebuilt.html">Rebuilt records</a></label>
+<label><input type="checkbox" id="c-map" checked> Map</label>
 </div>
+<details open>
+<summary>Per match &mdash; <a href="#" data-all="on" data-for="f">all</a> &middot;
+<a href="#" data-all="off" data-for="f">none</a></summary>
+<div class="pick fields">{match_boxes}</div>
+</details>
+<details>
+<summary>Per player &mdash; <a href="#" data-all="on" data-for="s">all</a> &middot;
+<a href="#" data-all="off" data-for="s">none</a></summary>
+<div class="pick fields">{stat_boxes}</div>
+</details>
 <p class="status"><span class="dot"></span><span id="est">&hellip;</span></p>
 <p><a class="btn" id="build" href="#">Download selection</a></p>
 <p class="host"><code id="url"></code></p>
 </div>
-<p class="note">Recordings are the heavy part &mdash; the whole archive is {gb(held_bytes)} of them,
-while every match result ever is about {gb(ids * 530)}. The size shown is exact for recordings and
-an estimate for the rest, since those are built as they are sent.</p>
+<p class="note">Every match carries its <code>uuid</code> and every player their name, whatever
+else you untick. Recordings are the heavy part &mdash; the whole archive is {gb(held_bytes)} of
+them, against roughly {gb(ids * 530)} for every match result ever. Sizes are exact for recordings
+and an estimate for the rest, since those are built as they are sent.</p>
 </section>
 
 <section>
@@ -588,7 +672,8 @@ on Discord &mdash; any format, any size, any dates. <a href="about.html">Why tha
     return page("download.html", "Download · TagPro ranked replay archive",
                 "Every file this archive publishes, whole or a week at a time.",
                 body, foot=foot,
-                script=(STATUS_JS + CUSTOM_JS).replace("__WORKER__", WORKER))
+                script=(STATUS_JS + CUSTOM_JS)
+                .replace("__WORKER__", WORKER).replace("__TOTAL__", str(ids)))
 
 
 def rebuilt_page(cov, ids, span):

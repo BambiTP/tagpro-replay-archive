@@ -97,6 +97,14 @@ white-space:nowrap;width:1%}
 .pick input[type=date]{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);
 border-radius:6px;background:var(--bg);color:var(--ink)}
 .pick .sep{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+.pick input[type=number]{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);
+border-radius:6px;background:var(--bg);color:var(--ink);width:104px;font-variant-numeric:tabular-nums}
+.pick.fields{gap:9px 18px;margin:10px 0 4px}
+.pick.fields label{font-size:13px;color:var(--muted)}
+details{margin:0 0 12px}
+summary{font-size:13px;color:var(--ink);cursor:pointer;padding:4px 0}
+summary a{font-size:12.5px}
+.n{font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums}
 </style></head><body>
 <header><div class="wrap">
 <h1>TagPro ranked replay archive</h1>
@@ -138,31 +146,43 @@ the 292 records <a href="rebuilt.html">rebuilt here from recordings</a>; they ar
 
 <section>
 <h2>Build a download</h2>
-<p class="lead">Pick a range and what to include. You get one tar with a manifest, the weeks you
-asked for, and nothing you did not.</p>
+<p class="lead">Pick a range and exactly which fields you want. You get one tar holding a manifest,
+the weeks your range covers, and nothing else.</p>
 <div class="card">
 <div class="pick">
-<label>From <input type="date" id="from" min="2025-03-24" max="2026-08-24" value="2025-03-24"></label>
-<label>To <input type="date" id="to" min="2025-03-24" max="2026-08-24" value="2026-08-24"></label>
+<span class="sep">Matches</span>
+<label>from <input type="number" id="start" min="1" max="123909" value="1" step="1"></label>
+<label>to <input type="number" id="end" min="1" max="123909" value="123909" step="1"></label>
+<span class="n" id="span"></span>
 </div>
+<p class="note" style="margin:-4px 0 14px">Match 1 is the oldest in the archive, 123,909 is the
+newest. Ordered by start time.</p>
 <div class="pick">
 <span class="sep">Include</span>
 <label><input type="checkbox" id="c-results" checked> Match results</label>
 <label><input type="checkbox" id="c-eu"> tagpro.eu records</label>
 <label><input type="checkbox" id="c-replays"> Recordings</label>
-</div>
-<div class="pick">
-<span class="sep">Options</span>
-<label><input type="checkbox" id="c-map" checked> Map and its tagpro.eu map id</label>
 <label><input type="checkbox" id="c-rebuilt" checked> <a href="rebuilt.html">Rebuilt records</a></label>
+<label><input type="checkbox" id="c-map" checked> Map</label>
 </div>
+<details open>
+<summary>Per match &mdash; <a href="#" data-all="on" data-for="f">all</a> &middot;
+<a href="#" data-all="off" data-for="f">none</a></summary>
+<div class="pick fields"><label><input type="checkbox" data-g="f" value="started" checked> start time</label><label><input type="checkbox" data-g="f" value="game_id" checked> game id</label><label><input type="checkbox" data-g="f" value="eu_match_id" checked> tagpro.eu id</label><label><input type="checkbox" data-g="f" value="record_source" checked> record source</label><label><input type="checkbox" data-g="f" value="duration_ms" checked> duration (ms)</label><label><input type="checkbox" data-g="f" value="duration_frames" checked> duration (frames)</label><label><input type="checkbox" data-g="f" value="mode" checked> mode</label><label><input type="checkbox" data-g="f" value="season" checked> season</label><label><input type="checkbox" data-g="f" value="finished" checked> finished</label><label><input type="checkbox" data-g="f" value="outcome" checked> outcome</label><label><input type="checkbox" data-g="f" value="void_reason" checked> void reason</label><label><input type="checkbox" data-g="f" value="overtime" checked> overtime</label><label><input type="checkbox" data-g="f" value="mercy" checked> mercy</label><label><input type="checkbox" data-g="f" value="score" checked> score</label><label><input type="checkbox" data-g="f" value="winner" checked> winner</label><label><input type="checkbox" data-g="f" value="server" checked> server</label><label><input type="checkbox" data-g="f" value="map" checked> map</label><label><input type="checkbox" data-g="f" value="ranked" checked> ranked skill</label><label><input type="checkbox" data-g="f" value="ranked_players" checked> ranked per player</label><label><input type="checkbox" data-g="f" value="players" checked> players</label></div>
+</details>
+<details>
+<summary>Per player &mdash; <a href="#" data-all="on" data-for="s">all</a> &middot;
+<a href="#" data-all="off" data-for="s">none</a></summary>
+<div class="pick fields"><label><input type="checkbox" data-g="s" value="team" checked> team</label><label><input type="checkbox" data-g="s" value="auth" checked> auth</label><label><input type="checkbox" data-g="s" value="score" checked> score</label><label><input type="checkbox" data-g="s" value="points" checked> points</label><label><input type="checkbox" data-g="s" value="grabs" checked> grabs</label><label><input type="checkbox" data-g="s" value="captures" checked> captures</label><label><input type="checkbox" data-g="s" value="drops" checked> drops</label><label><input type="checkbox" data-g="s" value="hold" checked> hold</label><label><input type="checkbox" data-g="s" value="tags" checked> tags</label><label><input type="checkbox" data-g="s" value="returns" checked> returns</label><label><input type="checkbox" data-g="s" value="pops" checked> pops</label><label><input type="checkbox" data-g="s" value="prevent" checked> prevent</label><label><input type="checkbox" data-g="s" value="button" checked> button</label><label><input type="checkbox" data-g="s" value="block" checked> block</label><label><input type="checkbox" data-g="s" value="pups_total" checked> powerups</label><label><input type="checkbox" data-g="s" value="time_played" checked> time played</label><label><input type="checkbox" data-g="s" value="caps_for" checked> caps for</label><label><input type="checkbox" data-g="s" value="caps_against" checked> caps against</label><label><input type="checkbox" data-g="s" value="disconnected" checked> disconnected</label></div>
+</details>
 <p class="status"><span class="dot"></span><span id="est">&hellip;</span></p>
 <p><a class="btn" id="build" href="#">Download selection</a></p>
 <p class="host"><code id="url"></code></p>
 </div>
-<p class="note">Recordings are the heavy part &mdash; the whole archive is 3.92 GB of them,
-while every match result ever is about 66 MB. The size shown is exact for recordings and
-an estimate for the rest, since those are built as they are sent.</p>
+<p class="note">Every match carries its <code>uuid</code> and every player their name, whatever
+else you untick. Recordings are the heavy part &mdash; the whole archive is 3.92 GB of
+them, against roughly 66 MB for every match result ever. Sizes are exact for recordings
+and an estimate for the rest, since those are built as they are sent.</p>
 </section>
 
 <section>
@@ -340,14 +360,40 @@ Generated 26 Aug 2026.
 
 (function () {
   var W = "https://tagpro-archive-tunnel.bambitagpro.workers.dev";
+  var TOTAL = 123909;
   var el = function (id) { return document.getElementById(id); };
-  var boxes = ["replays", "results", "eu", "map", "rebuilt"];
-  var est = el("est"), btn = el("build"), urlOut = el("url");
+  var flags = ["replays", "results", "eu", "map", "rebuilt"];
+  var est = el("est"), btn = el("build"), urlOut = el("url"), span = el("span");
   var timer = null;
 
+  function checked(group) {
+    return Array.prototype.slice
+      .call(document.querySelectorAll("input[data-g=" + group + "]"))
+      .filter(function (i) { return i.checked; })
+      .map(function (i) { return i.value; });
+  }
+
+  function total(group) {
+    return document.querySelectorAll("input[data-g=" + group + "]").length;
+  }
+
+  function clampRange() {
+    var a = parseInt(el("start").value, 10), b = parseInt(el("end").value, 10);
+    if (isNaN(a) || a < 1) a = 1;
+    if (isNaN(b) || b > TOTAL) b = TOTAL;
+    if (a > b) { var t = a; a = b; b = t; }
+    el("start").value = a; el("end").value = b;
+    return [a, b];
+  }
+
   function query() {
-    var q = ["from=" + el("from").value, "to=" + el("to").value];
-    boxes.forEach(function (b) { q.push(b + "=" + (el("c-" + b).checked ? "1" : "0")); });
+    var r = clampRange();
+    var q = ["start=" + r[0], "end=" + r[1]];
+    flags.forEach(function (b) { q.push(b + "=" + (el("c-" + b).checked ? "1" : "0")); });
+    // Only name fields when it is a real subset - a full list just makes the url long.
+    var f = checked("f"), s = checked("s");
+    if (f.length < total("f")) q.push("fields=" + f.join(","));
+    if (s.length < total("s")) q.push("stats=" + s.join(","));
     return q.join("&");
   }
 
@@ -364,7 +410,7 @@ Generated 26 Aug 2026.
     urlOut.textContent = href;
     if (!picked) {
       btn.setAttribute("aria-disabled", "true");
-      est.textContent = "Pick at least one of recordings, results, or tagpro.eu records.";
+      est.textContent = "Pick at least one of match results, tagpro.eu records, or recordings.";
       return;
     }
     btn.setAttribute("href", href);
@@ -375,11 +421,14 @@ Generated 26 Aug 2026.
       fetch(W + "/go/custom/estimate?" + q, { cache: "no-store" })
         .then(function (r) { return r.json(); })
         .then(function (d) {
-          if (!d.weeks) { est.textContent = "Nothing in that range."; return; }
-          est.textContent = d.weeks + (d.weeks === 1 ? " week, " : " weeks, ")
-            + d.matches.toLocaleString() + " matches, "
+          if (!d.matches) { est.textContent = "Nothing in that range."; return; }
+          est.textContent = d.matches.toLocaleString() + " matches across "
+            + d.weeks + (d.weeks === 1 ? " week, " : " weeks, ")
             + (d.exact ? "" : "about ") + size(d.bytes)
             + (d.selection.replays ? " (" + d.recordings.toLocaleString() + " recordings)" : "");
+          if (d.first_started && span) {
+            span.textContent = d.first_started.slice(0, 10) + " to " + d.last_started.slice(0, 10);
+          }
         })
         .catch(function () {
           est.textContent = "Cannot reach the host, so no size estimate. The link still works "
@@ -388,8 +437,20 @@ Generated 26 Aug 2026.
     }, 250);
   }
 
-  ["from", "to"].concat(boxes.map(function (b) { return "c-" + b; }))
+  document.querySelectorAll("[data-all]").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      var on = a.getAttribute("data-all") === "on";
+      document.querySelectorAll("input[data-g=" + a.getAttribute("data-for") + "]")
+        .forEach(function (i) { i.checked = on; });
+      refresh();
+    });
+  });
+  ["start", "end"].concat(flags.map(function (b) { return "c-" + b; }))
     .forEach(function (id) { el(id).addEventListener("change", refresh); });
+  document.querySelectorAll("input[data-g]").forEach(function (i) {
+    i.addEventListener("change", refresh);
+  });
   refresh();
 })();
 </script></body></html>

@@ -141,57 +141,16 @@ def replay_path(row):
     return p
 
 
-# ---------------------------------------------------------------- eu records
-
-def eu_record(conn, match_id):
-    m = conn.execute("SELECT * FROM matches WHERE match_id = ?", (match_id,)).fetchone()
-    if not m:
-        return None
-    rec = {k: m[k] for k in m.keys() if k != "raw_json"}
-    rec["players"] = [dict(r) for r in conn.execute(
-        "SELECT * FROM match_players WHERE match_id = ? ORDER BY team, player_name", (match_id,))]
-    rec["events"] = [dict(r) for r in conn.execute(
-        "SELECT time, player_name, team, kind, detail, x, y FROM match_events "
-        "WHERE match_id = ? ORDER BY time, id", (match_id,))]
-    rec["splats"] = [dict(r) for r in conn.execute(
-        "SELECT time, x, y, player_name, team, kind FROM match_splats "
-        "WHERE match_id = ? ORDER BY time, id", (match_id,))]
-    if m["map_id"] is not None:
-        mp = conn.execute("SELECT map_id, name, author, type, width, height FROM maps "
-                          "WHERE map_id = ?", (m["map_id"],)).fetchone()
-        rec["map"] = dict(mp) if mp else None
-    # Ranked skill/tier movement, keyed by the koala uuid rather than the eu id.
-    if m["koala_uuid"]:
-        rd = conn.execute("SELECT * FROM match_ranked_data WHERE uuid = ?",
-                          (m["koala_uuid"],)).fetchone()
-        rec["ranked"] = dict(rd) if rd else None
-        rec["ranked_players"] = [dict(r) for r in conn.execute(
-            "SELECT * FROM match_ranked_players WHERE uuid = ?", (m["koala_uuid"],))]
-    return rec
-
-
 # --------------------------------------------------------------- eu bulk shape
 
 # tagpro.eu's own bulk endpoint is {match_id: match_doc}. Genuine records are
 # served as the exact document the mirror gave us, plus the three fields the
-# pipeline derives (outcome, void_reason, disconnected_players), matching
-# export_ranked_bulk.py.
+# pipeline derives (outcome, void_reason, disconnected_players).
 #
 # Rebuilt records have no such document - they were reconstructed from a
 # recording and there is nothing to copy. They are emitted in the same shape
 # with the fields a recording cannot supply set to null, marked
-# "source": "replay", and left OUT unless rebuilt=1 is asked for. See the
-# Rebuilt records page on the site for what is and is not reproducible.
-
-def _disconnected(conn, match_ids):
-    out = {}
-    for mid in match_ids:
-        rows = conn.execute("SELECT player_name FROM match_players "
-                            "WHERE match_id = ? AND disconnected = 1", (mid,)).fetchall()
-        if rows:
-            out[mid] = [r[0] for r in rows]
-    return out
-
+# "source": "replay", and left OUT unless rebuilt=1 is asked for.
 
 def eu_bulk_doc(conn, row):
     """One entry of a tagpro.eu-shaped bulk file, genuine or rebuilt."""
@@ -244,7 +203,6 @@ def eu_bulk_doc(conn, row):
         "source": "replay",
         "events_decoded": events,
     }
-
 
 # ------------------------------------------------------------------ handler
 
@@ -366,9 +324,6 @@ class Handler(BaseHTTPRequestHandler):
                 return self.landing()
             if path == "/manifest.json":
                 return self.manifest()
-            if path == "/weeks.json":
-                return self.weeks()
-
             m = re.match(r"^/replay/([0-9a-f-]{36})$", path)
             if m:
                 return self.replay(m.group(1))
@@ -386,18 +341,10 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/custom/estimate":
                 return self.custom_estimate()
 
-            m = re.match(r"^/week/(\d{4}-\d{2}-\d{2})/replays\.json$", path)
-            if m:
-                return self.week_list(m.group(1))
-
             m = re.match(r"^/week/(\d{4}-\d{2}-\d{2})/results\.json\.gz$", path)
             if m:
                 return self.week_results(m.group(1), self.want("map", True),
                                          self.want("rebuilt", True))
-
-            m = re.match(r"^/eu/(\d+)\.json$", path)
-            if m:
-                return self.eu_one(int(m.group(1)))
 
             m = re.match(r"^/eu/week/(\d{4}-\d{2}-\d{2})\.json\.gz$", path)
             if m:
@@ -443,23 +390,15 @@ class Handler(BaseHTTPRequestHandler):
         with transfer_slot(self.ip()):
             self._sendfile(p, "application/gzip", f"{uuid}.ndjson.gz")
 
-    def bulk(self):
-        if not BULK.is_file():
-            return self._error(404, "bulk export not present")
-        with transfer_slot(self.ip()):
-            self._sendfile(BULK, "application/gzip", BULK.name)
-
-    def week_rows(self, week):
-        lo, hi = week_bounds(week)
+    def range_rows(self, lo, hi):
+        """Recordings held for matches started in [lo, hi)."""
         return db().execute(
             "SELECT k.uuid, k.game_id, k.started, k.map_name, r.path, r.bytes_stored "
             "FROM koala_matches k JOIN replay_files r ON r.uuid = k.uuid AND r.status = 'done' "
             "WHERE k.started >= ? AND k.started < ? ORDER BY k.started", (lo, hi)).fetchall()
 
-    def week_list(self, week):
-        rows = self.week_rows(week)
-        self._json([{"uuid": r["uuid"], "game_id": r["game_id"], "started": r["started"],
-                     "map": r["map_name"], "bytes": r["bytes_stored"]} for r in rows])
+    def week_rows(self, week):
+        return self.range_rows(*week_bounds(week))
 
     def stream_tar(self, rows, filename, prefix=""):
         """Stream mode: nothing buffered and nothing seeks, so this costs no disk
@@ -524,27 +463,114 @@ class Handler(BaseHTTPRequestHandler):
                 w.close()
                 log.info("streamed %d recordings as the whole archive", sent)
 
-    def results_records(self, week, with_map, with_rebuilt):
-        """How every match that week ended, and what each player did in it.
+    # ------------------------------------------------------------------ picking
 
-        Provenance is explicit per match: record_source says whether the stats
-        came from tagpro.eu or were rebuilt from the recording. Rebuilt ones are
-        included by default here (this is a results file, not a mirror of
-        tagpro.eu) and ?rebuilt=0 drops them.
+    # Every field a results record can carry. uuid is not listed because it is
+    # identity and always present. An absent ?fields= means all of them.
+    MATCH_FIELDS = ["game_id", "started", "eu_match_id", "record_source", "duration_ms",
+                    "duration_frames", "mode", "season", "finished", "outcome",
+                    "void_reason", "overtime", "mercy", "score", "winner", "server",
+                    "map", "ranked", "ranked_players", "players"]
+    # Per-player, inside "players". name is always present, same reason.
+    PLAYER_FIELDS = ["team", "auth", "score", "points", "grabs", "captures", "drops",
+                     "hold", "tags", "returns", "pops", "prevent", "button", "block",
+                     "pups_total", "time_played", "caps_for", "caps_against", "disconnected"]
+
+    def query(self):
+        return urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+
+    def picked(self, name, allowed):
+        """?name=a,b,c - absent or empty means everything allowed."""
+        q = self.query()
+        raw = (q.get(name) or [""])[0].strip()
+        if not raw:
+            return list(allowed)
+        want = {x.strip() for x in raw.split(",") if x.strip()}
+        return [x for x in allowed if x in want]
+
+    def bounds(self):
         """
-        lo, hi = week_bounds(week)
+        The slice of the archive being asked for, as [lo, hi) start times.
+
+        ?start= and ?end= are match numbers: 1 is the oldest match in the
+        archive, and the last is however many there are now. ?from= and ?to=
+        take ISO dates instead. Neither given means everything. Returns
+        (lo, hi, first_n, last_n) or None if the query is malformed.
+        """
+        q = self.query()
+        get = lambda k: (q.get(k) or [""])[0].strip()
+        conn = db()
+        total = conn.execute("SELECT COUNT(*) FROM koala_matches").fetchone()[0]
+        if not total:
+            return None
+
+        a, b = get("start"), get("end")
+        if a or b:
+            try:
+                first = max(1, int(a or 1))
+                last = min(total, int(b or total))
+            except ValueError:
+                return None
+            if first > last:
+                first, last = last, first
+            nth = lambda n: conn.execute(
+                "SELECT started FROM koala_matches ORDER BY started LIMIT 1 OFFSET ?",
+                (n - 1,)).fetchone()[0]
+            lo = nth(first)
+            hi_started = nth(last)
+            # hi is exclusive, so step past the last match's own instant
+            hi = hi_started[:-1] + "1Z" if hi_started.endswith("Z") else hi_started + "1"
+            return lo, hi, first, last
+
+        f, t = get("from"), get("to")
+        for v in (f, t):
+            if v and not WEEK_RE.match(v):
+                return None
+        lo = f"{f}T00:00:00.000Z" if f else "0000"
+        hi = ((dt.date.fromisoformat(t) + dt.timedelta(days=1)).isoformat() + "T00:00:00.000Z"
+              if t else "9999")
+        row = conn.execute(
+            "SELECT COUNT(*) FROM koala_matches WHERE started < ?", (lo,)).fetchone()
+        first = row[0] + 1
+        last = conn.execute(
+            "SELECT COUNT(*) FROM koala_matches WHERE started < ?", (hi,)).fetchone()[0]
+        return lo, hi, first, max(first, last)
+
+    def weeks_in(self, lo, hi):
+        """Weeks the range touches, with each week's own clamped bounds."""
+        rows = db().execute(
+            "SELECT DISTINCT substr(started,1,10) FROM koala_matches "
+            "WHERE started >= ? AND started < ?", (lo, hi)).fetchall()
+        out = {}
+        for (d,) in rows:
+            w = monday(d)
+            wlo, whi = week_bounds(w)
+            out[w] = (max(wlo, lo), min(whi, hi))
+        return [(w, out[w]) for w in sorted(out)]
+
+    # ------------------------------------------------------------------ results
+
+    def results_records(self, lo, hi, with_map, with_rebuilt, fields, stats):
+        """
+        How every match in the range ended, and what each player did in it.
+
+        Provenance is explicit: record_source says whether the stats came from
+        tagpro.eu or were rebuilt from the recording. Rebuilt ones are included
+        by default here - this is a results file, not a mirror of tagpro.eu.
+        """
         conn = db()
         rows = conn.execute(
             "SELECT k.uuid, k.game_id, k.started, k.map_name, k.map_type, k.server, "
             "       k.duration AS koala_duration_ms, k.winner, k.red_score AS k_red, "
-            "       k.blue_score AS k_blue, m.match_id, m.date, m.duration, m.finished, "
+            "       k.blue_score AS k_blue, m.match_id, m.duration, m.finished, "
             "       m.mode, m.season, m.red_score, m.blue_score, m.outcome, m.overtime, "
             "       m.mercy, m.void_reason, m.map_id, m.source "
             "FROM koala_matches k LEFT JOIN matches m ON m.koala_uuid = k.uuid "
             "WHERE k.started >= ? AND k.started < ? ORDER BY k.started", (lo, hi)).fetchall()
 
+        want = set(fields)
         maps = {}
-        if with_map:
+        if with_map and "map" in want:
             for mp in conn.execute("SELECT map_id, name, author, type, width, height, marsballs FROM maps"):
                 maps[mp["map_id"]] = dict(mp)
 
@@ -553,210 +579,83 @@ class Handler(BaseHTTPRequestHandler):
             rebuilt = r["source"] == "replay"
             if rebuilt and not with_rebuilt:
                 continue
-            rec = {
-                "uuid": r["uuid"], "game_id": r["game_id"], "started": r["started"],
+            full = {
+                "game_id": r["game_id"], "started": r["started"],
                 "eu_match_id": r["match_id"],
                 "record_source": None if r["match_id"] is None else
                                  ("replay" if rebuilt else "tagpro.eu"),
-                "duration_ms": r["koala_duration_ms"],
-                "duration_frames": r["duration"],
+                "duration_ms": r["koala_duration_ms"], "duration_frames": r["duration"],
                 "mode": r["mode"], "season": r["season"],
                 "finished": None if r["finished"] is None else bool(r["finished"]),
                 "outcome": r["outcome"], "void_reason": r["void_reason"],
                 "overtime": r["overtime"], "mercy": r["mercy"],
                 "score": {"red": r["red_score"] if r["red_score"] is not None else r["k_red"],
                           "blue": r["blue_score"] if r["blue_score"] is not None else r["k_blue"]},
-                "winner": r["winner"],
-                "server": r["server"],
+                "winner": r["winner"], "server": r["server"],
             }
-            if with_map:
+            rec = {"uuid": r["uuid"]}
+            for k in self.MATCH_FIELDS:
+                if k in want and k in full:
+                    rec[k] = full[k]
+
+            if with_map and "map" in want:
                 rec["map"] = {"name": r["map_name"], "type": r["map_type"],
                               "eu_map_id": r["map_id"], "eu_map": maps.get(r["map_id"])}
-            if r["match_id"] is not None:
-                rec["players"] = [
-                    {"name": pr["player_name"], "team": pr["team"], "auth": pr["auth"],
-                     "score": pr["score"], "points": pr["points"],
-                     "grabs": pr["grabs"], "captures": pr["captures"], "drops": pr["drops"],
-                     "hold": pr["hold"], "tags": pr["tags"], "returns": pr["returns"],
-                     "pops": pr["pops"], "prevent": pr["prevent"], "button": pr["button"],
-                     "block": pr["block"], "pups_total": pr["pups_total"],
-                     "time_played": pr["time_played"], "caps_for": pr["caps_for"],
-                     "caps_against": pr["caps_against"], "disconnected": pr["disconnected"]}
-                    for pr in conn.execute(
-                        "SELECT * FROM match_players WHERE match_id = ? ORDER BY team, player_name",
-                        (r["match_id"],))]
-            else:
-                rec["players"] = None
+
+            if "players" in want:
+                if r["match_id"] is None:
+                    rec["players"] = None
+                else:
+                    rec["players"] = [
+                        dict({"name": pr["player_name"]},
+                             **{k: pr[k] for k in stats})
+                        for pr in conn.execute(
+                            "SELECT * FROM match_players WHERE match_id = ? "
+                            "ORDER BY team, player_name", (r["match_id"],))]
+
             # Ranked skill movement is keyed by koala uuid and by user id, which
-            # does not map cleanly onto the names above, so it stays its own
-            # block rather than being merged into the players list.
-            rd = conn.execute("SELECT game_mode, region, season, void_occurred_at, "
-                              "red_avg_skill, red_win_prob, blue_avg_skill, blue_win_prob "
-                              "FROM match_ranked_data WHERE uuid = ?", (r["uuid"],)).fetchone()
-            if rd:
-                rec["ranked"] = dict(rd)
-                rec["ranked_players"] = [dict(x) for x in conn.execute(
-                    "SELECT user_id, pre_skill, pre_tier, pre_sub_tier, post_skill, "
-                    "post_tier, post_sub_tier, disconnected FROM match_ranked_players "
-                    "WHERE uuid = ?", (r["uuid"],))]
+            # does not map onto the player names above, so it stays its own block.
+            if "ranked" in want or "ranked_players" in want:
+                rd = conn.execute("SELECT game_mode, region, season, void_occurred_at, "
+                                  "red_avg_skill, red_win_prob, blue_avg_skill, blue_win_prob "
+                                  "FROM match_ranked_data WHERE uuid = ?", (r["uuid"],)).fetchone()
+                if rd and "ranked" in want:
+                    rec["ranked"] = dict(rd)
+                if rd and "ranked_players" in want:
+                    rec["ranked_players"] = [dict(x) for x in conn.execute(
+                        "SELECT user_id, pre_skill, pre_tier, pre_sub_tier, post_skill, "
+                        "post_tier, post_sub_tier, disconnected FROM match_ranked_players "
+                        "WHERE uuid = ?", (r["uuid"],))]
             out.append(rec)
         return out
 
-    def results_blob(self, week, with_map, with_rebuilt):
-        recs = self.results_records(week, with_map, with_rebuilt)
+    def results_blob(self, lo, hi, with_map, with_rebuilt, fields, stats):
+        recs = self.results_records(lo, hi, with_map, with_rebuilt, fields, stats)
         if not recs:
             return None
         return gzip.compress(json.dumps(recs, separators=(",", ":")).encode(), 6)
 
     def week_results(self, week, with_map, with_rebuilt):
-        blob = self.results_blob(week, with_map, with_rebuilt)
+        lo, hi = week_bounds(week)
+        blob = self.results_blob(lo, hi, with_map, with_rebuilt,
+                                 self.picked("fields", self.MATCH_FIELDS),
+                                 self.picked("stats", self.PLAYER_FIELDS))
         if blob is None:
             return self._error(404, "no matches that week")
         self._send(200, "application/gzip", blob,
                    {"Content-Disposition": f'attachment; filename="results-{week}.json.gz"'})
 
-    # ------------------------------------------------------------- custom pick
+    # ----------------------------------------------------------- tagpro.eu bulk
 
-    # Rough gzipped bytes per match, measured over a full week of each. Only
-    # used to warn before a download starts - the estimate endpoint says so.
-    RESULTS_BYTES_PER_MATCH = 530
-    EU_BYTES_PER_MATCH = 3100
-
-    def custom_range(self):
-        """?from=/&to= as ISO dates, snapped to the weeks they fall in."""
-        q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-        get = lambda k: (q.get(k) or [""])[0].strip()
-        a, b = get("from"), get("to")
-        for v in (a, b):
-            if v and not WEEK_RE.match(v):
-                return None
-        weeks = [r[0] for r in db().execute(
-            "SELECT DISTINCT substr(started,1,10) FROM koala_matches")]
-        weeks = sorted({monday(d) for d in weeks})
-        if a:
-            weeks = [w for w in weeks if w >= monday(a)]
-        if b:
-            weeks = [w for w in weeks if w <= monday(b)]
-        return weeks
-
-    def custom_selection(self):
-        return {
-            "replays": self.want("replays", False),
-            "results": self.want("results", True),
-            "eu": self.want("eu", False),
-            "map": self.want("map", True),
-            "rebuilt": self.want("rebuilt", True),
-        }
-
-    def custom_estimate(self):
-        weeks = self.custom_range()
-        if weeks is None:
-            return self._error(400, "from/to must be YYYY-MM-DD")
-        sel = self.custom_selection()
-        if not weeks:
-            return self._json({"weeks": 0, "matches": 0, "recordings": 0, "bytes": 0,
-                               "exact": True, "selection": sel})
-        marks = ",".join("?" * len(weeks))
-        rows = db().execute(
-            "SELECT COUNT(*) AS ids, "
-            "  SUM(CASE WHEN r.uuid IS NOT NULL THEN 1 ELSE 0 END) AS held, "
-            "  COALESCE(SUM(r.bytes_stored), 0) AS bytes "
-            "FROM koala_matches k LEFT JOIN replay_files r "
-            "  ON r.uuid = k.uuid AND r.status = 'done' "
-            "WHERE k.started >= ? AND k.started < ?",
-            (week_bounds(weeks[0])[0], week_bounds(weeks[-1])[1])).fetchone()
-        ids, held, rbytes = rows["ids"], rows["held"] or 0, rows["bytes"] or 0
-        total = 0
-        if sel["replays"]:
-            total += rbytes
-        if sel["results"]:
-            total += ids * self.RESULTS_BYTES_PER_MATCH
-        if sel["eu"]:
-            total += ids * self.EU_BYTES_PER_MATCH
-        self._json({
-            "weeks": len(weeks), "first_week": weeks[0], "last_week": weeks[-1],
-            "matches": ids, "recordings": held,
-            "recordings_bytes": rbytes, "bytes": int(total),
-            # Recording bytes are read off disk; the JSON parts are per-match
-            # averages, so the total is only exact when recordings are all
-            # that was asked for.
-            "exact": sel["replays"] and not (sel["results"] or sel["eu"]),
-            "selection": sel,
-        })
-
-    def custom_tar(self):
-        weeks = self.custom_range()
-        if weeks is None:
-            return self._error(400, "from/to must be YYYY-MM-DD")
-        if not weeks:
-            return self._error(404, "no weeks in that range")
-        sel = self.custom_selection()
-        if not (sel["replays"] or sel["results"] or sel["eu"]):
-            return self._error(400, "pick at least one of replays, results, eu")
-
-        conn = db()
-        name = f"tagpro-archive-{weeks[0]}-to-{weeks[-1]}.tar"
-        with transfer_slot(self.ip()):
-            self._head(200, "application/x-tar", None,
-                       {"Content-Disposition": f'attachment; filename="{name}"'})
-            if self.command == "HEAD":
-                return
-            w = self._chunks()
-            tar = tarfile.open(fileobj=w, mode="w|")
-
-            def add_bytes(arcname, blob):
-                info = tarfile.TarInfo(arcname)
-                info.size = len(blob)
-                info.mtime = int(dt.datetime.now(dt.timezone.utc).timestamp())
-                tar.addfile(info, io.BytesIO(blob))
-
-            try:
-                add_bytes("manifest.json", json.dumps({
-                    "site": SITE,
-                    "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-                    "weeks": weeks, "selection": sel,
-                }, indent=1).encode())
-
-                for week in weeks:
-                    if sel["results"]:
-                        blob = self.results_blob(week, sel["map"], sel["rebuilt"])
-                        if blob:
-                            add_bytes(f"results/{week}.json.gz", blob)
-                    if sel["eu"]:
-                        blob = self.eu_blob(week, sel["rebuilt"])
-                        if blob:
-                            add_bytes(f"eu/{week}.json.gz", blob)
-                    if sel["replays"]:
-                        for r in self.week_rows(week):
-                            p = replay_path(r)
-                            if not p:
-                                continue
-                            info = tar.gettarinfo(
-                                str(p), arcname=f"replays/{week}/{r['uuid']}.ndjson.gz")
-                            with open(p, "rb") as fh:
-                                tar.addfile(info, fh)
-            finally:
-                tar.close()
-                w.close()
-                log.info("custom download: %d weeks, %s", len(weeks),
-                         ",".join(k for k, v in sel.items() if v))
-
-    def eu_one(self, match_id):
-        rec = eu_record(db(), match_id)
-        if rec is None:
-            return self._error(404, "no tagpro.eu record held for that match id")
-        self._json(rec)
-
-    def eu_rows(self, week, rebuilt):
-        lo, hi = week_bounds(week)
+    def eu_rows(self, lo, hi, rebuilt):
         return db().execute(
             "SELECT m.* FROM koala_matches k JOIN matches m ON m.koala_uuid = k.uuid "
             "WHERE k.started >= ? AND k.started < ? "
             + ("" if rebuilt else "AND m.raw_json IS NOT NULL ")
             + "ORDER BY k.started", (lo, hi)).fetchall()
 
-    def eu_blob(self, week, rebuilt):
-        rows = self.eu_rows(week, rebuilt)
+    def eu_blob(self, lo, hi, rebuilt):
+        rows = self.eu_rows(lo, hi, rebuilt)
         if not rows:
             return None
         conn = db()
@@ -765,7 +664,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def eu_week(self, week, rebuilt):
         """That week's tagpro.eu records, in tagpro.eu's own {match_id: doc} bulk shape."""
-        blob = self.eu_blob(week, rebuilt)
+        lo, hi = week_bounds(week)
+        blob = self.eu_blob(lo, hi, rebuilt)
         if blob is None:
             return self._error(404, "no tagpro.eu records held for that week")
         name = f"eu-{week}{'-with-rebuilt' if rebuilt else ''}.json.gz"
@@ -806,21 +706,123 @@ class Handler(BaseHTTPRequestHandler):
                 gz.close()
                 w.close()
 
-    def weeks(self):
-        rows = db().execute(
-            "SELECT substr(k.started,1,10) AS d, COUNT(*) AS ids, "
-            "SUM(CASE WHEN r.uuid IS NOT NULL THEN 1 ELSE 0 END) AS held, "
-            "SUM(COALESCE(r.bytes_stored,0)) AS bytes "
+    # ------------------------------------------------------------------- custom
+
+    # Rough gzipped bytes per match, measured over a full week of each. Only
+    # used to size a download before it starts; the estimate says it is one.
+    RESULTS_BYTES_PER_MATCH = 530
+    EU_BYTES_PER_MATCH = 3100
+
+    def custom_selection(self):
+        return {
+            "replays": self.want("replays", False),
+            "results": self.want("results", True),
+            "eu": self.want("eu", False),
+            "map": self.want("map", True),
+            "rebuilt": self.want("rebuilt", True),
+        }
+
+    def custom_estimate(self):
+        b = self.bounds()
+        if b is None:
+            return self._error(400, "bad range")
+        lo, hi, first_n, last_n = b
+        sel = self.custom_selection()
+        fields = self.picked("fields", self.MATCH_FIELDS)
+        stats = self.picked("stats", self.PLAYER_FIELDS)
+        row = db().execute(
+            "SELECT COUNT(*) AS ids, "
+            "  SUM(CASE WHEN r.uuid IS NOT NULL THEN 1 ELSE 0 END) AS held, "
+            "  COALESCE(SUM(r.bytes_stored), 0) AS bytes, "
+            "  MIN(k.started) AS first, MAX(k.started) AS last "
             "FROM koala_matches k LEFT JOIN replay_files r "
-            "  ON r.uuid = k.uuid AND r.status = 'done' GROUP BY d").fetchall()
-        weeks = {}
-        for r in rows:
-            w = weeks.setdefault(monday(r["d"]), {"week": monday(r["d"]), "ids": 0,
-                                                  "recordings": 0, "bytes": 0})
-            w["ids"] += r["ids"]
-            w["recordings"] += r["held"]
-            w["bytes"] += r["bytes"]
-        return self._json([weeks[k] for k in sorted(weeks)])
+            "  ON r.uuid = k.uuid AND r.status = 'done' "
+            "WHERE k.started >= ? AND k.started < ?", (lo, hi)).fetchone()
+        ids, held, rbytes = row["ids"], row["held"] or 0, row["bytes"] or 0
+        # Fewer fields, smaller file - scale the per-match average by how much
+        # of the record was actually asked for.
+        share = (len(fields) / len(self.MATCH_FIELDS)) if fields else 0.0
+        if "players" in fields and stats:
+            share *= 0.5 + 0.5 * (len(stats) / len(self.PLAYER_FIELDS))
+        total = 0
+        if sel["replays"]:
+            total += rbytes
+        if sel["results"]:
+            total += ids * self.RESULTS_BYTES_PER_MATCH * share
+        if sel["eu"]:
+            total += ids * self.EU_BYTES_PER_MATCH
+        self._json({
+            "matches": ids, "first_match": first_n, "last_match": last_n,
+            "first_started": row["first"], "last_started": row["last"],
+            "weeks": len(self.weeks_in(lo, hi)),
+            "recordings": held, "recordings_bytes": rbytes, "bytes": int(total),
+            # Recording bytes come off disk; the JSON parts are per-match
+            # averages, so the total is only exact for recordings alone.
+            "exact": sel["replays"] and not (sel["results"] or sel["eu"]),
+            "total_matches": db().execute("SELECT COUNT(*) FROM koala_matches").fetchone()[0],
+            "selection": sel, "fields": fields, "stats": stats,
+        })
+
+    def custom_tar(self):
+        b = self.bounds()
+        if b is None:
+            return self._error(400, "bad range")
+        lo, hi, first_n, last_n = b
+        sel = self.custom_selection()
+        if not (sel["replays"] or sel["results"] or sel["eu"]):
+            return self._error(400, "pick at least one of replays, results, eu")
+        fields = self.picked("fields", self.MATCH_FIELDS)
+        stats = self.picked("stats", self.PLAYER_FIELDS)
+        weeks = self.weeks_in(lo, hi)
+        if not weeks:
+            return self._error(404, "nothing in that range")
+
+        name = f"tagpro-archive-{first_n}-to-{last_n}.tar"
+        with transfer_slot(self.ip()):
+            self._head(200, "application/x-tar", None,
+                       {"Content-Disposition": f'attachment; filename="{name}"'})
+            if self.command == "HEAD":
+                return
+            w = self._chunks()
+            tar = tarfile.open(fileobj=w, mode="w|")
+
+            def add_bytes(arcname, blob):
+                info = tarfile.TarInfo(arcname)
+                info.size = len(blob)
+                info.mtime = int(dt.datetime.now(dt.timezone.utc).timestamp())
+                tar.addfile(info, io.BytesIO(blob))
+
+            try:
+                add_bytes("manifest.json", json.dumps({
+                    "site": SITE,
+                    "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+                    "matches": [first_n, last_n], "weeks": [w for w, _ in weeks],
+                    "selection": sel, "fields": fields, "stats": stats,
+                }, indent=1).encode())
+
+                for week, (wlo, whi) in weeks:
+                    if sel["results"]:
+                        blob = self.results_blob(wlo, whi, sel["map"], sel["rebuilt"], fields, stats)
+                        if blob:
+                            add_bytes(f"results/{week}.json.gz", blob)
+                    if sel["eu"]:
+                        blob = self.eu_blob(wlo, whi, sel["rebuilt"])
+                        if blob:
+                            add_bytes(f"eu/{week}.json.gz", blob)
+                    if sel["replays"]:
+                        for r in self.range_rows(wlo, whi):
+                            p = replay_path(r)
+                            if not p:
+                                continue
+                            info = tar.gettarinfo(
+                                str(p), arcname=f"replays/{week}/{r['uuid']}.ndjson.gz")
+                            with open(p, "rb") as fh:
+                                tar.addfile(info, fh)
+            finally:
+                tar.close()
+                w.close()
+                log.info("custom: matches %d-%d, %s", first_n, last_n,
+                         ",".join(k for k, v in sel.items() if v))
 
     def manifest(self):
         conn = db()
@@ -837,14 +839,14 @@ class Handler(BaseHTTPRequestHandler):
             "last_match": one("SELECT MAX(started) FROM koala_matches"),
             "bulk_export_bytes": BULK.stat().st_size if BULK.is_file() else None,
             "routes": [
-                "/manifest.json", "/weeks.json",
+                "/manifest.json",
                 "/replay/<uuid>",
-                "/week/<YYYY-MM-DD>/replays.json", "/week/<YYYY-MM-DD>/replays.tar",
+                "/week/<YYYY-MM-DD>/replays.tar",
                 "/week/<YYYY-MM-DD>/results.json.gz[?map=0][?rebuilt=0]",
                 "/all/replays.tar",
                 "/custom.tar?from=&to=&replays=&results=&eu=&map=&rebuilt=",
                 "/custom/estimate?<same query>",
-                "/eu/<match_id>.json", "/eu/week/<YYYY-MM-DD>.json.gz[?rebuilt=1]",
+                "/eu/week/<YYYY-MM-DD>.json.gz[?rebuilt=1]",
                 "/bulk/ranked_matches_bulk.json.gz[?rebuilt=1]",
             ],
         })
@@ -885,15 +887,12 @@ font-family:ui-monospace,Menlo,Consolas,monospace}}
 <h2>Routes</h2>
 <table>
 <tr><td>/manifest.json</td><td>counts, sizes, what is here</td></tr>
-<tr><td>/weeks.json</td><td>per-week ids, recordings held, bytes</td></tr>
 <tr><td>/replay/&lt;uuid&gt;</td><td>one recording, <code>.ndjson.gz</code>, resumable</td></tr>
-<tr><td>/week/&lt;YYYY-MM-DD&gt;/replays.json</td><td>what that week holds</td></tr>
 <tr><td>/week/&lt;YYYY-MM-DD&gt;/results.json.gz</td><td>how every match that week ended, with per-player stats and the map; <code>?map=0</code>, <code>?rebuilt=0</code></td></tr>
 <tr><td>/week/&lt;YYYY-MM-DD&gt;/replays.tar</td><td>every recording that week, streamed as one tar</td></tr>
 <tr><td>/all/replays.tar</td><td>every recording held, {gb:.1f} GB, foldered by week</td></tr>
 <tr><td>/custom.tar</td><td>pick a date range and what to include: <code>?from=&amp;to=&amp;replays=1&amp;results=1&amp;eu=1&amp;map=1&amp;rebuilt=1</code></td></tr>
 <tr><td>/custom/estimate</td><td>same query, returns counts and a size estimate first</td></tr>
-<tr><td>/eu/&lt;match_id&gt;.json</td><td>one tagpro.eu record: match, players, events, splats, ranked</td></tr>
 <tr><td>/eu/week/&lt;YYYY-MM-DD&gt;.json.gz</td><td>that week's tagpro.eu records, in tagpro.eu bulk shape</td></tr>
 <tr><td>/bulk/ranked_matches_bulk.json.gz</td><td>the whole tagpro.eu export in one file</td></tr>
 <tr><td colspan=2 class=n>Both take <code>?rebuilt=1</code> to mix in the records rebuilt from
