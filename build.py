@@ -519,23 +519,32 @@ def about_page(cov, missing, ids, rep, held_bytes, span):
     record = sum(r["record"] for r in cov)
     body = f'''<section class="prose">
 <h2>What this is</h2>
-<p>A record of every ranked TagPro match the replay listing returns:
+<p>A crowdsourced record of every ranked TagPro match the replay listing returns:
 <strong>{f(ids)} matches</strong> since {span[0]}, each with its id, start time, map and duration,
 and a tagpro.eu record for {f(record)} of them. For <strong>{f(rep)}</strong> the recording itself
 is held too.</p>
 <p>It exists out of a love for data.</p>
 
-<h2>Why there are so few recordings</h2>
-<p>Scraping replays older than two days is forbidden, and the site blocks viewing a replay older
-than two days without an account. A request for a bulk download of the older material was
-declined.</p>
-<p>That is the whole reason the two halves of this site look so different. Ids can be listed in
-bulk, so every match has one. A recording has to be fetched inside the two-day window, so the
-archive holds them only from the point collection started, and only where it kept up.</p>
+<h2>Why this has to be crowdsourced</h2>
+<p>Scraping replays older than two days is forbidden. The site blocks viewing a replay older than
+two days without an account. A request for a bulk download of the older material was declined.</p>
+<p>None of that is a technical limit. The matches are still there &mdash; ask for an old one
+without an account and you are told to log in, not that it is gone. The two-day window, the account
+wall and the refusal are decisions, and what they hold back is the community's own record of
+itself.</p>
+<p><strong>This data is the community's by right.</strong> Every match in it was played by people
+who now cannot get at it. They filled the servers, they played the games, and the record of what
+they did is theirs. Running the machine it happens to sit on is not a better claim than that.</p>
+<p>So the only route left is to <strong>crowdsource</strong> it. This archive is complete on ids
+because a listing can be enumerated, and thin on recordings because each one had to be caught
+inside a two-day window as it happened. Everything older than that window when collection started
+is out of my reach &mdash; but it is not out of everyone's. It is sitting in folders on other
+people's machines.</p>
 
-<h2>Bulk replay dumps wanted</h2>
-<p>If you have replay dumps &mdash; exports, scrapes, anything &mdash; send them to
-<strong>{DISCORD}</strong> on Discord. Any format, any size, any dates.</p>
+<h2>Send me your replays</h2>
+<p>Every recording anyone contributes is one the archive can never get any other way. If you have
+replay dumps &mdash; exports, scrapes, anything &mdash; send them to <strong>{DISCORD}</strong> on
+Discord. Any format, any size, any dates.</p>
 <p>Recordings are keyed by uuid, so duplicates cost nothing and nothing needs checking or filtering
 first. The <a href="download.html">list of what is missing</a> is published if it is useful.</p>
 <p><strong>Ask for what you need.</strong> Message <strong>{DISCORD}</strong> on Discord for a
@@ -570,7 +579,7 @@ collected them and are served from it &mdash; see <a href="download.html">Downlo
     foot = ('Numbers on this page come from the same database as the coverage tables and move '
             'with them. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>')
     return page("about.html", "About · TagPro ranked replay archive",
-                "What this archive is, why it is complete in one half and not the other.",
+                "A crowdsourced record of ranked TagPro, and why it has to be one.",
                 body, foot=foot)
 
 
