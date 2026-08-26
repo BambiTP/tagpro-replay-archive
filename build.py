@@ -241,6 +241,14 @@ details{margin:0 0 12px}
 summary{font-size:13px;color:var(--ink);cursor:pointer;padding:4px 0}
 summary a{font-size:12.5px}
 .n{font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mini{font:inherit;font-size:12.5px;padding:7px 12px;border-radius:6px;border:1px solid var(--rule);
+background:var(--panel);color:var(--muted);cursor:pointer}
+.mini:hover{color:var(--ink)}
+.urlbox{margin:12px 0 0}
+.url{display:block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+color:var(--id);word-break:break-all;text-decoration:none;line-height:1.5}
+.url:hover{text-decoration:underline}
 """
 
 HEAD = ('<tr><th>Week</th><th></th><th style="text-align:right">Count</th>'
@@ -329,6 +337,7 @@ CUSTOM_JS = """
   var el = function (id) { return document.getElementById(id); };
   var flags = ["replays", "results", "eu", "map", "rebuilt"];
   var est = el("est"), btn = el("build"), urlOut = el("url"), span = el("span");
+  var copy = el("copy");
   var timer = null;
 
   function checked(group) {
@@ -373,6 +382,10 @@ CUSTOM_JS = """
     var q = query();
     var href = W + "/go/custom.tar?" + q;
     urlOut.textContent = href;
+    urlOut.setAttribute("href", href);
+    // Carry the selection in this page's own address, so a bookmark or a
+    // pasted link reopens the picker exactly as it was left.
+    try { history.replaceState(null, "", "?" + q); } catch (e) {}
     if (!picked) {
       btn.setAttribute("aria-disabled", "true");
       est.textContent = "Pick at least one of match results, tagpro.eu records, or recordings.";
@@ -402,6 +415,44 @@ CUSTOM_JS = """
     }, 250);
   }
 
+  function applyFromUrl() {
+    var q;
+    try { q = new URLSearchParams(location.search); } catch (e) { return; }
+    if (!q.toString()) return;
+    if (q.has("start")) el("start").value = q.get("start");
+    if (q.has("end")) el("end").value = q.get("end");
+    flags.forEach(function (b) {
+      if (q.has(b)) el("c-" + b).checked = q.get(b) === "1";
+    });
+    [["f", "fields"], ["s", "stats"]].forEach(function (pair) {
+      if (!q.has(pair[1])) return;
+      var want = q.get(pair[1]).split(",");
+      document.querySelectorAll("input[data-g=" + pair[0] + "]").forEach(function (i) {
+        i.checked = want.indexOf(i.value) !== -1;
+      });
+    });
+  }
+
+  if (copy) {
+    copy.addEventListener("click", function () {
+      var text = urlOut.textContent;
+      var done = function () {
+        copy.textContent = "Copied";
+        setTimeout(function () { copy.textContent = "Copy link"; }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+        return;
+      }
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    });
+  }
+
   document.querySelectorAll("[data-all]").forEach(function (a) {
     a.addEventListener("click", function (e) {
       e.preventDefault();
@@ -416,6 +467,7 @@ CUSTOM_JS = """
   document.querySelectorAll("input[data-g]").forEach(function (i) {
     i.addEventListener("change", refresh);
   });
+  applyFromUrl();
   refresh();
 })();
 """
@@ -598,9 +650,13 @@ newest. Ordered by start time.</p>
 <div class="pick fields">{stat_boxes}</div>
 </details>
 <p class="status"><span class="dot"></span><span id="est">&hellip;</span></p>
-<p><a class="btn" id="build" href="#">Download selection</a></p>
-<p class="host"><code id="url"></code></p>
+<p class="row"><a class="btn" id="build" href="#">Download selection</a>
+<button class="mini" id="copy" type="button">Copy link</button></p>
+<p class="urlbox"><a id="url" class="url" href="#"></a></p>
 </div>
+<p class="note">The link changes as you tick things, and it is the whole request &mdash; paste it
+into a terminal, a script, or a message. This page&rsquo;s own address tracks your picks too, so
+bookmarking or sending it hands over the same selection.</p>
 <p class="note">Every match carries its <code>uuid</code> and every player their name, whatever
 else you untick. Recordings are the heavy part &mdash; the whole archive is {gb(held_bytes)} of
 them, against roughly {gb(ids * 530)} for every match result ever. Sizes are exact for recordings
