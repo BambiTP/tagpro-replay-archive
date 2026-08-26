@@ -92,6 +92,11 @@ line-height:1.55;font-family:ui-monospace,Menlo,Consolas,monospace;margin:0 0 14
 white-space:nowrap;width:1%}
 .files td a{text-decoration:none}
 .files td a:hover{text-decoration:underline}
+.pick{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 14px;align-items:center}
+.pick label{font-size:13.5px;color:var(--ink);display:flex;align-items:center;gap:7px;cursor:pointer}
+.pick input[type=date]{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);
+border-radius:6px;background:var(--bg);color:var(--ink)}
+.pick .sep{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
 </style></head><body>
 <header><div class="wrap">
 <h1>TagPro ranked replay archive</h1>
@@ -129,6 +134,35 @@ they need the host to be up.</p>
 <p class="note">The bulk file is the mirror's records only. Add <code>?rebuilt=1</code> to mix in
 the 292 records <a href="rebuilt.html">rebuilt here from recordings</a>; they are marked
 <code>source: "replay"</code> wherever they appear.</p>
+</section>
+
+<section>
+<h2>Build a download</h2>
+<p class="lead">Pick a range and what to include. You get one tar with a manifest, the weeks you
+asked for, and nothing you did not.</p>
+<div class="card">
+<div class="pick">
+<label>From <input type="date" id="from" min="2025-03-24" max="2026-08-24" value="2025-03-24"></label>
+<label>To <input type="date" id="to" min="2025-03-24" max="2026-08-24" value="2026-08-24"></label>
+</div>
+<div class="pick">
+<span class="sep">Include</span>
+<label><input type="checkbox" id="c-results" checked> Match results</label>
+<label><input type="checkbox" id="c-eu"> tagpro.eu records</label>
+<label><input type="checkbox" id="c-replays"> Recordings</label>
+</div>
+<div class="pick">
+<span class="sep">Options</span>
+<label><input type="checkbox" id="c-map" checked> Map and its tagpro.eu map id</label>
+<label><input type="checkbox" id="c-rebuilt" checked> <a href="rebuilt.html">Rebuilt records</a></label>
+</div>
+<p class="status"><span class="dot"></span><span id="est">&hellip;</span></p>
+<p><a class="btn" id="build" href="#">Download selection</a></p>
+<p class="host"><code id="url"></code></p>
+</div>
+<p class="note">Recordings are the heavy part &mdash; the whole archive is 3.92 GB of them,
+while every match result ever is about 66 MB. The size shown is exact for recordings and
+an estimate for the rest, since those are built as they are sent.</p>
 </section>
 
 <section>
@@ -302,5 +336,60 @@ Generated 26 Aug 2026.
       txt.textContent = "Could not reach the address service.";
       btn.setAttribute("aria-disabled", "true");
     });
+})();
+
+(function () {
+  var W = "https://tagpro-archive-tunnel.bambitagpro.workers.dev";
+  var el = function (id) { return document.getElementById(id); };
+  var boxes = ["replays", "results", "eu", "map", "rebuilt"];
+  var est = el("est"), btn = el("build"), urlOut = el("url");
+  var timer = null;
+
+  function query() {
+    var q = ["from=" + el("from").value, "to=" + el("to").value];
+    boxes.forEach(function (b) { q.push(b + "=" + (el("c-" + b).checked ? "1" : "0")); });
+    return q.join("&");
+  }
+
+  function size(n) {
+    if (n >= 1e9) return (n / 1e9).toFixed(2) + " GB";
+    if (n >= 1e6) return (n / 1e6).toFixed(0) + " MB";
+    return Math.max(1, Math.round(n / 1e3)) + " KB";
+  }
+
+  function refresh() {
+    var picked = el("c-replays").checked || el("c-results").checked || el("c-eu").checked;
+    var q = query();
+    var href = W + "/go/custom.tar?" + q;
+    urlOut.textContent = href;
+    if (!picked) {
+      btn.setAttribute("aria-disabled", "true");
+      est.textContent = "Pick at least one of recordings, results, or tagpro.eu records.";
+      return;
+    }
+    btn.setAttribute("href", href);
+    btn.removeAttribute("aria-disabled");
+    est.textContent = "Working out the size\u2026";
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      fetch(W + "/go/custom/estimate?" + q, { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.weeks) { est.textContent = "Nothing in that range."; return; }
+          est.textContent = d.weeks + (d.weeks === 1 ? " week, " : " weeks, ")
+            + d.matches.toLocaleString() + " matches, "
+            + (d.exact ? "" : "about ") + size(d.bytes)
+            + (d.selection.replays ? " (" + d.recordings.toLocaleString() + " recordings)" : "");
+        })
+        .catch(function () {
+          est.textContent = "Cannot reach the host, so no size estimate. The link still works "
+            + "once it is back.";
+        });
+    }, 250);
+  }
+
+  ["from", "to"].concat(boxes.map(function (b) { return "c-" + b; }))
+    .forEach(function (id) { el(id).addEventListener("change", refresh); });
+  refresh();
 })();
 </script></body></html>

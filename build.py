@@ -228,6 +228,11 @@ line-height:1.55;font-family:ui-monospace,Menlo,Consolas,monospace;margin:0 0 14
 white-space:nowrap;width:1%}
 .files td a{text-decoration:none}
 .files td a:hover{text-decoration:underline}
+.pick{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 14px;align-items:center}
+.pick label{font-size:13.5px;color:var(--ink);display:flex;align-items:center;gap:7px;cursor:pointer}
+.pick input[type=date]{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--rule);
+border-radius:6px;background:var(--bg);color:var(--ink)}
+.pick .sep{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
 """
 
 HEAD = ('<tr><th>Week</th><th></th><th style="text-align:right">Count</th>'
@@ -288,6 +293,63 @@ STATUS_JS = """
 })();
 """
 
+
+CUSTOM_JS = """
+(function () {
+  var W = "__WORKER__";
+  var el = function (id) { return document.getElementById(id); };
+  var boxes = ["replays", "results", "eu", "map", "rebuilt"];
+  var est = el("est"), btn = el("build"), urlOut = el("url");
+  var timer = null;
+
+  function query() {
+    var q = ["from=" + el("from").value, "to=" + el("to").value];
+    boxes.forEach(function (b) { q.push(b + "=" + (el("c-" + b).checked ? "1" : "0")); });
+    return q.join("&");
+  }
+
+  function size(n) {
+    if (n >= 1e9) return (n / 1e9).toFixed(2) + " GB";
+    if (n >= 1e6) return (n / 1e6).toFixed(0) + " MB";
+    return Math.max(1, Math.round(n / 1e3)) + " KB";
+  }
+
+  function refresh() {
+    var picked = el("c-replays").checked || el("c-results").checked || el("c-eu").checked;
+    var q = query();
+    var href = W + "/go/custom.tar?" + q;
+    urlOut.textContent = href;
+    if (!picked) {
+      btn.setAttribute("aria-disabled", "true");
+      est.textContent = "Pick at least one of recordings, results, or tagpro.eu records.";
+      return;
+    }
+    btn.setAttribute("href", href);
+    btn.removeAttribute("aria-disabled");
+    est.textContent = "Working out the size\\u2026";
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      fetch(W + "/go/custom/estimate?" + q, { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.weeks) { est.textContent = "Nothing in that range."; return; }
+          est.textContent = d.weeks + (d.weeks === 1 ? " week, " : " weeks, ")
+            + d.matches.toLocaleString() + " matches, "
+            + (d.exact ? "" : "about ") + size(d.bytes)
+            + (d.selection.replays ? " (" + d.recordings.toLocaleString() + " recordings)" : "");
+        })
+        .catch(function () {
+          est.textContent = "Cannot reach the host, so no size estimate. The link still works "
+            + "once it is back.";
+        });
+    }, 250);
+  }
+
+  ["from", "to"].concat(boxes.map(function (b) { return "c-" + b; }))
+    .forEach(function (id) { el(id).addEventListener("change", refresh); });
+  refresh();
+})();
+"""
 
 def page(slug, title, subtitle, body, stats="", foot="", script=""):
     """The shell every page shares: head, title block, tabs, body, footer."""
@@ -387,6 +449,7 @@ def download_page(cov, ids, rep, held_bytes, span):
     record = sum(r["record"] for r in cov)
     rebuilt = sum(r["rebuilt"] for r in cov)
     latest = cov[-1]["week"]
+    first, last = cov[0]["week"], cov[-1]["week"]
     rows = []
     for c in reversed(cov):
         lbl = dt.date.fromisoformat(c["week"]).strftime("%d %b %Y")
@@ -429,6 +492,35 @@ they need the host to be up.</p>
 <p class="note">The bulk file is the mirror's records only. Add <code>?rebuilt=1</code> to mix in
 the {f(rebuilt)} records <a href="rebuilt.html">rebuilt here from recordings</a>; they are marked
 <code>source: "replay"</code> wherever they appear.</p>
+</section>
+
+<section>
+<h2>Build a download</h2>
+<p class="lead">Pick a range and what to include. You get one tar with a manifest, the weeks you
+asked for, and nothing you did not.</p>
+<div class="card">
+<div class="pick">
+<label>From <input type="date" id="from" min="{first}" max="{last}" value="{first}"></label>
+<label>To <input type="date" id="to" min="{first}" max="{last}" value="{last}"></label>
+</div>
+<div class="pick">
+<span class="sep">Include</span>
+<label><input type="checkbox" id="c-results" checked> Match results</label>
+<label><input type="checkbox" id="c-eu"> tagpro.eu records</label>
+<label><input type="checkbox" id="c-replays"> Recordings</label>
+</div>
+<div class="pick">
+<span class="sep">Options</span>
+<label><input type="checkbox" id="c-map" checked> Map and its tagpro.eu map id</label>
+<label><input type="checkbox" id="c-rebuilt" checked> <a href="rebuilt.html">Rebuilt records</a></label>
+</div>
+<p class="status"><span class="dot"></span><span id="est">&hellip;</span></p>
+<p><a class="btn" id="build" href="#">Download selection</a></p>
+<p class="host"><code id="url"></code></p>
+</div>
+<p class="note">Recordings are the heavy part &mdash; the whole archive is {gb(held_bytes)} of them,
+while every match result ever is about {gb(ids * 530)}. The size shown is exact for recordings and
+an estimate for the rest, since those are built as they are sent.</p>
 </section>
 
 <section>
@@ -495,7 +587,8 @@ on Discord &mdash; any format, any size, any dates. <a href="about.html">Why tha
             '<a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>')
     return page("download.html", "Download · TagPro ranked replay archive",
                 "Every file this archive publishes, whole or a week at a time.",
-                body, foot=foot, script=STATUS_JS.replace("__WORKER__", WORKER))
+                body, foot=foot,
+                script=(STATUS_JS + CUSTOM_JS).replace("__WORKER__", WORKER))
 
 
 def rebuilt_page(cov, ids, span):
