@@ -56,3 +56,12 @@ played in a week, so it is derived as ids held plus tagpro.eu matches with no id
 instant. Counts shown against it carry a `~`. Matching allows 120 seconds of disagreement between
 the two sources' start times; a handful of matches differ by more than that and are counted absent
 despite probably being present.
+
+## Recordings
+
+The recordings themselves are not in this repo - they are served from the
+archive host, see the [Download](https://bambitp.github.io/tagpro-replay-archive/download.html)
+tab. Each is `<uuid>.ndjson.gz`: gzipped NDJSON, one JSON array per line, in the
+form `[offset_ms, "event-name", {...}]`, exactly as the recorder served it. The
+first line is `recorder-metadata`, carrying the uuid, start time, duration, map
+and server.
