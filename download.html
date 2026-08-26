@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Download · TagPro ranked replay archive</title>
+<meta name="description" content="Every file this archive publishes, and a live link to the recordings themselves.">
+<style>
+:root{--bg:#f7f7f5;--panel:#fff;--ink:#16181d;--muted:#5b6270;--faint:#8a919e;--rule:#e3e5ea;
+--id:#2f6fb3;--rep:#2e7d5b;--rec:#2e9e6b;--reb:#c9772e;--track:#e8eaee;--code:#f0f1f4}
+@media (prefers-color-scheme:dark){:root{--bg:#101215;--panel:#171a1f;--ink:#e8eaee;--muted:#a2aab8;
+--faint:#78808e;--rule:#282c34;--id:#5b9bdd;--rep:#4dae83;--rec:#4fbe8b;--reb:#e08a3c;--track:#252932;--code:#1e222a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:0 22px}
+header{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+h1{font-size:23px;font-weight:640;letter-spacing:-.01em;margin:0 0 6px}
+.sub{color:var(--muted);font-size:14px;margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+background:var(--rule);border:1px solid var(--rule);border-radius:9px;overflow:hidden;margin:26px 0 0}
+.stat{background:var(--panel);padding:15px 16px}
+.stat b{display:block;font-size:22px;font-weight:640;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
+section{padding:34px 0 8px}
+h2{font-size:17px;font-weight:640;margin:0 0 6px;letter-spacing:-.01em;text-transform:none;
+color:var(--ink)}
+.lead{font-size:14px;color:var(--muted);margin:0 0 14px;max-width:70ch}
+.lead strong{color:var(--ink);font-weight:640}
+.note{font-size:13px;color:var(--muted);margin:0 0 16px}
+table{border-collapse:collapse;width:100%;background:var(--panel);
+border:1px solid var(--rule);border-radius:9px;overflow:hidden}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);
+font-weight:600;text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule)}
+td{padding:5px 12px;border-bottom:1px solid var(--rule);font-size:13px}
+tr:last-child td{border-bottom:0}
+td.wk{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;width:104px}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:150px}
+td.n i{font-style:normal;color:var(--faint)}
+td.p{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);width:56px}
+td.dl{width:186px;text-align:right;white-space:nowrap}
+.track{height:9px;border-radius:3px;background:var(--track);overflow:hidden;min-width:90px}
+.track span{display:block;height:100%}
+.fid span{background:var(--id)}
+.frep span{background:var(--rep)}
+.bars{display:flex;flex-direction:column;gap:2px;min-width:90px}
+.bars .track{height:5px;border-radius:2px}
+.bars .track:first-child{height:9px;border-radius:3px}
+.frec span{background:var(--rec)}
+.freb span{background:var(--reb)}
+.track.split{display:flex}
+.seg-rec{background:var(--rec)}
+.seg-reb{background:var(--reb)}
+td.n2{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:112px}
+td.n2 i{font-style:normal;color:var(--faint);margin-left:5px;font-size:11.5px}
+.key{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 12px}
+.key i{display:inline-block;width:18px;height:7px;border-radius:2px;vertical-align:1px;margin-right:6px}
+tfoot td{font-weight:640;background:var(--panel);border-top:2px solid var(--rule);padding:10px 12px}
+a{color:var(--id)}
+.dl a{font-size:10.5px;color:var(--faint);text-decoration:none;border:1px solid var(--rule);border-radius:4px;padding:2px 5px;margin-left:3px}
+.dl a:hover{color:var(--id)}
+footer{padding:26px 0 60px;color:var(--faint);font-size:12.5px;border-top:1px solid var(--rule);margin-top:34px}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em;
+font-family:ui-monospace,Menlo,Consolas,monospace}
+@media(max-width:640px){td.n{width:76px}td.n2{width:64px}td.n2 i{display:none}td.dl{width:150px}td.wk{width:80px;font-size:11px}.track,.bars{min-width:40px}td.dl{width:92px}.dl a{padding:2px 3px;margin-left:2px}}
+.nav{display:flex;gap:2px;margin:20px 0 0;flex-wrap:wrap}
+.nav a{font-size:13.5px;color:var(--muted);text-decoration:none;padding:7px 13px;border-radius:7px;
+border:1px solid transparent}
+.nav a:hover{color:var(--ink);background:var(--panel)}
+.nav a.on{color:var(--ink);background:var(--panel);border-color:var(--rule);font-weight:600}
+.prose{max-width:70ch}
+.prose p{font-size:14.5px;color:var(--muted);margin:0 0 14px}
+.prose p strong{color:var(--ink);font-weight:640}
+.prose ul{max-width:70ch;font-size:14.5px;color:var(--muted);margin:0 0 14px;padding-left:20px}
+.prose li{margin:0 0 6px}
+h3{font-size:14.5px;font-weight:640;margin:24px 0 8px;letter-spacing:-.01em}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:9px;padding:18px 20px;margin:0 0 18px}
+.card p:last-child{margin-bottom:0}
+.btn{display:inline-block;background:var(--id);color:#fff;text-decoration:none;font-size:14px;
+font-weight:600;padding:9px 17px;border-radius:7px}
+.btn:hover{filter:brightness(1.08)}
+.btn[aria-disabled=true]{background:var(--track);color:var(--faint);pointer-events:none}
+.status{font-size:13.5px;color:var(--muted);margin:0 0 14px;display:flex;align-items:center;gap:9px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--faint);flex:none}
+.dot.up{background:var(--rec)}
+.dot.down{background:var(--reb)}
+.host{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--faint);
+word-break:break-all;margin:12px 0 0}
+pre{background:var(--code);padding:13px 15px;border-radius:7px;overflow-x:auto;font-size:12.5px;
+line-height:1.55;font-family:ui-monospace,Menlo,Consolas,monospace;margin:0 0 14px}
+.files td{font-size:13.5px;padding:8px 12px}
+.files td:first-child{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+white-space:nowrap;width:1%}
+.files td a{text-decoration:none}
+.files td a:hover{text-decoration:underline}
+</style></head><body>
+<header><div class="wrap">
+<h1>TagPro ranked replay archive</h1>
+<p class="sub">Every file this archive publishes, and a live link to the recordings themselves.</p>
+<nav class="nav"><a href="index.html">Coverage</a><a href="about.html">About</a><a href="download.html" class="on">Download</a></nav>
+
+</div></header>
+
+<div class="wrap">
+<section>
+<h2>Coverage data</h2>
+<p class="lead">Ids, timings, maps and held-flags for every match. Small enough to sit on this
+site, so these links always work.</p>
+<table class="files"><tbody>
+<tr><td><a href="data/all.replay.json" download>all.replay.json</a></td>
+<td>every match: <code>uuid</code> plus the <code>game_id</code> a recording is requested by</td></tr>
+<tr><td><a href="data/all.json" download>all.json</a></td>
+<td>every match with start, map, duration, tagpro.eu id, and flags for what is held here</td></tr>
+<tr><td><a href="data/missing_replays.json" download>missing_replays.json</a></td>
+<td>the 113,379 matches with no recording held &mdash; the wanted list</td></tr>
+<tr><td><a href="data/all.eu.json" download>all.eu.json</a></td>
+<td>every linked tagpro.eu match id (121,609 of them)</td></tr>
+<tr><td><a href="data/coverage.json">coverage.json</a></td>
+<td>the per-week totals behind the tables on the Coverage tab</td></tr>
+<tr><td><a href="DATA_MAP.md">DATA_MAP.md</a></td>
+<td>what every field means</td></tr>
+</tbody></table>
+<p class="note">The same four files exist per week, linked from every row of the
+<a href="index.html">Coverage</a> tables.</p>
+</section>
+
+<section>
+<h2>Recordings and tagpro.eu records</h2>
+<p class="lead">The recordings themselves &mdash; 10,503 of them, 3.9 GB &mdash;
+and the full tagpro.eu records behind them. Too big for this site, so they are served straight from
+the machine that holds them.</p>
+<div class="card">
+<p class="status"><span class="dot" id="dot"></span><span id="stxt">Checking the archive host&hellip;</span></p>
+<p><a class="btn" id="open" href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go" aria-disabled="true">Open the archive host</a></p>
+<p class="host" id="host"></p>
+</div>
+<p class="note">That is a home machine on a free tunnel, so two things follow. It is up when it is
+up &mdash; if it is offline, come back later. And its address changes every time the tunnel
+restarts, which is why the link above points at a redirector that always knows the current one.
+Link to <code>https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/&hellip;</code> and your link keeps working; link to the
+<code>trycloudflare.com</code> address it lands on and it will be dead by next week.</p>
+
+<h3>What is there</h3>
+<table class="files"><tbody>
+<tr><td>/go/manifest.json</td><td>counts, sizes, date range</td></tr>
+<tr><td>/go/weeks.json</td><td>per week: ids, recordings held, bytes</td></tr>
+<tr><td>/go/replay/&lt;uuid&gt;</td><td>one recording, <code>.ndjson.gz</code>, resumable</td></tr>
+<tr><td>/go/week/&lt;week&gt;/replays.json</td><td>what that week holds</td></tr>
+<tr><td>/go/week/&lt;week&gt;/replays.tar</td><td>every recording for that week, streamed as one tar</td></tr>
+<tr><td>/go/eu/&lt;match_id&gt;.json</td><td>one tagpro.eu record: match, players, events, splats, ranked skill</td></tr>
+<tr><td>/go/eu/week/&lt;week&gt;.json.gz</td><td>every tagpro.eu record for that week</td></tr>
+<tr><td>/go/bulk/ranked_matches_bulk.json.gz</td><td>the whole tagpro.eu export in one file</td></tr>
+</tbody></table>
+<p class="note">Weeks are the Monday, UTC &mdash; the same keys as the Coverage tables, so a week
+here holds exactly the matches that week's row counts.</p>
+
+<h3>Fetching it with a script</h3>
+<pre>curl -LOJ https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/replay/&lt;uuid&gt;
+
+curl -L https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/replays.tar | tar x
+
+curl -L -C - -O https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/bulk/ranked_matches_bulk.json.gz</pre>
+<p class="note"><code>-L</code> follows the redirect to wherever the host currently is, so a script
+written once survives every rotation. <code>-J</code> takes the filename from the server rather than
+from the url, and <code>-C -</code> resumes a part-finished file. If the host is
+offline the redirector answers 503 rather than sending you somewhere dead. It is one home uplink:
+eight transfers run at once and the rest wait, so pull a week at a time rather than opening fifty
+connections.</p>
+</section>
+
+<section>
+<h2>Going the other way</h2>
+<p class="lead">If you have replays this archive does not, send them to <strong>metjr_</strong> on
+Discord &mdash; any format, any size, any date range. <a href="about.html">Why that matters.</a></p>
+</section>
+
+<footer><div class="wrap">
+The recordings are <code>.ndjson.gz</code>, one JSON event per line, exactly as the recorder served them. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>
+Generated 26 Aug 2026.
+</div></footer>
+</div><script>
+(function () {
+  var W = "https://tagpro-archive-tunnel.bambitagpro.workers.dev";
+  var dot = document.getElementById("dot"),
+      txt = document.getElementById("stxt"),
+      btn = document.getElementById("open"),
+      host = document.getElementById("host");
+  function ago(s) {
+    if (s < 60) return s + " seconds ago";
+    if (s < 3600) return Math.round(s / 60) + " minutes ago";
+    return Math.round(s / 3600) + " hours ago";
+  }
+  fetch(W + "/status", { cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.online) {
+        dot.className = "dot up";
+        txt.textContent = "Online \u2014 last checked in " + ago(d.age) + ".";
+        btn.removeAttribute("aria-disabled");
+        host.textContent = "Currently at " + d.url;
+      } else {
+        dot.className = "dot down";
+        txt.textContent = d.updated
+          ? "Offline since " + new Date(d.updated).toLocaleString() + ". Try again later."
+          : "Offline right now. Try again later.";
+        btn.setAttribute("aria-disabled", "true");
+        host.textContent = "";
+      }
+    })
+    .catch(function () {
+      dot.className = "dot down";
+      txt.textContent = "Could not reach the address service.";
+      btn.setAttribute("aria-disabled", "true");
+    });
+})();
+</script></body></html>

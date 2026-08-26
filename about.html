@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>About · TagPro ranked replay archive</title>
+<meta name="description" content="What this archive is, why it is complete in one half and not the other.">
+<style>
+:root{--bg:#f7f7f5;--panel:#fff;--ink:#16181d;--muted:#5b6270;--faint:#8a919e;--rule:#e3e5ea;
+--id:#2f6fb3;--rep:#2e7d5b;--rec:#2e9e6b;--reb:#c9772e;--track:#e8eaee;--code:#f0f1f4}
+@media (prefers-color-scheme:dark){:root{--bg:#101215;--panel:#171a1f;--ink:#e8eaee;--muted:#a2aab8;
+--faint:#78808e;--rule:#282c34;--id:#5b9bdd;--rep:#4dae83;--rec:#4fbe8b;--reb:#e08a3c;--track:#252932;--code:#1e222a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:0 22px}
+header{padding:44px 0 26px;border-bottom:1px solid var(--rule)}
+h1{font-size:23px;font-weight:640;letter-spacing:-.01em;margin:0 0 6px}
+.sub{color:var(--muted);font-size:14px;margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+background:var(--rule);border:1px solid var(--rule);border-radius:9px;overflow:hidden;margin:26px 0 0}
+.stat{background:var(--panel);padding:15px 16px}
+.stat b{display:block;font-size:22px;font-weight:640;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
+section{padding:34px 0 8px}
+h2{font-size:17px;font-weight:640;margin:0 0 6px;letter-spacing:-.01em;text-transform:none;
+color:var(--ink)}
+.lead{font-size:14px;color:var(--muted);margin:0 0 14px;max-width:70ch}
+.lead strong{color:var(--ink);font-weight:640}
+.note{font-size:13px;color:var(--muted);margin:0 0 16px}
+table{border-collapse:collapse;width:100%;background:var(--panel);
+border:1px solid var(--rule);border-radius:9px;overflow:hidden}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);
+font-weight:600;text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule)}
+td{padding:5px 12px;border-bottom:1px solid var(--rule);font-size:13px}
+tr:last-child td{border-bottom:0}
+td.wk{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;width:104px}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:150px}
+td.n i{font-style:normal;color:var(--faint)}
+td.p{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);width:56px}
+td.dl{width:186px;text-align:right;white-space:nowrap}
+.track{height:9px;border-radius:3px;background:var(--track);overflow:hidden;min-width:90px}
+.track span{display:block;height:100%}
+.fid span{background:var(--id)}
+.frep span{background:var(--rep)}
+.bars{display:flex;flex-direction:column;gap:2px;min-width:90px}
+.bars .track{height:5px;border-radius:2px}
+.bars .track:first-child{height:9px;border-radius:3px}
+.frec span{background:var(--rec)}
+.freb span{background:var(--reb)}
+.track.split{display:flex}
+.seg-rec{background:var(--rec)}
+.seg-reb{background:var(--reb)}
+td.n2{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;width:112px}
+td.n2 i{font-style:normal;color:var(--faint);margin-left:5px;font-size:11.5px}
+.key{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 12px}
+.key i{display:inline-block;width:18px;height:7px;border-radius:2px;vertical-align:1px;margin-right:6px}
+tfoot td{font-weight:640;background:var(--panel);border-top:2px solid var(--rule);padding:10px 12px}
+a{color:var(--id)}
+.dl a{font-size:10.5px;color:var(--faint);text-decoration:none;border:1px solid var(--rule);border-radius:4px;padding:2px 5px;margin-left:3px}
+.dl a:hover{color:var(--id)}
+footer{padding:26px 0 60px;color:var(--faint);font-size:12.5px;border-top:1px solid var(--rule);margin-top:34px}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em;
+font-family:ui-monospace,Menlo,Consolas,monospace}
+@media(max-width:640px){td.n{width:76px}td.n2{width:64px}td.n2 i{display:none}td.dl{width:150px}td.wk{width:80px;font-size:11px}.track,.bars{min-width:40px}td.dl{width:92px}.dl a{padding:2px 3px;margin-left:2px}}
+.nav{display:flex;gap:2px;margin:20px 0 0;flex-wrap:wrap}
+.nav a{font-size:13.5px;color:var(--muted);text-decoration:none;padding:7px 13px;border-radius:7px;
+border:1px solid transparent}
+.nav a:hover{color:var(--ink);background:var(--panel)}
+.nav a.on{color:var(--ink);background:var(--panel);border-color:var(--rule);font-weight:600}
+.prose{max-width:70ch}
+.prose p{font-size:14.5px;color:var(--muted);margin:0 0 14px}
+.prose p strong{color:var(--ink);font-weight:640}
+.prose ul{max-width:70ch;font-size:14.5px;color:var(--muted);margin:0 0 14px;padding-left:20px}
+.prose li{margin:0 0 6px}
+h3{font-size:14.5px;font-weight:640;margin:24px 0 8px;letter-spacing:-.01em}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:9px;padding:18px 20px;margin:0 0 18px}
+.card p:last-child{margin-bottom:0}
+.btn{display:inline-block;background:var(--id);color:#fff;text-decoration:none;font-size:14px;
+font-weight:600;padding:9px 17px;border-radius:7px}
+.btn:hover{filter:brightness(1.08)}
+.btn[aria-disabled=true]{background:var(--track);color:var(--faint);pointer-events:none}
+.status{font-size:13.5px;color:var(--muted);margin:0 0 14px;display:flex;align-items:center;gap:9px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--faint);flex:none}
+.dot.up{background:var(--rec)}
+.dot.down{background:var(--reb)}
+.host{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--faint);
+word-break:break-all;margin:12px 0 0}
+pre{background:var(--code);padding:13px 15px;border-radius:7px;overflow-x:auto;font-size:12.5px;
+line-height:1.55;font-family:ui-monospace,Menlo,Consolas,monospace;margin:0 0 14px}
+.files td{font-size:13.5px;padding:8px 12px}
+.files td:first-child{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+white-space:nowrap;width:1%}
+.files td a{text-decoration:none}
+.files td a:hover{text-decoration:underline}
+</style></head><body>
+<header><div class="wrap">
+<h1>TagPro ranked replay archive</h1>
+<p class="sub">What this archive is, why it is complete in one half and not the other.</p>
+<nav class="nav"><a href="index.html">Coverage</a><a href="about.html" class="on">About</a><a href="download.html">Download</a></nav>
+
+</div></header>
+
+<div class="wrap">
+<section class="prose">
+<h2>What this is</h2>
+<p>Every ranked TagPro match the ranked replay listing will return, catalogued and kept:
+<strong>123,882 match ids</strong> across 75 weeks, Mar 2025 to Aug 2026, with the
+recording itself held for <strong>10,503</strong> of them and a tagpro.eu record linked for
+121,609.</p>
+<p>It exists because I like data and this data was not kept anywhere. Nobody had ranked matches
+in a form you could query, so I started keeping them.</p>
+
+<h2>Why the recordings stop at 8%</h2>
+<p>Because of the two-day wall. I was told not to scrape replays older than two days, and the site
+itself will not show a replay older than two days to anyone without an account. When I asked for a
+bulk download of the older material, I was declined.</p>
+<p>So the archive is built inside those limits: a rolling window, taking each match while it is
+still young enough to be taken. That is why the two halves of this site look so different. The ids
+are complete, because the listing enumerates them and enumerating is cheap. The recordings are not,
+because every match older than the window when collection reached it was already out of reach, and
+still is.</p>
+<p><strong>The gap is historical and it does not close on its own.</strong> Every week that runs
+from here forward is collected in full. Nothing that aged out before then comes back by waiting.</p>
+
+<h2>If you have replays, I want them</h2>
+<p>This is the part where you can actually help. If you have a bulk replay dump &mdash; anything you
+exported, scraped, recorded, or have sitting in a folder from years ago &mdash; send it to
+<strong>metjr_</strong> on Discord. Any format, any size, any date range, however messy.</p>
+<p>Recordings already held here are matched by uuid, so overlap costs nothing and there is no need
+to check first or filter anything out. A dump of a thousand matches where nine hundred are already
+here is still a hundred matches this archive did not have. The
+<a href="download.html">missing list</a> is published if you would rather target the holes, but
+please do not let that stop you sending the whole thing.</p>
+
+<h2>How the numbers are made</h2>
+<p>Two sources describe the same matches and neither is complete on its own.</p>
+<ul>
+<li><strong>The ranked replay listing</strong> is the authority on which matches exist. Its ids are
+what the coverage tables count, so those totals are exact rather than estimated.</li>
+<li><strong>tagpro.eu</strong> is the second source: the box score, the events, the players. About
+98% of matches have one. The two are matched on start time, allowing 120 seconds of disagreement
+between them, because they record it in different time zones and to different precision.</li>
+<li><strong>292 tagpro.eu records were rebuilt here</strong> out of archived recordings, for
+matches the mirror never carried. That is the orange band on the coverage table &mdash; progress
+against a shortfall, not a share of the whole.</li>
+<li><strong>8 matches are exceptions</strong>: they appear on tagpro.eu but the ranked
+listing returns nothing for them, including inside date ranges it reported as fully enumerated.
+There is no recording to collect for those.</li>
+</ul>
+<p>Two ids identify a match. <code>uuid</code> identifies the replay; <code>game_id</code> addresses
+the recording itself and is what a recording is requested by; <code>eu_match_id</code> is the same
+match on tagpro.eu. The full field reference is in <a href="DATA_MAP.md">DATA_MAP.md</a>.</p>
+
+<h2>How it runs</h2>
+<p>A pipeline on a home machine follows the listing continuously, pulls each replay while it is
+still reachable, links it to its tagpro.eu record, and rebuilds records for matches the mirror
+missed. This site is regenerated from that database and republished on a schedule, so the tables
+are never far behind. The 3.9 GB of recordings live on that machine and are
+served from it directly &mdash; see the <a href="download.html">Download</a> tab.</p>
+</section>
+
+<footer><div class="wrap">
+Numbers on this page come from the same database as the coverage tables and move with them. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>
+Generated 26 Aug 2026.
+</div></footer>
+</div></body></html>

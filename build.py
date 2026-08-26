@@ -134,7 +134,9 @@ def build():
                        "duration": r[4], "have_replay": bool(r[5]),
                        "have_record": bool(r[6]), "eu_match_id": r[7]} for r in rows])
 
-    render(cov, missing)
+    held_bytes = conn.execute("SELECT COALESCE(SUM(bytes_stored),0) FROM replay_files "
+                              "WHERE status = 'done'").fetchone()[0]
+    render(cov, missing, held_bytes)
     return cov
 
 
@@ -197,6 +199,36 @@ footer{padding:26px 0 60px;color:var(--faint);font-size:12.5px;border-top:1px so
 code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em;
 font-family:ui-monospace,Menlo,Consolas,monospace}
 @media(max-width:640px){td.n{width:76px}td.n2{width:64px}td.n2 i{display:none}td.dl{width:150px}td.wk{width:80px;font-size:11px}.track,.bars{min-width:40px}td.dl{width:92px}.dl a{padding:2px 3px;margin-left:2px}}
+.nav{display:flex;gap:2px;margin:20px 0 0;flex-wrap:wrap}
+.nav a{font-size:13.5px;color:var(--muted);text-decoration:none;padding:7px 13px;border-radius:7px;
+border:1px solid transparent}
+.nav a:hover{color:var(--ink);background:var(--panel)}
+.nav a.on{color:var(--ink);background:var(--panel);border-color:var(--rule);font-weight:600}
+.prose{max-width:70ch}
+.prose p{font-size:14.5px;color:var(--muted);margin:0 0 14px}
+.prose p strong{color:var(--ink);font-weight:640}
+.prose ul{max-width:70ch;font-size:14.5px;color:var(--muted);margin:0 0 14px;padding-left:20px}
+.prose li{margin:0 0 6px}
+h3{font-size:14.5px;font-weight:640;margin:24px 0 8px;letter-spacing:-.01em}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:9px;padding:18px 20px;margin:0 0 18px}
+.card p:last-child{margin-bottom:0}
+.btn{display:inline-block;background:var(--id);color:#fff;text-decoration:none;font-size:14px;
+font-weight:600;padding:9px 17px;border-radius:7px}
+.btn:hover{filter:brightness(1.08)}
+.btn[aria-disabled=true]{background:var(--track);color:var(--faint);pointer-events:none}
+.status{font-size:13.5px;color:var(--muted);margin:0 0 14px;display:flex;align-items:center;gap:9px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--faint);flex:none}
+.dot.up{background:var(--rec)}
+.dot.down{background:var(--reb)}
+.host{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--faint);
+word-break:break-all;margin:12px 0 0}
+pre{background:var(--code);padding:13px 15px;border-radius:7px;overflow-x:auto;font-size:12.5px;
+line-height:1.55;font-family:ui-monospace,Menlo,Consolas,monospace;margin:0 0 14px}
+.files td{font-size:13.5px;padding:8px 12px}
+.files td:first-child{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+white-space:nowrap;width:1%}
+.files td a{text-decoration:none}
+.files td a:hover{text-decoration:underline}
 """
 
 HEAD = ('<tr><th>Week</th><th></th><th style="text-align:right">Count</th>'
@@ -207,7 +239,241 @@ HEAD_ID = ('<tr><th>Week</th><th></th><th style="text-align:right">Replay ids</t
            '<th style="text-align:right">tagpro.eu rebuilt</th><th></th></tr>')
 
 
-def render(cov, missing=()):
+# Where the archive host currently is. The host sits on a free cloudflared
+# quick tunnel whose hostname changes on every restart, so nothing here can
+# link to it directly; this Worker holds the current address and redirects
+# /go/<path> to it (worker/src/index.js, host/supervise.sh).
+WORKER = "https://tagpro-archive-tunnel.bambitagpro.workers.dev"
+
+DISCORD = "metjr_"
+
+NAV = (("index.html", "Coverage"), ("about.html", "About"), ("download.html", "Download"))
+
+# Fills in the download page's live status line. Kept out of the f-strings
+# below so its braces don't have to be doubled.
+STATUS_JS = """
+(function () {
+  var W = "__WORKER__";
+  var dot = document.getElementById("dot"),
+      txt = document.getElementById("stxt"),
+      btn = document.getElementById("open"),
+      host = document.getElementById("host");
+  function ago(s) {
+    if (s < 60) return s + " seconds ago";
+    if (s < 3600) return Math.round(s / 60) + " minutes ago";
+    return Math.round(s / 3600) + " hours ago";
+  }
+  fetch(W + "/status", { cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.online) {
+        dot.className = "dot up";
+        txt.textContent = "Online \\u2014 last checked in " + ago(d.age) + ".";
+        btn.removeAttribute("aria-disabled");
+        host.textContent = "Currently at " + d.url;
+      } else {
+        dot.className = "dot down";
+        txt.textContent = d.updated
+          ? "Offline since " + new Date(d.updated).toLocaleString() + ". Try again later."
+          : "Offline right now. Try again later.";
+        btn.setAttribute("aria-disabled", "true");
+        host.textContent = "";
+      }
+    })
+    .catch(function () {
+      dot.className = "dot down";
+      txt.textContent = "Could not reach the address service.";
+      btn.setAttribute("aria-disabled", "true");
+    });
+})();
+"""
+
+
+def page(slug, title, subtitle, body, stats="", foot="", script=""):
+    """The shell every page shares: head, title block, tabs, body, footer."""
+    nav = []
+    for href, label in NAV:
+        cls = ' class="on"' if href == slug else ""
+        nav.append(f'<a href="{href}"{cls}>{label}</a>')
+    script_tag = f"<script>{script}</script>" if script else ""
+    return f'''<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title}</title>
+<meta name="description" content="{subtitle}">
+<style>{CSS}</style></head><body>
+<header><div class="wrap">
+<h1>TagPro ranked replay archive</h1>
+<p class="sub">{subtitle}</p>
+<nav class="nav">{"".join(nav)}</nav>
+{stats}
+</div></header>
+
+<div class="wrap">
+{body}
+
+<footer><div class="wrap">
+{foot}
+Generated {dt.datetime.now(dt.timezone.utc):%d %b %Y}.
+</div></footer>
+</div>{script_tag}</body></html>'''
+
+
+def about_page(cov, missing, ids, rep, held_bytes, span):
+    f = lambda n: f"{n:,}"
+    pc = lambda a, b: (100.0 * a / b) if b else 0.0
+    rebuilt = sum(r["rebuilt"] for r in cov)
+    record = sum(r["record"] for r in cov)
+    body = f'''<section class="prose">
+<h2>What this is</h2>
+<p>Every ranked TagPro match the ranked replay listing will return, catalogued and kept:
+<strong>{f(ids)} match ids</strong> across {len(cov)} weeks, {span[0]} to {span[1]}, with the
+recording itself held for <strong>{f(rep)}</strong> of them and a tagpro.eu record linked for
+{f(record)}.</p>
+<p>It exists because I like data and this data was not kept anywhere. Nobody had ranked matches
+in a form you could query, so I started keeping them.</p>
+
+<h2>Why the recordings stop at {pc(rep, ids):.0f}%</h2>
+<p>Because of the two-day wall. I was told not to scrape replays older than two days, and the site
+itself will not show a replay older than two days to anyone without an account. When I asked for a
+bulk download of the older material, I was declined.</p>
+<p>So the archive is built inside those limits: a rolling window, taking each match while it is
+still young enough to be taken. That is why the two halves of this site look so different. The ids
+are complete, because the listing enumerates them and enumerating is cheap. The recordings are not,
+because every match older than the window when collection reached it was already out of reach, and
+still is.</p>
+<p><strong>The gap is historical and it does not close on its own.</strong> Every week that runs
+from here forward is collected in full. Nothing that aged out before then comes back by waiting.</p>
+
+<h2>If you have replays, I want them</h2>
+<p>This is the part where you can actually help. If you have a bulk replay dump &mdash; anything you
+exported, scraped, recorded, or have sitting in a folder from years ago &mdash; send it to
+<strong>{DISCORD}</strong> on Discord. Any format, any size, any date range, however messy.</p>
+<p>Recordings already held here are matched by uuid, so overlap costs nothing and there is no need
+to check first or filter anything out. A dump of a thousand matches where nine hundred are already
+here is still a hundred matches this archive did not have. The
+<a href="download.html">missing list</a> is published if you would rather target the holes, but
+please do not let that stop you sending the whole thing.</p>
+
+<h2>How the numbers are made</h2>
+<p>Two sources describe the same matches and neither is complete on its own.</p>
+<ul>
+<li><strong>The ranked replay listing</strong> is the authority on which matches exist. Its ids are
+what the coverage tables count, so those totals are exact rather than estimated.</li>
+<li><strong>tagpro.eu</strong> is the second source: the box score, the events, the players. About
+98% of matches have one. The two are matched on start time, allowing 120 seconds of disagreement
+between them, because they record it in different time zones and to different precision.</li>
+<li><strong>{f(rebuilt)} tagpro.eu records were rebuilt here</strong> out of archived recordings, for
+matches the mirror never carried. That is the orange band on the coverage table &mdash; progress
+against a shortfall, not a share of the whole.</li>
+<li><strong>{len(missing)} matches are exceptions</strong>: they appear on tagpro.eu but the ranked
+listing returns nothing for them, including inside date ranges it reported as fully enumerated.
+There is no recording to collect for those.</li>
+</ul>
+<p>Two ids identify a match. <code>uuid</code> identifies the replay; <code>game_id</code> addresses
+the recording itself and is what a recording is requested by; <code>eu_match_id</code> is the same
+match on tagpro.eu. The full field reference is in <a href="DATA_MAP.md">DATA_MAP.md</a>.</p>
+
+<h2>How it runs</h2>
+<p>A pipeline on a home machine follows the listing continuously, pulls each replay while it is
+still reachable, links it to its tagpro.eu record, and rebuilds records for matches the mirror
+missed. This site is regenerated from that database and republished on a schedule, so the tables
+are never far behind. The {held_bytes / 1e9:.1f} GB of recordings live on that machine and are
+served from it directly &mdash; see the <a href="download.html">Download</a> tab.</p>
+</section>'''
+    foot = ('Numbers on this page come from the same database as the coverage tables and move '
+            'with them. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>')
+    return page("about.html", "About · TagPro ranked replay archive",
+                "What this archive is, why it is complete in one half and not the other.",
+                body, foot=foot)
+
+
+def download_page(cov, ids, rep, held_bytes, span):
+    f = lambda n: f"{n:,}"
+    events_note = f(sum(r["record"] for r in cov))
+    latest = cov[-1]["week"]
+    body = f'''<section>
+<h2>Coverage data</h2>
+<p class="lead">Ids, timings, maps and held-flags for every match. Small enough to sit on this
+site, so these links always work.</p>
+<table class="files"><tbody>
+<tr><td><a href="data/all.replay.json" download>all.replay.json</a></td>
+<td>every match: <code>uuid</code> plus the <code>game_id</code> a recording is requested by</td></tr>
+<tr><td><a href="data/all.json" download>all.json</a></td>
+<td>every match with start, map, duration, tagpro.eu id, and flags for what is held here</td></tr>
+<tr><td><a href="data/missing_replays.json" download>missing_replays.json</a></td>
+<td>the {f(ids - rep)} matches with no recording held &mdash; the wanted list</td></tr>
+<tr><td><a href="data/all.eu.json" download>all.eu.json</a></td>
+<td>every linked tagpro.eu match id ({events_note} of them)</td></tr>
+<tr><td><a href="data/coverage.json">coverage.json</a></td>
+<td>the per-week totals behind the tables on the Coverage tab</td></tr>
+<tr><td><a href="DATA_MAP.md">DATA_MAP.md</a></td>
+<td>what every field means</td></tr>
+</tbody></table>
+<p class="note">The same four files exist per week, linked from every row of the
+<a href="index.html">Coverage</a> tables.</p>
+</section>
+
+<section>
+<h2>Recordings and tagpro.eu records</h2>
+<p class="lead">The recordings themselves &mdash; {f(rep)} of them, {held_bytes / 1e9:.1f} GB &mdash;
+and the full tagpro.eu records behind them. Too big for this site, so they are served straight from
+the machine that holds them.</p>
+<div class="card">
+<p class="status"><span class="dot" id="dot"></span><span id="stxt">Checking the archive host&hellip;</span></p>
+<p><a class="btn" id="open" href="{WORKER}/go" aria-disabled="true">Open the archive host</a></p>
+<p class="host" id="host"></p>
+</div>
+<p class="note">That is a home machine on a free tunnel, so two things follow. It is up when it is
+up &mdash; if it is offline, come back later. And its address changes every time the tunnel
+restarts, which is why the link above points at a redirector that always knows the current one.
+Link to <code>{WORKER}/go/&hellip;</code> and your link keeps working; link to the
+<code>trycloudflare.com</code> address it lands on and it will be dead by next week.</p>
+
+<h3>What is there</h3>
+<table class="files"><tbody>
+<tr><td>/go/manifest.json</td><td>counts, sizes, date range</td></tr>
+<tr><td>/go/weeks.json</td><td>per week: ids, recordings held, bytes</td></tr>
+<tr><td>/go/replay/&lt;uuid&gt;</td><td>one recording, <code>.ndjson.gz</code>, resumable</td></tr>
+<tr><td>/go/week/&lt;week&gt;/replays.json</td><td>what that week holds</td></tr>
+<tr><td>/go/week/&lt;week&gt;/replays.tar</td><td>every recording for that week, streamed as one tar</td></tr>
+<tr><td>/go/eu/&lt;match_id&gt;.json</td><td>one tagpro.eu record: match, players, events, splats, ranked skill</td></tr>
+<tr><td>/go/eu/week/&lt;week&gt;.json.gz</td><td>every tagpro.eu record for that week</td></tr>
+<tr><td>/go/bulk/ranked_matches_bulk.json.gz</td><td>the whole tagpro.eu export in one file</td></tr>
+</tbody></table>
+<p class="note">Weeks are the Monday, UTC &mdash; the same keys as the Coverage tables, so a week
+here holds exactly the matches that week's row counts.</p>
+
+<h3>Fetching it with a script</h3>
+<pre>curl -LOJ {WORKER}/go/replay/&lt;uuid&gt;
+
+curl -L {WORKER}/go/week/{latest}/replays.tar | tar x
+
+curl -L -C - -O {WORKER}/go/bulk/ranked_matches_bulk.json.gz</pre>
+<p class="note"><code>-L</code> follows the redirect to wherever the host currently is, so a script
+written once survives every rotation. <code>-J</code> takes the filename from the server rather than
+from the url, and <code>-C -</code> resumes a part-finished file. If the host is
+offline the redirector answers 503 rather than sending you somewhere dead. It is one home uplink:
+eight transfers run at once and the rest wait, so pull a week at a time rather than opening fifty
+connections.</p>
+</section>
+
+<section>
+<h2>Going the other way</h2>
+<p class="lead">If you have replays this archive does not, send them to <strong>{DISCORD}</strong> on
+Discord &mdash; any format, any size, any date range. <a href="about.html">Why that matters.</a></p>
+</section>'''
+    foot = ('The recordings are <code>.ndjson.gz</code>, one JSON event per line, exactly as the '
+            'recorder served them. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>')
+    return page("download.html", "Download · TagPro ranked replay archive",
+                "Every file this archive publishes, and a live link to the recordings themselves.",
+                body, foot=foot, script=STATUS_JS.replace("__WORKER__", WORKER))
+
+def write(name, html):
+    open(OUT / name, "w").write(html)
+
+
+def render(cov, missing=(), held_bytes=0):
     f = lambda n: f"{n:,}"
     pc = lambda a, b: (100.0 * a / b) if b else 0.0
     tot = lambda k: sum(r[k] for r in cov)
@@ -286,25 +552,14 @@ def render(cov, missing=()):
         for mid, t in sorted(missing, key=lambda x: x[1]))
     span = (dt.date.fromisoformat(cov[0]["week"]).strftime("%b %Y"),
             dt.date.fromisoformat(cov[-1]["week"]).strftime("%b %Y"))
-    html = f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ranked Replay Coverage</title>
-<meta name="description" content="Per-week coverage of collected TagPro ranked match ids and replay recordings.">
-<style>{CSS}</style></head><body>
-<header><div class="wrap">
-<h1>Ranked replay coverage</h1>
-<p class="sub">Match ids and replay recordings collected per week, {span[0]} &ndash; {span[1]}.</p>
-<div class="stats">
+    stats = f'''<div class="stats">
 <div class="stat"><b>{f(ids)}</b><span>replay ids</span></div>
 <div class="stat"><b>100%</b><span>replay id coverage</span></div>
 <div class="stat"><b>{f(rep)}</b><span>recordings held</span></div>
 <div class="stat"><b>{pc(rep,ids):.2f}%</b><span>recordings downloaded</span></div>
-</div>
-</div></header>
+</div>'''
 
-<div class="wrap">
-<section>
+    body = f'''<section>
 <h2>Replay ids &mdash; complete</h2>
 <p class="lead">Every ranked match the replay listing returns has its id here: <strong>{f(ids)} of
 {f(ids)}, 100%</strong>. Nothing is outstanding.</p>
@@ -343,10 +598,9 @@ counted here rather than as missing ids.</p>
 <table><thead><tr><th>tagpro.eu</th><th>Started (UTC)</th></tr></thead><tbody>
 {exceptions}
 </tbody></table>
-</section>
+</section>'''
 
-<footer><div class="wrap">
-Each week offers four downloads. <code>rep</code> is every replay id (uuid plus the game id a
+    foot = f'''Each week offers four downloads. <code>rep</code> is every replay id (uuid plus the game id a
 recording is requested by), <code>missing</code> is the subset with no recording held here,
 <code>eu</code> is the tagpro.eu ids, and <code>all</code> is everything with flags for what is held.
 <br><br>
@@ -354,11 +608,14 @@ Whole archive: <a href="data/all.replay.json" download>all.replay.json</a> &midd
 <a href="data/missing_replays.json" download>missing_replays.json</a> &middot;
 <a href="data/all.eu.json" download>all.eu.json</a> &middot;
 <a href="data/all.json" download>all.json</a> &middot;
-<a href="data/coverage.json">coverage.json</a>. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.
-Generated {dt.datetime.now(dt.timezone.utc):%d %b %Y}.
-</div></footer>
-</div></body></html>'''
-    open(OUT / "index.html", "w").write(html)
+<a href="data/coverage.json">coverage.json</a>. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.'''
+
+    write("index.html", page(
+        "index.html", "Coverage \u00b7 TagPro ranked replay archive",
+        f"Match ids and replay recordings collected per week, {span[0]} \u2013 {span[1]}.",
+        body, stats=stats, foot=foot))
+    write("about.html", about_page(cov, missing, ids, rep, held_bytes, span))
+    write("download.html", download_page(cov, ids, rep, held_bytes, span))
 
 
 if __name__ == "__main__":

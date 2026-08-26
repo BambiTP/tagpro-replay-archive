@@ -1,1 +1,8 @@
 .publish.log
+.publish_cron.log
+.publish.lock
+.tunnel.log
+.tunnel.lock
+.cloudflared.log
+worker/node_modules
+worker/.wrangler
