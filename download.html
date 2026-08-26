@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Download · TagPro ranked replay archive</title>
-<meta name="description" content="Every file this archive publishes, and a live link to the recordings themselves.">
+<meta name="description" content="Every file this archive publishes, whole or a week at a time.">
 <style>
 :root{--bg:#f7f7f5;--panel:#fff;--ink:#16181d;--muted:#5b6270;--faint:#8a919e;--rule:#e3e5ea;
 --id:#2f6fb3;--rep:#2e7d5b;--rec:#2e9e6b;--reb:#c9772e;--track:#e8eaee;--code:#f0f1f4}
@@ -95,21 +95,139 @@ white-space:nowrap;width:1%}
 </style></head><body>
 <header><div class="wrap">
 <h1>TagPro ranked replay archive</h1>
-<p class="sub">Every file this archive publishes, and a live link to the recordings themselves.</p>
-<nav class="nav"><a href="index.html">Coverage</a><a href="about.html">About</a><a href="download.html" class="on">Download</a></nav>
+<p class="sub">Every file this archive publishes, whole or a week at a time.</p>
+<nav class="nav"><a href="index.html">Coverage</a><a href="about.html">About</a><a href="rebuilt.html">Rebuilt records</a><a href="download.html" class="on">Download</a></nav>
 
 </div></header>
 
 <div class="wrap">
 <section>
+<div class="card">
+<p><strong>Want something that is not here?</strong> A particular cut of the data, a format that
+suits your tooling, a query run against the whole archive, or a hand with a project you are
+building on it &mdash; message <strong>metjr_</strong> on Discord and ask. That is what it is
+for, and it is quicker than working around a file that nearly fits.</p>
+</div>
+</section>
+
+<section>
+<h2>Everything at once</h2>
+<p class="lead">Two files hold the archive. Both stream from the machine that collected them, so
+they need the host to be up.</p>
+<div class="card">
+<p class="status"><span class="dot" id="dot"></span><span id="stxt">Checking the archive host&hellip;</span></p>
+<p><a class="btn" id="open" href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go" aria-disabled="true">Open the archive host</a></p>
+<p class="host" id="host"></p>
+</div>
+<table class="files"><tbody>
+<tr><td><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/all/replays.tar">all/replays.tar</a></td>
+<td>every recording held, 10,530 files, 3.92 GB, one folder per week</td></tr>
+<tr><td><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/bulk/ranked_matches_bulk.json.gz">ranked_matches_bulk.json.gz</a></td>
+<td>every tagpro.eu record, 121,636 matches, in
+<a href="https://tagpro.eu/?science" target="_blank" rel="noopener">tagpro.eu's own bulk shape</a></td></tr>
+</tbody></table>
+<p class="note">The bulk file is the mirror's records only. Add <code>?rebuilt=1</code> to mix in
+the 292 records <a href="rebuilt.html">rebuilt here from recordings</a>; they are marked
+<code>source: "replay"</code> wherever they appear.</p>
+</section>
+
+<section>
+<h2>By week</h2>
+<p class="lead">The same thing a week at a time. <strong>replays.tar</strong> is that week's
+recordings, <strong>results</strong> is how every match ended with per-player stats, and
+<strong>tagpro.eu</strong> is that week's mirror records in bulk shape.</p>
+<p class="note">Weeks are the Monday, UTC, matching the <a href="index.html">Coverage</a> tables.
+<code>results</code> carries the map and its tagpro.eu map id by default &mdash; drop it with
+<code>?map=0</code> &mdash; and includes rebuilt records marked as such, which
+<code>?rebuilt=0</code> removes.</p>
+<table><thead><tr><th>Week</th><th style="text-align:right">Matches</th>
+<th style="text-align:right">Recordings</th><th style="text-align:right">Size</th>
+<th></th></tr></thead><tbody>
+<tr><td class="wk">24 Aug 2026</td><td class="n">793</td><td class="n">793</td><td class="n">297 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-24.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">17 Aug 2026</td><td class="n">2,201</td><td class="n">928</td><td class="n">347 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-17/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-17/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-17.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">10 Aug 2026</td><td class="n">2,238</td><td class="n">273</td><td class="n">101 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-10/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-10/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-10.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">03 Aug 2026</td><td class="n">1,926</td><td class="n">1,926</td><td class="n">715 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-03/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-03/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-03.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">27 Jul 2026</td><td class="n">1,892</td><td class="n">1,892</td><td class="n">701 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-07-27/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-07-27/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-07-27.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">20 Jul 2026</td><td class="n">1,687</td><td class="n">1,687</td><td class="n">633 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-07-20/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-07-20/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-07-20.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">13 Jul 2026</td><td class="n">1,630</td><td class="n">510</td><td class="n">190 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-07-13/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-07-13/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-07-13.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">06 Jul 2026</td><td class="n">1,629</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-07-06/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-07-06.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">29 Jun 2026</td><td class="n">1,681</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-06-29/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-06-29.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">22 Jun 2026</td><td class="n">1,992</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-06-22/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-06-22.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">15 Jun 2026</td><td class="n">1,878</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-06-15/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-06-15.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">08 Jun 2026</td><td class="n">1,506</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-06-08/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-06-08.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">01 Jun 2026</td><td class="n">1,921</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-06-01/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-06-01.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">25 May 2026</td><td class="n">1,976</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-05-25/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-05-25.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">18 May 2026</td><td class="n">1,670</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-05-18/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-05-18.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">11 May 2026</td><td class="n">1,808</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-05-11/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-05-11.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">04 May 2026</td><td class="n">1,830</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-05-04/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-05-04.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">27 Apr 2026</td><td class="n">1,708</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-04-27/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-04-27.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">20 Apr 2026</td><td class="n">1,557</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-04-20/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-04-20.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">13 Apr 2026</td><td class="n">1,588</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-04-13/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-04-13.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">06 Apr 2026</td><td class="n">1,614</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-04-06/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-04-06.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">30 Mar 2026</td><td class="n">1,625</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-03-30/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-03-30.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">23 Mar 2026</td><td class="n">2,001</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-03-23/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-03-23.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">16 Mar 2026</td><td class="n">1,695</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-03-16/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-03-16.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">09 Mar 2026</td><td class="n">1,884</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-03-09/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-03-09.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">02 Mar 2026</td><td class="n">1,862</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-03-02/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-03-02.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">23 Feb 2026</td><td class="n">1,891</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-02-23/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-02-23.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">16 Feb 2026</td><td class="n">1,483</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-02-16/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-02-16.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">09 Feb 2026</td><td class="n">1,636</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-02-09/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-02-09.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">02 Feb 2026</td><td class="n">1,856</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-02-02/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-02-02.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">26 Jan 2026</td><td class="n">2,025</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-01-26/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-01-26.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">19 Jan 2026</td><td class="n">1,792</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-01-19/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-01-19.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">12 Jan 2026</td><td class="n">1,943</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-01-12/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-01-12.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">05 Jan 2026</td><td class="n">2,121</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-01-05/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-01-05.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">29 Dec 2025</td><td class="n">1,848</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-12-29/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-12-29.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">22 Dec 2025</td><td class="n">1,193</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-12-22/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-12-22.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">15 Dec 2025</td><td class="n">2,159</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-12-15/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-12-15.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">08 Dec 2025</td><td class="n">1,075</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-12-08/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-12-08.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">01 Dec 2025</td><td class="n">1,902</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-12-01/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-12-01.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">24 Nov 2025</td><td class="n">1,290</td><td class="n">966</td><td class="n">363 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-11-24/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-11-24/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-11-24.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">17 Nov 2025</td><td class="n">1,598</td><td class="n">1,526</td><td class="n">562 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-11-17/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-11-17/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-11-17.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">10 Nov 2025</td><td class="n">1,340</td><td class="n">24</td><td class="n">9 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-11-10/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-11-10/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-11-10.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">03 Nov 2025</td><td class="n">1,215</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-11-03/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-11-03.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">27 Oct 2025</td><td class="n">993</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-10-27/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-10-27.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">20 Oct 2025</td><td class="n">1,098</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-10-20/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-10-20.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">13 Oct 2025</td><td class="n">1,169</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-10-13/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-10-13.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">06 Oct 2025</td><td class="n">966</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-10-06/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-10-06.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">29 Sep 2025</td><td class="n">1,074</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-09-29/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-09-29.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">22 Sep 2025</td><td class="n">1,029</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-09-22/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-09-22.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">15 Sep 2025</td><td class="n">1,139</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-09-15/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-09-15.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">08 Sep 2025</td><td class="n">1,228</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-09-08/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-09-08.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">01 Sep 2025</td><td class="n">1,347</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-09-01/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-09-01.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">25 Aug 2025</td><td class="n">1,198</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-08-25/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-08-25.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">18 Aug 2025</td><td class="n">1,038</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-08-18/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-08-18.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">11 Aug 2025</td><td class="n">1,085</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-08-11/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-08-11.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">04 Aug 2025</td><td class="n">1,192</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-08-04/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-08-04.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">28 Jul 2025</td><td class="n">1,290</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-07-28/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-07-28.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">21 Jul 2025</td><td class="n">1,276</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-07-21/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-07-21.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">14 Jul 2025</td><td class="n">1,274</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-07-14/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-07-14.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">07 Jul 2025</td><td class="n">1,256</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-07-07/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-07-07.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">30 Jun 2025</td><td class="n">1,027</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-06-30/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-06-30.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">23 Jun 2025</td><td class="n">1,318</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-06-23/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-06-23.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">16 Jun 2025</td><td class="n">1,572</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-06-16/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-06-16.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">09 Jun 2025</td><td class="n">1,757</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-06-09/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-06-09.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">02 Jun 2025</td><td class="n">1,633</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-06-02/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-06-02.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">26 May 2025</td><td class="n">2,072</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-05-26/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-05-26.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">19 May 2025</td><td class="n">1,904</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-05-19/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-05-19.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">12 May 2025</td><td class="n">2,095</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-05-12/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-05-12.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">05 May 2025</td><td class="n">2,245</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-05-05/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-05-05.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">28 Apr 2025</td><td class="n">2,321</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-04-28/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-04-28.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">21 Apr 2025</td><td class="n">1,944</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-04-21/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-04-21.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">14 Apr 2025</td><td class="n">2,118</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-04-14/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-04-14.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">07 Apr 2025</td><td class="n">2,832</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-04-07/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-04-07.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">31 Mar 2025</td><td class="n">3,431</td><td class="n">0</td><td class="n">&mdash;</td><td class="dl"><i>none</i><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-03-31/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-03-31.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">24 Mar 2025</td><td class="n">1,829</td><td class="n">5</td><td class="n">2 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-03-24/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2025-03-24/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2025-03-24.json.gz">tagpro.eu</a></td></tr>
+</tbody></table>
+</section>
+
+<section>
 <h2>Coverage data</h2>
-<p class="lead">Ids, timings, maps and held-flags for every match. Small enough to sit on this
-site, so these links always work.</p>
+<p class="lead">Ids, timings and held-flags for every match. Small enough to sit on this site, so
+these links always work, host up or down.</p>
 <table class="files"><tbody>
 <tr><td><a href="data/all.replay.json" download>all.replay.json</a></td>
 <td>every match: <code>uuid</code> plus the <code>game_id</code> a recording is requested by</td></tr>
-<tr><td><a href="data/all.json" download>all.json</a></td>
-<td>every match with start, map, duration, tagpro.eu id, and flags for what is held here</td></tr>
 <tr><td><a href="data/missing_replays.json" download>missing_replays.json</a></td>
 <td>the 113,379 matches with no recording held &mdash; the wanted list</td></tr>
 <tr><td><a href="data/all.eu.json" download>all.eu.json</a></td>
@@ -119,62 +237,35 @@ site, so these links always work.</p>
 <tr><td><a href="DATA_MAP.md">DATA_MAP.md</a></td>
 <td>what every field means</td></tr>
 </tbody></table>
-<p class="note">The same four files exist per week, linked from every row of the
+<p class="note">Per-week equivalents are linked from every row of the
 <a href="index.html">Coverage</a> tables.</p>
 </section>
 
 <section>
-<h2>Recordings and tagpro.eu records</h2>
-<p class="lead">The recordings themselves &mdash; 10,530 of them, 3.9 GB &mdash;
-and the full tagpro.eu records behind them. Too big for this site, so they are served straight from
-the machine that holds them.</p>
-<div class="card">
-<p class="status"><span class="dot" id="dot"></span><span id="stxt">Checking the archive host&hellip;</span></p>
-<p><a class="btn" id="open" href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go" aria-disabled="true">Open the archive host</a></p>
-<p class="host" id="host"></p>
-</div>
-<p class="note">That is a home machine on a free tunnel, so two things follow. It is up when it is
-up &mdash; if it is offline, come back later. And its address changes every time the tunnel
-restarts, which is why the link above points at a redirector that always knows the current one.
-Link to <code>https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/&hellip;</code> and your link keeps working; link to the
-<code>trycloudflare.com</code> address it lands on and it will be dead by next week.</p>
-
-<h3>What is there</h3>
-<table class="files"><tbody>
-<tr><td>/go/manifest.json</td><td>counts, sizes, date range</td></tr>
-<tr><td>/go/weeks.json</td><td>per week: ids, recordings held, bytes</td></tr>
-<tr><td>/go/replay/&lt;uuid&gt;</td><td>one recording, <code>.ndjson.gz</code>, resumable</td></tr>
-<tr><td>/go/week/&lt;week&gt;/replays.json</td><td>what that week holds</td></tr>
-<tr><td>/go/week/&lt;week&gt;/replays.tar</td><td>every recording for that week, streamed as one tar</td></tr>
-<tr><td>/go/eu/&lt;match_id&gt;.json</td><td>one tagpro.eu record: match, players, events, splats, ranked skill</td></tr>
-<tr><td>/go/eu/week/&lt;week&gt;.json.gz</td><td>every tagpro.eu record for that week</td></tr>
-<tr><td>/go/bulk/ranked_matches_bulk.json.gz</td><td>the whole tagpro.eu export in one file</td></tr>
-</tbody></table>
-<p class="note">Weeks are the Monday, UTC &mdash; the same keys as the Coverage tables, so a week
-here holds exactly the matches that week's row counts.</p>
-
-<h3>Fetching it with a script</h3>
+<h2>Fetching it with a script</h2>
 <pre>curl -LOJ https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/replay/&lt;uuid&gt;
 
 curl -L https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/replays.tar | tar x
 
-curl -L -C - -O https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/bulk/ranked_matches_bulk.json.gz</pre>
+curl -L -C - -O https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/bulk/ranked_matches_bulk.json.gz
+
+curl -L -o results-2026-08-24.json.gz \
+  "https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/results.json.gz?map=0"</pre>
 <p class="note"><code>-L</code> follows the redirect to wherever the host currently is, so a script
-written once survives every rotation. <code>-J</code> takes the filename from the server rather than
-from the url, and <code>-C -</code> resumes a part-finished file. If the host is
-offline the redirector answers 503 rather than sending you somewhere dead. It is one home uplink:
-eight transfers run at once and the rest wait, so pull a week at a time rather than opening fifty
-connections.</p>
+written once survives every rotation. <code>-J</code> takes the filename from the server rather
+than from the url, and <code>-C -</code> resumes a part-finished file. If the host is offline the
+redirector answers 503 rather than sending you somewhere dead. It is one home uplink: eight
+transfers run at once and the rest wait.</p>
 </section>
 
 <section>
 <h2>Going the other way</h2>
-<p class="lead">If you have replays this archive does not, send them to <strong>metjr_</strong> on
-Discord &mdash; any format, any size, any date range. <a href="about.html">Why that matters.</a></p>
+<p class="lead">If you have replays this archive does not, send them to <strong>metjr_</strong>
+on Discord &mdash; any format, any size, any dates. <a href="about.html">Why that matters.</a></p>
 </section>
 
 <footer><div class="wrap">
-The recordings are <code>.ndjson.gz</code>, one JSON event per line, exactly as the recorder served them. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>
+Recordings are <code>.ndjson.gz</code>, one JSON event per line, as the recorder served them. tagpro.eu records follow <a href="https://tagpro.eu/?science" target="_blank" rel="noopener">tagpro.eu&rsquo;s own format</a>. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>
 Generated 26 Aug 2026.
 </div></footer>
 </div><script>

@@ -5,6 +5,7 @@
   "replay": 5,
   "record": 1761,
   "rebuilt": 0,
+  "bytes": 1665231,
   "missing_ids": 0,
   "est": 1829,
   "partial": false
@@ -15,6 +16,7 @@
   "replay": 0,
   "record": 3310,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 1,
   "est": 3432,
   "partial": false
@@ -25,6 +27,7 @@
   "replay": 0,
   "record": 2765,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 2832,
   "partial": false
@@ -35,6 +38,7 @@
   "replay": 0,
   "record": 2060,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 2118,
   "partial": false
@@ -45,6 +49,7 @@
   "replay": 0,
   "record": 1913,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1944,
   "partial": false
@@ -55,6 +60,7 @@
   "replay": 0,
   "record": 2280,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 2321,
   "partial": false
@@ -65,6 +71,7 @@
   "replay": 0,
   "record": 2207,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 2245,
   "partial": false
@@ -75,6 +82,7 @@
   "replay": 0,
   "record": 2055,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 2095,
   "partial": false
@@ -85,6 +93,7 @@
   "replay": 0,
   "record": 1872,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1904,
   "partial": false
@@ -95,6 +104,7 @@
   "replay": 0,
   "record": 2025,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 2072,
   "partial": false
@@ -105,6 +115,7 @@
   "replay": 0,
   "record": 1605,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1633,
   "partial": false
@@ -115,6 +126,7 @@
   "replay": 0,
   "record": 1731,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1757,
   "partial": false
@@ -125,6 +137,7 @@
   "replay": 0,
   "record": 1546,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1572,
   "partial": false
@@ -135,6 +148,7 @@
   "replay": 0,
   "record": 1292,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1318,
   "partial": false
@@ -145,6 +159,7 @@
   "replay": 0,
   "record": 1015,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1027,
   "partial": false
@@ -155,6 +170,7 @@
   "replay": 0,
   "record": 1240,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1256,
   "partial": false
@@ -165,6 +181,7 @@
   "replay": 0,
   "record": 1256,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1274,
   "partial": false
@@ -175,6 +192,7 @@
   "replay": 0,
   "record": 1255,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1276,
   "partial": false
@@ -185,6 +203,7 @@
   "replay": 0,
   "record": 1264,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1290,
   "partial": false
@@ -195,6 +214,7 @@
   "replay": 0,
   "record": 1182,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1192,
   "partial": false
@@ -205,6 +225,7 @@
   "replay": 0,
   "record": 1059,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1085,
   "partial": false
@@ -215,6 +236,7 @@
   "replay": 0,
   "record": 1018,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 1,
   "est": 1039,
   "partial": false
@@ -225,6 +247,7 @@
   "replay": 0,
   "record": 1174,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 1,
   "est": 1199,
   "partial": false
@@ -235,6 +258,7 @@
   "replay": 0,
   "record": 1325,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1347,
   "partial": false
@@ -245,6 +269,7 @@
   "replay": 0,
   "record": 1207,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1228,
   "partial": false
@@ -255,6 +280,7 @@
   "replay": 0,
   "record": 1121,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1139,
   "partial": false
@@ -265,6 +291,7 @@
   "replay": 0,
   "record": 1012,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1029,
   "partial": false
@@ -275,6 +302,7 @@
   "replay": 0,
   "record": 1053,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1074,
   "partial": false
@@ -285,6 +313,7 @@
   "replay": 0,
   "record": 951,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 966,
   "partial": false
@@ -295,6 +324,7 @@
   "replay": 0,
   "record": 1144,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1169,
   "partial": false
@@ -305,6 +335,7 @@
   "replay": 0,
   "record": 1071,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1098,
   "partial": false
@@ -315,6 +346,7 @@
   "replay": 0,
   "record": 962,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 993,
   "partial": false
@@ -325,6 +357,7 @@
   "replay": 0,
   "record": 1191,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1215,
   "partial": false
@@ -335,6 +368,7 @@
   "replay": 24,
   "record": 1305,
   "rebuilt": 1,
+  "bytes": 8504200,
   "missing_ids": 0,
   "est": 1340,
   "partial": false
@@ -345,6 +379,7 @@
   "replay": 1526,
   "record": 1598,
   "rebuilt": 37,
+  "bytes": 562108117,
   "missing_ids": 3,
   "est": 1601,
   "partial": false
@@ -355,6 +390,7 @@
   "replay": 966,
   "record": 1282,
   "rebuilt": 30,
+  "bytes": 363010119,
   "missing_ids": 0,
   "est": 1290,
   "partial": false
@@ -365,6 +401,7 @@
   "replay": 0,
   "record": 1866,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1902,
   "partial": false
@@ -375,6 +412,7 @@
   "replay": 0,
   "record": 1047,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1075,
   "partial": false
@@ -385,6 +423,7 @@
   "replay": 0,
   "record": 2119,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 2159,
   "partial": false
@@ -395,6 +434,7 @@
   "replay": 0,
   "record": 1177,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1193,
   "partial": false
@@ -405,6 +445,7 @@
   "replay": 0,
   "record": 1808,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1848,
   "partial": false
@@ -415,6 +456,7 @@
   "replay": 0,
   "record": 2090,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 2121,
   "partial": false
@@ -425,6 +467,7 @@
   "replay": 0,
   "record": 1909,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1943,
   "partial": false
@@ -435,6 +478,7 @@
   "replay": 0,
   "record": 1764,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1792,
   "partial": false
@@ -445,6 +489,7 @@
   "replay": 0,
   "record": 1987,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 2025,
   "partial": false
@@ -455,6 +500,7 @@
   "replay": 0,
   "record": 1830,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1856,
   "partial": false
@@ -465,6 +511,7 @@
   "replay": 0,
   "record": 1608,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1636,
   "partial": false
@@ -475,6 +522,7 @@
   "replay": 0,
   "record": 1465,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 1,
   "est": 1484,
   "partial": false
@@ -485,6 +533,7 @@
   "replay": 0,
   "record": 1861,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1891,
   "partial": false
@@ -495,6 +544,7 @@
   "replay": 0,
   "record": 1825,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1862,
   "partial": false
@@ -505,6 +555,7 @@
   "replay": 0,
   "record": 1845,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 1,
   "est": 1885,
   "partial": false
@@ -515,6 +566,7 @@
   "replay": 0,
   "record": 1671,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1695,
   "partial": false
@@ -525,6 +577,7 @@
   "replay": 0,
   "record": 1981,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 2001,
   "partial": false
@@ -535,6 +588,7 @@
   "replay": 0,
   "record": 1607,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1625,
   "partial": false
@@ -545,6 +599,7 @@
   "replay": 0,
   "record": 1596,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1614,
   "partial": false
@@ -555,6 +610,7 @@
   "replay": 0,
   "record": 1562,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1588,
   "partial": false
@@ -565,6 +621,7 @@
   "replay": 0,
   "record": 1528,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1557,
   "partial": false
@@ -575,6 +632,7 @@
   "replay": 0,
   "record": 1675,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1708,
   "partial": false
@@ -585,6 +643,7 @@
   "replay": 0,
   "record": 1804,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1830,
   "partial": false
@@ -595,6 +654,7 @@
   "replay": 0,
   "record": 1770,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1808,
   "partial": false
@@ -605,6 +665,7 @@
   "replay": 0,
   "record": 1634,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1670,
   "partial": false
@@ -615,6 +676,7 @@
   "replay": 0,
   "record": 1947,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1976,
   "partial": false
@@ -625,6 +687,7 @@
   "replay": 0,
   "record": 1891,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1921,
   "partial": false
@@ -635,6 +698,7 @@
   "replay": 0,
   "record": 1463,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1506,
   "partial": false
@@ -645,6 +709,7 @@
   "replay": 0,
   "record": 1814,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1878,
   "partial": false
@@ -655,6 +720,7 @@
   "replay": 0,
   "record": 1924,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1992,
   "partial": false
@@ -665,6 +731,7 @@
   "replay": 0,
   "record": 1637,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1681,
   "partial": false
@@ -675,6 +742,7 @@
   "replay": 0,
   "record": 1591,
   "rebuilt": 0,
+  "bytes": 0,
   "missing_ids": 0,
   "est": 1629,
   "partial": false
@@ -685,6 +753,7 @@
   "replay": 510,
   "record": 1587,
   "rebuilt": 14,
+  "bytes": 189988073,
   "missing_ids": 0,
   "est": 1630,
   "partial": false
@@ -695,6 +764,7 @@
   "replay": 1687,
   "record": 1687,
   "rebuilt": 50,
+  "bytes": 632803792,
   "missing_ids": 0,
   "est": 1687,
   "partial": false
@@ -705,6 +775,7 @@
   "replay": 1892,
   "record": 1892,
   "rebuilt": 44,
+  "bytes": 700770766,
   "missing_ids": 0,
   "est": 1892,
   "partial": false
@@ -715,6 +786,7 @@
   "replay": 1926,
   "record": 1926,
   "rebuilt": 66,
+  "bytes": 714896959,
   "missing_ids": 0,
   "est": 1926,
   "partial": false
@@ -725,6 +797,7 @@
   "replay": 273,
   "record": 2178,
   "rebuilt": 7,
+  "bytes": 101457112,
   "missing_ids": 0,
   "est": 2238,
   "partial": false
@@ -735,6 +808,7 @@
   "replay": 928,
   "record": 2170,
   "rebuilt": 27,
+  "bytes": 347165182,
   "missing_ids": 0,
   "est": 2201,
   "partial": false
@@ -745,6 +819,7 @@
   "replay": 793,
   "record": 793,
   "rebuilt": 16,
+  "bytes": 296890577,
   "missing_ids": 0,
   "est": 793,
   "partial": true

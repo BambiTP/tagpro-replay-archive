@@ -23,7 +23,7 @@ Fields in the combined file:
 | `game_id` | string | the id a recording is requested by |
 | `started` | string | match start, ISO-8601 UTC |
 | `map` | string | map name |
-| `duration` | int | match length in frames (60 = 1 second) |
+| `duration` | int | match length in **milliseconds** (this is the ranked listing's own field; tagpro.eu's `duration` is in 60 fps frames, which is not the same number) |
 | `have_replay` | bool | the recording is held here |
 | `have_record` | bool | a tagpro.eu record is linked |
 | `eu_match_id` | int / null | tagpro.eu match id where linked |
@@ -34,9 +34,11 @@ Fields in the combined file:
 | --- | --- |
 | `data/all.replay.json` | every `uuid` + `game_id` |
 | `data/all.eu.json` | every tagpro.eu match id |
-| `data/all.json` | every match with all fields and held-flags |
 | `data/missing_replays.json` | matches whose recording is not held — `uuid`, `game_id`, `started`, `map` |
 | `data/coverage.json` | per-week totals behind the tables |
+
+Per-week `YYYY-MM-DD.json` still carries every field for that week; the whole-archive
+`all.json` was dropped - it was 12 MB rewritten into git on every build.
 
 ## coverage.json
 
@@ -46,7 +48,8 @@ Fields in the combined file:
 | `ids` | match ids collected |
 | `replay` | recordings held |
 | `record` | ids that have a tagpro.eu record |
-| `rebuilt` | records reconstructed here from a recording rather than carried by the mirror |
+| `rebuilt` | records reconstructed here from a recording rather than carried by the mirror (see the site's Rebuilt records page) |
+| `bytes` | recordings held for that week, compressed size on disk |
 | `missing_ids` | ids tagpro.eu lists that are absent here |
 | `est` | estimated ranked matches that week |
 | `partial` | week still in progress, totals not final |
@@ -65,3 +68,24 @@ tab. Each is `<uuid>.ndjson.gz`: gzipped NDJSON, one JSON array per line, in the
 form `[offset_ms, "event-name", {...}]`, exactly as the recorder served it. The
 first line is `recorder-metadata`, carrying the uuid, start time, duration, map
 and server.
+
+## Served from the archive host
+
+Too big for this repo, so these come from the machine that holds them, through the
+redirector on the [Download](https://bambitp.github.io/tagpro-replay-archive/download.html) tab.
+
+| Route | Contents |
+| --- | --- |
+| `/all/replays.tar` | every recording held, one folder per week |
+| `/week/<week>/replays.tar` | that week's recordings |
+| `/week/<week>/results.json.gz` | how every match that week ended: outcome, void reason, score, per-player stats, map and its tagpro.eu map id, ranked skill movement |
+| `/eu/week/<week>.json.gz` | that week's tagpro.eu records in tagpro.eu's `{match_id: doc}` bulk shape |
+| `/bulk/ranked_matches_bulk.json.gz` | every tagpro.eu record, same shape |
+| `/eu/<match_id>.json` | one record expanded: match, players, events, splats, ranked |
+
+Two flags:
+
+- `?rebuilt=1` on the tagpro.eu downloads mixes in records rebuilt from recordings. Off by
+  default there. `?rebuilt=0` on `results` removes them; they are included by default and always
+  carry `record_source`.
+- `?map=0` on `results` drops the map block.

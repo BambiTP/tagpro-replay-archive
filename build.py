@@ -41,7 +41,8 @@ def load(conn):
     rows = conn.execute("""
         SELECT k.uuid, k.game_id, k.started, k.map_name, k.duration,
                CASE WHEN r.uuid IS NOT NULL THEN 1 ELSE 0 END,
-               CASE WHEN m.match_id IS NOT NULL THEN 1 ELSE 0 END, m.match_id, m.source
+               CASE WHEN m.match_id IS NOT NULL THEN 1 ELSE 0 END, m.match_id, m.source,
+               COALESCE(r.bytes_stored, 0)
         FROM koala_matches k
         LEFT JOIN replay_files r ON r.uuid = k.uuid AND r.status = 'done'
         LEFT JOIN matches m ON m.koala_uuid = k.uuid
@@ -70,12 +71,13 @@ def build():
     rows, missing = load(conn)
 
     weeks, out_rows = {}, {}
-    for uuid, gid, started, mp, dur, has_rep, has_rec, eu_id, eu_src in rows:
+    for uuid, gid, started, mp, dur, has_rep, has_rec, eu_id, eu_src, nbytes in rows:
         t = dt.datetime.fromisoformat(started.replace("Z", "+00:00"))
         w = monday(t.date())
         c = weeks.setdefault(w, {"ids": 0, "replay": 0, "missing": 0,
-                                 "record": 0, "rebuilt": 0})
+                                 "record": 0, "rebuilt": 0, "bytes": 0})
         c["ids"] += 1
+        c["bytes"] += nbytes
         c["replay"] += has_rep
         c["record"] += has_rec
         # a tagpro.eu record we reconstructed ourselves from an archived
@@ -90,7 +92,7 @@ def build():
     for _mid, t in missing:
         weeks.setdefault(monday(t.date()),
                          {"ids": 0, "replay": 0, "missing": 0,
-                          "record": 0, "rebuilt": 0})["missing"] += 1
+                          "record": 0, "rebuilt": 0, "bytes": 0})["missing"] += 1
 
     today = dt.datetime.now(dt.timezone.utc).date()
     curwk = monday(today)
@@ -98,7 +100,7 @@ def build():
     for w in sorted(weeks):
         c = weeks[w]
         cov.append({"week": w, "ids": c["ids"], "replay": c["replay"],
-                    "record": c["record"], "rebuilt": c["rebuilt"],
+                    "record": c["record"], "rebuilt": c["rebuilt"], "bytes": c["bytes"],
                     "missing_ids": c["missing"], "est": c["ids"] + c["missing"],
                     "partial": w == curwk})
 
@@ -130,9 +132,6 @@ def build():
     dump("missing_replays.json",
          [{"uuid": r[0], "game_id": r[1], "started": r[2], "map": r[3]}
           for r in rows if not r[5]])
-    dump("all.json", [{"uuid": r[0], "game_id": r[1], "started": r[2], "map": r[3],
-                       "duration": r[4], "have_replay": bool(r[5]),
-                       "have_record": bool(r[6]), "eu_match_id": r[7]} for r in rows])
 
     held_bytes = conn.execute("SELECT COALESCE(SUM(bytes_stored),0) FROM replay_files "
                               "WHERE status = 'done'").fetchone()[0]
@@ -247,7 +246,8 @@ WORKER = "https://tagpro-archive-tunnel.bambitagpro.workers.dev"
 
 DISCORD = "metjr_"
 
-NAV = (("index.html", "Coverage"), ("about.html", "About"), ("download.html", "Download"))
+NAV = (("index.html", "Coverage"), ("about.html", "About"),
+       ("rebuilt.html", "Rebuilt records"), ("download.html", "Download"))
 
 # Fills in the download page's live status line. Kept out of the f-strings
 # below so its braces don't have to be doubled.
@@ -345,16 +345,22 @@ archive holds them only from the point collection started, and only where it kep
 <strong>{DISCORD}</strong> on Discord. Any format, any size, any dates.</p>
 <p>Recordings are keyed by uuid, so duplicates cost nothing and nothing needs checking or filtering
 first. The <a href="download.html">list of what is missing</a> is published if it is useful.</p>
+<p><strong>Ask for what you need.</strong> Message <strong>{DISCORD}</strong> on Discord for a
+particular cut of the data, a different format, a query run across the whole archive, or help with
+a project you are building on it. Requests are welcome and are usually quicker to answer than they
+are to work around.</p>
 
 <h2>Where the numbers come from</h2>
 <ul>
 <li><strong>The ranked replay listing</strong> decides what exists. Every id here came from it, so
 the totals are counts, not estimates.</li>
-<li><strong>tagpro.eu</strong> is the second source, and where the box score, events and players
-come from. About 98% of matches have one. The two are matched on start time with 120 seconds of
+<li><strong><a href="https://tagpro.eu/?science" target="_blank" rel="noopener">tagpro.eu</a></strong>
+is the second source, and where the box score, events and players come from. About 98% of matches
+have one. The two are matched on start time with 120 seconds of
 slack, because they record it in different time zones and to different precision.</li>
 <li><strong>{f(rebuilt)} tagpro.eu records were rebuilt here</strong> from recordings, for matches
-the mirror never had. That is the orange band on the coverage table.</li>
+the mirror never had. That is the orange band on the coverage table, and there is a page on
+<a href="rebuilt.html">how accurate they are</a>.</li>
 <li><strong>{len(missing)} matches are exceptions.</strong> They are on tagpro.eu but the listing
 returns nothing for them, even inside ranges it says are complete. There is no recording to get.</li>
 </ul>
@@ -377,84 +383,192 @@ collected them and are served from it &mdash; see <a href="download.html">Downlo
 
 def download_page(cov, ids, rep, held_bytes, span):
     f = lambda n: f"{n:,}"
-    events_note = f(sum(r["record"] for r in cov))
+    gb = lambda n: (f"{n / 1e9:.2f} GB" if n >= 1e9 else f"{n / 1e6:.0f} MB")
+    record = sum(r["record"] for r in cov)
+    rebuilt = sum(r["rebuilt"] for r in cov)
     latest = cov[-1]["week"]
+    rows = []
+    for c in reversed(cov):
+        lbl = dt.date.fromisoformat(c["week"]).strftime("%d %b %Y")
+        w = c["week"]
+        tar = (f'<a href="{WORKER}/go/week/{w}/replays.tar">replays.tar</a>'
+               if c["replay"] else '<i>none</i>')
+        rows.append(
+            f'<tr><td class="wk">{lbl}</td>'
+            f'<td class="n">{f(c["ids"])}</td>'
+            f'<td class="n">{f(c["replay"])}</td>'
+            f'<td class="n">{gb(c["bytes"]) if c["bytes"] else "&mdash;"}</td>'
+            f'<td class="dl">{tar}'
+            f'<a href="{WORKER}/go/week/{w}/results.json.gz">results</a>'
+            f'<a href="{WORKER}/go/eu/week/{w}.json.gz">tagpro.eu</a></td></tr>')
     body = f'''<section>
-<h2>Coverage data</h2>
-<p class="lead">Ids, timings, maps and held-flags for every match. Small enough to sit on this
-site, so these links always work.</p>
-<table class="files"><tbody>
-<tr><td><a href="data/all.replay.json" download>all.replay.json</a></td>
-<td>every match: <code>uuid</code> plus the <code>game_id</code> a recording is requested by</td></tr>
-<tr><td><a href="data/all.json" download>all.json</a></td>
-<td>every match with start, map, duration, tagpro.eu id, and flags for what is held here</td></tr>
-<tr><td><a href="data/missing_replays.json" download>missing_replays.json</a></td>
-<td>the {f(ids - rep)} matches with no recording held &mdash; the wanted list</td></tr>
-<tr><td><a href="data/all.eu.json" download>all.eu.json</a></td>
-<td>every linked tagpro.eu match id ({events_note} of them)</td></tr>
-<tr><td><a href="data/coverage.json">coverage.json</a></td>
-<td>the per-week totals behind the tables on the Coverage tab</td></tr>
-<tr><td><a href="DATA_MAP.md">DATA_MAP.md</a></td>
-<td>what every field means</td></tr>
-</tbody></table>
-<p class="note">The same four files exist per week, linked from every row of the
-<a href="index.html">Coverage</a> tables.</p>
+<div class="card">
+<p><strong>Want something that is not here?</strong> A particular cut of the data, a format that
+suits your tooling, a query run against the whole archive, or a hand with a project you are
+building on it &mdash; message <strong>{DISCORD}</strong> on Discord and ask. That is what it is
+for, and it is quicker than working around a file that nearly fits.</p>
+</div>
 </section>
 
 <section>
-<h2>Recordings and tagpro.eu records</h2>
-<p class="lead">The recordings themselves &mdash; {f(rep)} of them, {held_bytes / 1e9:.1f} GB &mdash;
-and the full tagpro.eu records behind them. Too big for this site, so they are served straight from
-the machine that holds them.</p>
+<h2>Everything at once</h2>
+<p class="lead">Two files hold the archive. Both stream from the machine that collected them, so
+they need the host to be up.</p>
 <div class="card">
 <p class="status"><span class="dot" id="dot"></span><span id="stxt">Checking the archive host&hellip;</span></p>
 <p><a class="btn" id="open" href="{WORKER}/go" aria-disabled="true">Open the archive host</a></p>
 <p class="host" id="host"></p>
 </div>
-<p class="note">That is a home machine on a free tunnel, so two things follow. It is up when it is
-up &mdash; if it is offline, come back later. And its address changes every time the tunnel
-restarts, which is why the link above points at a redirector that always knows the current one.
-Link to <code>{WORKER}/go/&hellip;</code> and your link keeps working; link to the
-<code>trycloudflare.com</code> address it lands on and it will be dead by next week.</p>
-
-<h3>What is there</h3>
 <table class="files"><tbody>
-<tr><td>/go/manifest.json</td><td>counts, sizes, date range</td></tr>
-<tr><td>/go/weeks.json</td><td>per week: ids, recordings held, bytes</td></tr>
-<tr><td>/go/replay/&lt;uuid&gt;</td><td>one recording, <code>.ndjson.gz</code>, resumable</td></tr>
-<tr><td>/go/week/&lt;week&gt;/replays.json</td><td>what that week holds</td></tr>
-<tr><td>/go/week/&lt;week&gt;/replays.tar</td><td>every recording for that week, streamed as one tar</td></tr>
-<tr><td>/go/eu/&lt;match_id&gt;.json</td><td>one tagpro.eu record: match, players, events, splats, ranked skill</td></tr>
-<tr><td>/go/eu/week/&lt;week&gt;.json.gz</td><td>every tagpro.eu record for that week</td></tr>
-<tr><td>/go/bulk/ranked_matches_bulk.json.gz</td><td>the whole tagpro.eu export in one file</td></tr>
+<tr><td><a href="{WORKER}/go/all/replays.tar">all/replays.tar</a></td>
+<td>every recording held, {f(rep)} files, {gb(held_bytes)}, one folder per week</td></tr>
+<tr><td><a href="{WORKER}/go/bulk/ranked_matches_bulk.json.gz">ranked_matches_bulk.json.gz</a></td>
+<td>every tagpro.eu record, {f(record)} matches, in
+<a href="https://tagpro.eu/?science" target="_blank" rel="noopener">tagpro.eu's own bulk shape</a></td></tr>
 </tbody></table>
-<p class="note">Weeks are the Monday, UTC &mdash; the same keys as the Coverage tables, so a week
-here holds exactly the matches that week's row counts.</p>
+<p class="note">The bulk file is the mirror's records only. Add <code>?rebuilt=1</code> to mix in
+the {f(rebuilt)} records <a href="rebuilt.html">rebuilt here from recordings</a>; they are marked
+<code>source: "replay"</code> wherever they appear.</p>
+</section>
 
-<h3>Fetching it with a script</h3>
+<section>
+<h2>By week</h2>
+<p class="lead">The same thing a week at a time. <strong>replays.tar</strong> is that week's
+recordings, <strong>results</strong> is how every match ended with per-player stats, and
+<strong>tagpro.eu</strong> is that week's mirror records in bulk shape.</p>
+<p class="note">Weeks are the Monday, UTC, matching the <a href="index.html">Coverage</a> tables.
+<code>results</code> carries the map and its tagpro.eu map id by default &mdash; drop it with
+<code>?map=0</code> &mdash; and includes rebuilt records marked as such, which
+<code>?rebuilt=0</code> removes.</p>
+<table><thead><tr><th>Week</th><th style="text-align:right">Matches</th>
+<th style="text-align:right">Recordings</th><th style="text-align:right">Size</th>
+<th></th></tr></thead><tbody>
+{chr(10).join(rows)}
+</tbody></table>
+</section>
+
+<section>
+<h2>Coverage data</h2>
+<p class="lead">Ids, timings and held-flags for every match. Small enough to sit on this site, so
+these links always work, host up or down.</p>
+<table class="files"><tbody>
+<tr><td><a href="data/all.replay.json" download>all.replay.json</a></td>
+<td>every match: <code>uuid</code> plus the <code>game_id</code> a recording is requested by</td></tr>
+<tr><td><a href="data/missing_replays.json" download>missing_replays.json</a></td>
+<td>the {f(ids - rep)} matches with no recording held &mdash; the wanted list</td></tr>
+<tr><td><a href="data/all.eu.json" download>all.eu.json</a></td>
+<td>every linked tagpro.eu match id ({f(record)} of them)</td></tr>
+<tr><td><a href="data/coverage.json">coverage.json</a></td>
+<td>the per-week totals behind the tables on the Coverage tab</td></tr>
+<tr><td><a href="DATA_MAP.md">DATA_MAP.md</a></td>
+<td>what every field means</td></tr>
+</tbody></table>
+<p class="note">Per-week equivalents are linked from every row of the
+<a href="index.html">Coverage</a> tables.</p>
+</section>
+
+<section>
+<h2>Fetching it with a script</h2>
 <pre>curl -LOJ {WORKER}/go/replay/&lt;uuid&gt;
 
 curl -L {WORKER}/go/week/{latest}/replays.tar | tar x
 
-curl -L -C - -O {WORKER}/go/bulk/ranked_matches_bulk.json.gz</pre>
+curl -L -C - -O {WORKER}/go/bulk/ranked_matches_bulk.json.gz
+
+curl -L -o results-{latest}.json.gz \\
+  "{WORKER}/go/week/{latest}/results.json.gz?map=0"</pre>
 <p class="note"><code>-L</code> follows the redirect to wherever the host currently is, so a script
-written once survives every rotation. <code>-J</code> takes the filename from the server rather than
-from the url, and <code>-C -</code> resumes a part-finished file. If the host is
-offline the redirector answers 503 rather than sending you somewhere dead. It is one home uplink:
-eight transfers run at once and the rest wait, so pull a week at a time rather than opening fifty
-connections.</p>
+written once survives every rotation. <code>-J</code> takes the filename from the server rather
+than from the url, and <code>-C -</code> resumes a part-finished file. If the host is offline the
+redirector answers 503 rather than sending you somewhere dead. It is one home uplink: eight
+transfers run at once and the rest wait.</p>
 </section>
 
 <section>
 <h2>Going the other way</h2>
-<p class="lead">If you have replays this archive does not, send them to <strong>{DISCORD}</strong> on
-Discord &mdash; any format, any size, any date range. <a href="about.html">Why that matters.</a></p>
+<p class="lead">If you have replays this archive does not, send them to <strong>{DISCORD}</strong>
+on Discord &mdash; any format, any size, any dates. <a href="about.html">Why that matters.</a></p>
 </section>'''
-    foot = ('The recordings are <code>.ndjson.gz</code>, one JSON event per line, exactly as the '
-            'recorder served them. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>')
+    foot = ('Recordings are <code>.ndjson.gz</code>, one JSON event per line, as the recorder served '
+            'them. tagpro.eu records follow <a href="https://tagpro.eu/?science" target="_blank" '
+            'rel="noopener">tagpro.eu&rsquo;s own format</a>. Field reference: '
+            '<a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>')
     return page("download.html", "Download · TagPro ranked replay archive",
-                "Every file this archive publishes, and a live link to the recordings themselves.",
+                "Every file this archive publishes, whole or a week at a time.",
                 body, foot=foot, script=STATUS_JS.replace("__WORKER__", WORKER))
+
+
+def rebuilt_page(cov, ids, span):
+    f = lambda n: f"{n:,}"
+    rebuilt = sum(r["rebuilt"] for r in cov)
+    record = sum(r["record"] for r in cov)
+    body = f'''<section class="prose">
+<h2>Records rebuilt from recordings</h2>
+<p>tagpro.eu carries {f(record)} of the {f(ids)} matches here, about
+{100.0 * record / ids:.0f}%. For some of the rest there is a recording in this archive, and a
+recording contains everything a match record holds. <strong>{f(rebuilt)} records</strong> have been
+reconstructed that way. They are the orange band on the <a href="index.html">coverage table</a>.</p>
+<p>They are kept separate on purpose. A record derived from a recording is not a tagpro.eu record,
+so it carries <code>source: "replay"</code> and a synthetic match id from 1,000,000,000 up, well
+clear of tagpro.eu's id space. <strong>Downloads leave them out unless you ask for them</strong>
+&mdash; add <code>?rebuilt=1</code>.</p>
+
+<h2>How accurate they are</h2>
+<p>Measured by rebuilding matches that exist in <em>both</em> sources and comparing field by field,
+across 250 matches and 1,992 player rows:</p>
+<table><thead><tr><th>Field</th><th style="text-align:right">Agreement</th></tr></thead><tbody>
+<tr><td>captures</td><td class="p">100.00%</td></tr>
+<tr><td>pops</td><td class="p">100.00%</td></tr>
+<tr><td>tags</td><td class="p">100.00%</td></tr>
+<tr><td>returns</td><td class="p">100.00%</td></tr>
+<tr><td>powerups</td><td class="p">100.00%</td></tr>
+<tr><td>grabs</td><td class="p">99.95%</td></tr>
+<tr><td>drops</td><td class="p">99.95%</td></tr>
+</tbody><tfoot><tr><td>Player rows exact on all seven</td>
+<td class="p">1,990 / 1,992 &mdash; 99.90%</td></tr></tfoot></table>
+<p><strong>hold</strong> comes out frame-accurate: median error zero, every row within one second.
+<strong>prevent</strong> is second-resolution only, because the recording carries it as a counter
+ticking once a second rather than as events.</p>
+<p>Two things the extractor has to get right, and did not at first. Counters belong to a player,
+not to a slot: a player who rejoins gets a new slot that inherits their accumulated counters, and
+treating that as a fresh player double-counts everything they had already done. And the units
+differ &mdash; a recording counts hold and prevent in seconds while tagpro.eu stores 60&nbsp;fps
+frames &mdash; so everything is normalised to frames before it is written.</p>
+
+<h2>What a recording cannot supply</h2>
+<p>These fields are null on a rebuilt record rather than guessed:</p>
+<ul>
+<li>The packed per-player <code>events</code> string and the per-team <code>splats</code> blob.
+tagpro.eu's own encoding of these is not reproduced. The events are supplied instead as
+<code>events_decoded</code>, one object per event.</li>
+<li><code>auth</code>, <code>flair</code>, <code>degree</code>, <code>score</code> and
+<code>points</code> &mdash; account and scoring metadata the mirror adds, which is not in the
+recording.</li>
+<li><code>port</code> and <code>timeLimit</code>.</li>
+<li><code>mapId</code> is filled in only when the map name matches a map tagpro.eu already knows.
+No map rows are invented: a recording's map identifier is a different id space, and a fabricated
+id would corrupt every per-map aggregate downstream.</li>
+</ul>
+
+<h2>Where they are better</h2>
+<p>The event stream from a recording is richer than the mirror's. Every event carries a position.
+tagpro.eu only has coordinates for pops and drops, and only inside a packed blob that had to be
+reverse-engineered to read at all.</p>
+
+<h2>Getting them, or not</h2>
+<p>Every tagpro.eu download takes the flag. Without it you get the mirror's records only, which is
+what tagpro.eu itself would give you:</p>
+<pre>&hellip;/eu/week/{cov[-1]["week"]}.json.gz              mirror records only
+&hellip;/eu/week/{cov[-1]["week"]}.json.gz?rebuilt=1   with the rebuilt ones mixed in</pre>
+<p>Both are in <a href="https://tagpro.eu/?science" target="_blank" rel="noopener">tagpro.eu's own
+bulk shape</a>: an object keyed by match id. See <a href="download.html">Download</a>.</p>
+<p><strong>If a rebuilt record looks wrong, tell me.</strong> Message <strong>{DISCORD}</strong> on
+Discord with the match id and I will look at the recording it came from.</p>
+</section>'''
+    return page("rebuilt.html", "Rebuilt records · TagPro ranked replay archive",
+                "Match records reconstructed from recordings, and how accurate they are.",
+                body)
+
 
 def write(name, html):
     open(OUT / name, "w").write(html)
@@ -594,7 +708,6 @@ recording is requested by), <code>missing</code> is the subset with no recording
 Whole archive: <a href="data/all.replay.json" download>all.replay.json</a> &middot;
 <a href="data/missing_replays.json" download>missing_replays.json</a> &middot;
 <a href="data/all.eu.json" download>all.eu.json</a> &middot;
-<a href="data/all.json" download>all.json</a> &middot;
 <a href="data/coverage.json">coverage.json</a>. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.'''
 
     write("index.html", page(
@@ -602,6 +715,7 @@ Whole archive: <a href="data/all.replay.json" download>all.replay.json</a> &midd
         f"Match ids and replay recordings collected per week, {span[0]} \u2013 {span[1]}.",
         body, stats=stats, foot=foot))
     write("about.html", about_page(cov, missing, ids, rep, held_bytes, span))
+    write("rebuilt.html", rebuilt_page(cov, ids, span))
     write("download.html", download_page(cov, ids, rep, held_bytes, span))
 
 
