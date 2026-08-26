@@ -815,13 +815,13 @@
  },
  {
   "week": "2026-08-24",
-  "ids": 890,
-  "replay": 890,
-  "record": 890,
+  "ids": 919,
+  "replay": 919,
+  "record": 919,
   "rebuilt": 16,
-  "bytes": 334210246,
-  "missing_ids": 16,
-  "est": 906,
+  "bytes": 346295335,
+  "missing_ids": 0,
+  "est": 919,
   "partial": true
  }
 ]
