@@ -103,53 +103,47 @@ white-space:nowrap;width:1%}
 <div class="wrap">
 <section class="prose">
 <h2>What this is</h2>
-<p>A record of every ranked TagPro match I can get at: <strong>123,909 matches</strong> since
-Mar 2025, each with its id, start time, map and duration, and a tagpro.eu record for 121,636
-of them. For <strong>10,530</strong> I also have the recording itself.</p>
-<p>I wanted this data and nobody had it. Ranked games happen, get listed for a couple of days, and
-then you can't query them any more. So I started saving them.</p>
+<p>A record of every ranked TagPro match the replay listing returns:
+<strong>123,909 matches</strong> since Mar 2025, each with its id, start time, map and duration,
+and a tagpro.eu record for 121,636 of them. For <strong>10,530</strong> the recording itself
+is held too.</p>
+<p>It exists out of a love for data.</p>
 
 <h2>Why there are so few recordings</h2>
-<p>I can't get the old ones. Scraping replays older than two days isn't allowed, and the site
-won't show you a replay older than two days without an account. I asked for a bulk download of
-everything already past that point and was turned down.</p>
-<p>So I take them as they happen. The ids are easy: the listing hands over whole date ranges at
-once, which is why that side is complete. The recordings are one file per match, fetched while the
-match is still inside the window, which is why that side is not. Everything older than two days
-when I started was already out of reach.</p>
-<p><strong>Every week from here on gets collected in full. The old matches aren't coming back on
-their own.</strong></p>
+<p>Scraping replays older than two days is forbidden, and the site blocks viewing a replay older
+than two days without an account. A request for a bulk download of the older material was
+declined.</p>
+<p>That is the whole reason the two halves of this site look so different. Ids can be listed in
+bulk, so every match has one. A recording has to be fetched inside the two-day window, so the
+archive holds them only from the point collection started, and only where it kept up.</p>
 
-<h2>Send me your replays</h2>
-<p>If you have replay dumps sitting around &mdash; exports, scrapes, a folder from two years ago,
-anything &mdash; send them to <strong>metjr_</strong> on Discord. Any format, any size, any
-dates, however messy.</p>
-<p>I match on uuid, so duplicates cost nothing and you don't need to check what I already have or
-filter anything out first. A dump where 90% is already here is still 10% I didn't have. There is a
-<a href="download.html">list of what is missing</a> if you want to aim at the gaps, but don't let
-that stop you sending the whole thing.</p>
+<h2>Bulk replay dumps wanted</h2>
+<p>If you have replay dumps &mdash; exports, scrapes, anything &mdash; send them to
+<strong>metjr_</strong> on Discord. Any format, any size, any dates.</p>
+<p>Recordings are keyed by uuid, so duplicates cost nothing and nothing needs checking or filtering
+first. The <a href="download.html">list of what is missing</a> is published if it is useful.</p>
 
 <h2>Where the numbers come from</h2>
 <ul>
-<li><strong>The ranked replay listing</strong> decides what exists. Every id on this site came from
-it, so the totals are counts, not estimates.</li>
+<li><strong>The ranked replay listing</strong> decides what exists. Every id here came from it, so
+the totals are counts, not estimates.</li>
 <li><strong>tagpro.eu</strong> is the second source, and where the box score, events and players
 come from. About 98% of matches have one. The two are matched on start time with 120 seconds of
 slack, because they record it in different time zones and to different precision.</li>
 <li><strong>292 tagpro.eu records were rebuilt here</strong> from recordings, for matches
 the mirror never had. That is the orange band on the coverage table.</li>
 <li><strong>8 matches are exceptions.</strong> They are on tagpro.eu but the listing
-returns nothing for them, even inside ranges it says are complete. There's no recording to get.</li>
+returns nothing for them, even inside ranges it says are complete. There is no recording to get.</li>
 </ul>
 <p>Two ids identify a match: <code>uuid</code> for the replay, <code>game_id</code> for the
 recording (that is the one you request a recording by), and <code>eu_match_id</code> for the same
 match on tagpro.eu. Full field list in <a href="DATA_MAP.md">DATA_MAP.md</a>.</p>
 
 <h2>How it runs</h2>
-<p>A pipeline on a machine at my house follows the listing, pulls each replay while it is still
-there, links it to its tagpro.eu record, and rebuilds records for matches the mirror missed. This
-site is regenerated from that database on a schedule. The 3.9 GB of recordings
-stay on that machine and are served from it &mdash; see <a href="download.html">Download</a>.</p>
+<p>A pipeline follows the listing, pulls each replay while it is still reachable, links it to its
+tagpro.eu record, and rebuilds records for matches the mirror missed. This site is regenerated from
+that database on a schedule. The 3.9 GB of recordings stay on the machine that
+collected them and are served from it &mdash; see <a href="download.html">Download</a>.</p>
 </section>
 
 <footer><div class="wrap">
