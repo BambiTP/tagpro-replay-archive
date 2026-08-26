@@ -291,11 +291,15 @@ STATUS_JS = """
   }
   function served(d) {
     var box = document.getElementById("served");
-    if (!box || !d.served || !d.served.downloads) return;
-    var gb = d.served.bytes / 1e9;
-    box.innerHTML = "<b>" + d.served.downloads.toLocaleString() + "</b> downloads &middot; <b>"
-      + (gb >= 1 ? gb.toFixed(1) + " GB" : (d.served.bytes / 1e6).toFixed(0) + " MB")
-      + "</b> handed out";
+    if (!box) return;
+    // Render at zero too. A counter that only appears once it is non-zero is
+    // one nobody can find when they go looking for it.
+    var n = (d.served && d.served.downloads) || 0;
+    var bytes = (d.served && d.served.bytes) || 0;
+    var gb = bytes / 1e9;
+    box.innerHTML = "<b>" + n.toLocaleString() + "</b> download" + (n === 1 ? "" : "s")
+      + " &middot; <b>" + (gb >= 1 ? gb.toFixed(1) + " GB" : (bytes / 1e6).toFixed(1) + " MB")
+      + "</b> downloaded from here";
   }
 
   fetch(W + "/status", { cache: "no-store" })
@@ -659,7 +663,7 @@ they need the host to be up.</p>
 <p class="status"><span class="dot" id="dot"></span><span id="stxt">Checking the archive host&hellip;</span></p>
 <p><a class="btn" id="open" href="{WORKER}/go" aria-disabled="true">Open the archive host</a></p>
 <p class="host" id="host"></p>
-<p class="served" id="served"></p>
+<p class="served" id="served">Counting downloads&hellip;</p>
 </div>
 <table class="files"><tbody>
 <tr><td><a href="{WORKER}/go/all/replays.tar">all/replays.tar</a></td>

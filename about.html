@@ -130,8 +130,8 @@ color:var(--id);word-break:break-all;text-decoration:none;line-height:1.5}
 <section class="prose">
 <h2>What this is</h2>
 <p>A crowdsourced record of every ranked TagPro match the replay listing returns:
-<strong>123,942 matches</strong> since Mar 2025, each with its id, start time, map and duration,
-and a tagpro.eu record for 121,669 of them. For <strong>10,563</strong> the recording itself
+<strong>124,006 matches</strong> since Mar 2025, each with its id, start time, map and duration,
+and a tagpro.eu record for 121,733 of them. For <strong>10,627</strong> the recording itself
 is held too.</p>
 <p>It exists out of a love for data.</p>
 
@@ -195,7 +195,7 @@ slack, because they record it in different time zones and to different precision
 <li><strong>292 tagpro.eu records were rebuilt here</strong> from recordings, for matches
 the mirror never had. That is the orange band on the coverage table, and there is a page on
 <a href="rebuilt.html">how accurate they are</a>.</li>
-<li><strong>8 matches are exceptions.</strong> They are on tagpro.eu but the listing
+<li><strong>24 matches are exceptions.</strong> They are on tagpro.eu but the listing
 returns nothing for them, even inside ranges it says are complete. There is no recording to get.</li>
 </ul>
 <p>Two ids identify a match: <code>uuid</code> for the replay, <code>game_id</code> for the
@@ -205,7 +205,7 @@ match on tagpro.eu. Full field list in <a href="DATA_MAP.md">DATA_MAP.md</a>.</p
 <h2>How it runs</h2>
 <p>A pipeline follows the listing, pulls each replay while it is still reachable, links it to its
 tagpro.eu record, and rebuilds records for matches the mirror missed. This site is regenerated from
-that database on a schedule. The 3.9 GB of recordings stay on the machine that
+that database on a schedule. The 4.0 GB of recordings stay on the machine that
 collected them and are served from it &mdash; see <a href="download.html">Download</a>.</p>
 </section>
 
