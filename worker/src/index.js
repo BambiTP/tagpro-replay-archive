@@ -25,6 +25,32 @@ import { DurableObject } from "cloudflare:workers";
 const STALE_S = 300;
 
 export class TunnelRegistry extends DurableObject {
+  /**
+   * Clicks on /go links, counted here rather than only on the host: this sees
+   * a link followed while the host is down, and a link shared somewhere else
+   * entirely. The host's own /stats.json is the authority on bytes actually
+   * transferred - these two answer different questions and will not agree.
+   */
+  async hit(kind) {
+    const day = new Date().toISOString().slice(0, 10);
+    const keys = ["hits:total", `hits:kind:${kind}`, `hits:day:${day}`];
+    const have = await this.ctx.storage.get(keys);
+    const put = {};
+    for (const k of keys) put[k] = (have.get(k) || 0) + 1;
+    await this.ctx.storage.put(put);
+  }
+
+  async counts() {
+    const all = await this.ctx.storage.list({ prefix: "hits:" });
+    const out = { total: 0, by_kind: {}, by_day: {} };
+    for (const [k, v] of all) {
+      if (k === "hits:total") out.total = v;
+      else if (k.startsWith("hits:kind:")) out.by_kind[k.slice(10)] = v;
+      else if (k.startsWith("hits:day:")) out.by_day[k.slice(9)] = v;
+    }
+    return out;
+  }
+
   async current() {
     return (await this.ctx.storage.get("current")) || null;
   }
@@ -84,7 +110,7 @@ function validOrigin(url) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const { pathname } = url;
 
@@ -133,6 +159,9 @@ export default {
         );
       }
       const rest = pathname.slice("/go".length); // "" or "/something"
+      // Counted off the critical path - a redirect should not wait on a write.
+      const kind = (rest.split("/")[1] || "root").slice(0, 32);
+      ctx.waitUntil(registry(env).hit(kind));
       return new Response(null, {
         status: 302,
         headers: {
@@ -141,6 +170,10 @@ export default {
           "Access-Control-Allow-Origin": "*",
         },
       });
+    }
+
+    if (pathname === "/stats") {
+      return json(await registry(env).counts());
     }
 
     if (pathname === "/" || pathname === "/status") {
