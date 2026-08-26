@@ -16,7 +16,6 @@ the matches that week's row on the site counts.
 """
 import datetime as dt
 import gzip
-import hashlib
 import html
 import io
 import json
@@ -36,14 +35,10 @@ from pathlib import Path
 DB = Path(os.environ.get("ARCHIVE_DB", "/home/metjr/nte/data/tagpro.db"))
 REPLAYS = Path(os.environ.get("ARCHIVE_REPLAYS", "/home/metjr/nte/data/replays"))
 BULK = Path(os.environ.get("ARCHIVE_BULK", "/home/metjr/nte/data/ranked_matches_bulk.json.gz"))
-# Deliberately outside the repo: publish.sh runs 'git add -A' and pushes to a
-# public remote, and this file holds who downloaded what.
+# Outside the repo: publish.sh runs 'git add -A' and pushes to a public
+# remote, and a log does not belong in a git history rewritten every hour.
 STATS_DB = Path(os.environ.get("ARCHIVE_STATS",
                                Path.home() / ".local/share/tagpro-archive/downloads.sqlite"))
-# Salt for the per-visitor hash. Generated once and kept next to the log, so
-# the log never holds a raw address but repeat visitors still resolve to the
-# same anonymous id.
-SALT_FILE = STATS_DB.parent / "salt"
 SITE = "https://bambitp.github.io/tagpro-replay-archive/"
 
 # A home uplink, not a CDN. Past this many transfers in flight the rest are
@@ -64,7 +59,6 @@ WEEK_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 log = logging.getLogger("archive")
 _local = threading.local()
 _transfers = threading.BoundedSemaphore(MAX_TRANSFERS)
-_SALT = None                     # per-visitor hash key, read once from disk
 _ip_lock = threading.Lock()
 _ip_active = {}                  # ip -> transfers in flight
 _ip_hits = {}                    # ip -> [timestamps within the window]
@@ -155,14 +149,12 @@ def replay_path(row):
 
 STATS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS downloads (
-    id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    ts      TEXT    NOT NULL,
-    kind    TEXT    NOT NULL,   -- replay | week_tar | results | eu_week | bulk | all_tar | custom
-    detail  TEXT,               -- the week, the uuid, or the query behind it
-    bytes   INTEGER NOT NULL,   -- what actually left the machine, not what was asked for
-    ok      INTEGER NOT NULL,   -- 0 = the client went away part way through
-    country TEXT,
-    who     TEXT                -- salted hash of the address, never the address
+    id     INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts     TEXT    NOT NULL,
+    kind   TEXT    NOT NULL,   -- replay | week_tar | results | eu_week | bulk | all_tar | custom
+    detail TEXT,               -- the week, the uuid, or the query behind it
+    bytes  INTEGER NOT NULL,   -- what actually left the machine, not what was asked for
+    ok     INTEGER NOT NULL    -- 0 = the client went away part way through
 );
 CREATE INDEX IF NOT EXISTS idx_downloads_ts ON downloads(ts);
 CREATE INDEX IF NOT EXISTS idx_downloads_kind ON downloads(kind);
@@ -181,29 +173,15 @@ def stats_db():
     return conn
 
 
-def visitor_salt():
-    global _SALT
-    if _SALT is None:
-        STATS_DB.parent.mkdir(parents=True, exist_ok=True)
-        if SALT_FILE.exists():
-            _SALT = SALT_FILE.read_bytes()
-        else:
-            _SALT = os.urandom(32)
-            SALT_FILE.write_bytes(_SALT)
-            SALT_FILE.chmod(0o600)
-    return _SALT
-
-
-def record(kind, detail, nbytes, ok, ip, country):
-    """One completed (or abandoned) transfer. Never raises into a request."""
+def record(kind, detail, nbytes, ok):
+    """One transfer, counted. Nothing here identifies who asked for it - no
+    address, no hash of one, no country. Never raises into a request."""
     try:
-        who = hashlib.blake2b(ip.encode(), key=visitor_salt(), digest_size=8).hexdigest()
-        stats_db().execute(
-            "INSERT INTO downloads (ts, kind, detail, bytes, ok, country, who) "
-            "VALUES (?,?,?,?,?,?,?)",
-            (dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-             kind, detail, nbytes, 1 if ok else 0, country, who))
-        stats_db().commit()
+        conn = stats_db()
+        conn.execute("INSERT INTO downloads (ts, kind, detail, bytes, ok) VALUES (?,?,?,?,?)",
+                     (dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+                      kind, detail, nbytes, 1 if ok else 0))
+        conn.commit()
     except Exception:
         log.exception("could not record a download")
 
@@ -456,8 +434,7 @@ class Handler(BaseHTTPRequestHandler):
                 pass
         finally:
             if self.dl_kind and self.command != "HEAD":
-                record(self.dl_kind, self.dl_detail, self.sent, ok,
-                       self.ip(), self.headers.get("CF-IPCountry"))
+                record(self.dl_kind, self.dl_detail, self.sent, ok)
 
     def want(self, name, default):
         """Boolean query flag: ?name=0/1/true/false/yes/no/on/off."""
@@ -971,25 +948,21 @@ class Handler(BaseHTTPRequestHandler):
                          ",".join(k for k, v in sel.items() if v))
 
     def stats(self):
-        """What has been downloaded. Aggregates only - no addresses, and the
-        per-visitor hash never leaves the machine."""
+        """How much has been downloaded. Counts and sizes only."""
         conn = stats_db()
-        one = lambda q, *a: conn.execute(q, a).fetchone()
+        one = lambda q, *a: conn.execute(q, a).fetchone()[0]
         rows = lambda q, *a: [dict(r) for r in conn.execute(q, a)]
         since = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=30)).isoformat()
         self._json({
-            "downloads": one("SELECT COUNT(*) FROM downloads WHERE ok = 1")[0],
-            "abandoned": one("SELECT COUNT(*) FROM downloads WHERE ok = 0")[0],
-            "bytes": one("SELECT COALESCE(SUM(bytes),0) FROM downloads")[0],
-            "visitors": one("SELECT COUNT(DISTINCT who) FROM downloads")[0],
-            "first": one("SELECT MIN(ts) FROM downloads")[0],
+            "downloads": one("SELECT COUNT(*) FROM downloads WHERE ok = 1"),
+            "abandoned": one("SELECT COUNT(*) FROM downloads WHERE ok = 0"),
+            "bytes": one("SELECT COALESCE(SUM(bytes),0) FROM downloads"),
+            "since": one("SELECT COALESCE(MIN(ts),'')  FROM downloads") or None,
             "by_kind": rows("SELECT kind, COUNT(*) AS n, COALESCE(SUM(bytes),0) AS bytes "
-                            "FROM downloads GROUP BY kind ORDER BY n DESC"),
+                            "FROM downloads GROUP BY kind ORDER BY bytes DESC"),
             "by_day": rows("SELECT substr(ts,1,10) AS day, COUNT(*) AS n, "
-                           "  COALESCE(SUM(bytes),0) AS bytes, COUNT(DISTINCT who) AS visitors "
+                           "  COALESCE(SUM(bytes),0) AS bytes "
                            "FROM downloads WHERE ts >= ? GROUP BY day ORDER BY day", since),
-            "by_country": rows("SELECT COALESCE(country,'?') AS country, COUNT(*) AS n "
-                               "FROM downloads GROUP BY country ORDER BY n DESC LIMIT 25"),
             "popular_weeks": rows("SELECT detail AS week, COUNT(*) AS n FROM downloads "
                                   "WHERE kind IN ('week_tar','results','eu_week') AND detail IS NOT NULL "
                                   "GROUP BY detail ORDER BY n DESC LIMIT 20"),
@@ -1058,7 +1031,7 @@ font-family:ui-monospace,Menlo,Consolas,monospace}}
 <h2>Routes</h2>
 <table>
 <tr><td>/manifest.json</td><td>counts, sizes, what is here</td></tr>
-<tr><td>/stats.json</td><td>what has been downloaded, in aggregate</td></tr>
+<tr><td>/stats.json</td><td>how many downloads and how many bytes</td></tr>
 <tr><td>/replay/&lt;uuid&gt;</td><td>one recording, <code>.ndjson.gz</code>, resumable</td></tr>
 <tr><td>/week/&lt;YYYY-MM-DD&gt;/results.json.gz</td><td>how every match that week ended, with per-player stats and the map; <code>?map=0</code>, <code>?rebuilt=0</code></td></tr>
 <tr><td>/week/&lt;YYYY-MM-DD&gt;/replays.tar</td><td>every recording that week, streamed as one tar</td></tr>

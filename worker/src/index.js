@@ -55,10 +55,17 @@ export class TunnelRegistry extends DurableObject {
     return (await this.ctx.storage.get("current")) || null;
   }
 
-  async set(url) {
+  async set(url, totals) {
     const rec = { url, updated: new Date().toISOString() };
     await this.ctx.storage.put("current", rec);
+    // Totals ride in on the heartbeat and are kept separately, so the site can
+    // still show them while the host is down.
+    if (totals) await this.ctx.storage.put("totals", totals);
     return rec;
+  }
+
+  async totals() {
+    return (await this.ctx.storage.get("totals")) || null;
   }
 
   async clear() {
@@ -143,7 +150,11 @@ export default {
       const origin = validOrigin(body && body.url);
       if (!origin) return json({ error: "url must be an https *.trycloudflare.com origin" }, 400);
 
-      const rec = await registry(env).set(origin);
+      const totals =
+        Number.isFinite(body.downloads) && Number.isFinite(body.bytes)
+          ? { downloads: body.downloads, bytes: body.bytes, at: new Date().toISOString() }
+          : null;
+      const rec = await registry(env).set(origin, totals);
       return json({ ok: true, ...rec });
     }
 
@@ -173,17 +184,29 @@ export default {
     }
 
     if (pathname === "/stats") {
-      return json(await registry(env).counts());
+      const [clicks, totals] = await Promise.all([
+        registry(env).counts(),
+        registry(env).totals(),
+      ]);
+      return json({ served: totals, clicks });
     }
 
     if (pathname === "/" || pathname === "/status") {
-      const rec = withAge(await registry(env).current());
-      if (!rec) return json({ online: false, url: null, updated: null, age: null });
+      const [rec, totals] = await Promise.all([
+        registry(env).current().then(withAge),
+        registry(env).totals(),
+      ]);
+      if (!rec) {
+        return json({ online: false, url: null, updated: null, age: null, served: totals });
+      }
       return json({
         online: rec.online,
         url: rec.online ? rec.url : null,
         updated: rec.updated,
         age: rec.age,
+        // What the host has served, carried in on its heartbeat, so this is
+        // here whether or not the host is up right now.
+        served: totals,
       });
     }
 

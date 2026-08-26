@@ -73,10 +73,16 @@ tunnel_host() {
 }
 
 register() {
+    # Download totals ride along with the heartbeat, so the site can show them
+    # from the same request it already makes - and can still show them while
+    # the host is down, which is exactly when nobody could ask the host.
+    local totals
+    totals=$(curl -sf -m 5 "http://127.0.0.1:$PORT/stats.json" \
+             | sed -n 's/.*"downloads":\([0-9]*\).*"bytes":\([0-9]*\).*/,"downloads":\1,"bytes":\2/p')
     curl -sf -m 15 -X POST "$WORKER_URL/register" \
          -H "Authorization: Bearer $TUNNEL_SECRET" \
          -H "Content-Type: application/json" \
-         -d "{\"url\":\"$1\"}" -o /dev/null
+         -d "{\"url\":\"$1\"$totals}" -o /dev/null
 }
 
 start_tunnel() {
