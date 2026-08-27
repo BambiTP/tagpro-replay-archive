@@ -4,3 +4,4 @@
   File "/usr/lib/python3.12/pathlib.py", line 1344, in unlink
     os.unlink(self)
 FileNotFoundError: [Errno 2] No such file or directory: '/home/metjr/tagpro-archive/data/weeks/2025-12-29.json'
+2026-08-26T04:20:11-07:00 published: ids 124,035/124,043 (99.99%), replays 10,656 (8.59%)
