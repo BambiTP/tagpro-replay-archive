@@ -148,13 +148,13 @@ they need the host to be up.</p>
 </div>
 <table class="files"><tbody>
 <tr><td><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/all/replays.tar">all/replays.tar</a></td>
-<td>every recording held, 13,386 files, 4.96 GB, one folder per week</td></tr>
+<td>every recording held, 13,750 files, 5.10 GB, one folder per week</td></tr>
 <tr><td><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/bulk/ranked_matches_bulk.json.gz">ranked_matches_bulk.json.gz</a></td>
-<td>every tagpro.eu record, 124,512 matches, in
+<td>every tagpro.eu record, 124,878 matches, in
 <a href="https://tagpro.eu/?science" target="_blank" rel="noopener">tagpro.eu's own bulk shape</a></td></tr>
 </tbody></table>
 <p class="note">The bulk file is the mirror's records only. Add <code>?rebuilt=1</code> to mix in
-the 374 records <a href="rebuilt.html">rebuilt here from recordings</a>; they are marked
+the 381 records <a href="rebuilt.html">rebuilt here from recordings</a>; they are marked
 <code>source: "replay"</code> wherever they appear.</p>
 </section>
 
@@ -165,11 +165,11 @@ the weeks your range covers, and nothing else.</p>
 <div class="card">
 <div class="pick">
 <span class="sep">Matches</span>
-<label>from <input type="number" id="start" min="1" max="126786" value="1" step="1"></label>
-<label>to <input type="number" id="end" min="1" max="126786" value="126786" step="1"></label>
+<label>from <input type="number" id="start" min="1" max="127152" value="1" step="1"></label>
+<label>to <input type="number" id="end" min="1" max="127152" value="127152" step="1"></label>
 <span class="n" id="span"></span>
 </div>
-<p class="note" style="margin:-4px 0 14px">Match 1 is the oldest in the archive, 126,786 is the
+<p class="note" style="margin:-4px 0 14px">Match 1 is the oldest in the archive, 127,152 is the
 newest. Ordered by start time.</p>
 <div class="pick">
 <span class="sep">Player</span>
@@ -203,7 +203,7 @@ newest. Ordered by start time.</p>
 into a terminal, a script, or a message. This page&rsquo;s own address tracks your picks too, so
 bookmarking or sending it hands over the same selection.</p>
 <p class="note">Every match carries its <code>uuid</code> and every player their name, whatever
-else you untick. Recordings are the heavy part &mdash; the whole archive is 4.96 GB of
+else you untick. Recordings are the heavy part &mdash; the whole archive is 5.10 GB of
 them, against roughly 67 MB for every match result ever. Sizes are exact for recordings
 and an estimate for the rest, since those are built as they are sent.</p>
 </section>
@@ -220,7 +220,7 @@ recordings, <strong>results</strong> is how every match ended with per-player st
 <table><thead><tr><th>Week</th><th style="text-align:right">Matches</th>
 <th style="text-align:right">Recordings</th><th style="text-align:right">Size</th>
 <th></th></tr></thead><tbody>
-<tr><td class="wk">31 Aug 2026</td><td class="n">1,229</td><td class="n">1,208</td><td class="n">449 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-31/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-31/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-31.json.gz">tagpro.eu</a></td></tr>
+<tr><td class="wk">31 Aug 2026</td><td class="n">1,595</td><td class="n">1,572</td><td class="n">583 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-31/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-31/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-31.json.gz">tagpro.eu</a></td></tr>
 <tr><td class="wk">24 Aug 2026</td><td class="n">2,441</td><td class="n">2,441</td><td class="n">898 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-24/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-24.json.gz">tagpro.eu</a></td></tr>
 <tr><td class="wk">17 Aug 2026</td><td class="n">2,201</td><td class="n">928</td><td class="n">347 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-17/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-17/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-17.json.gz">tagpro.eu</a></td></tr>
 <tr><td class="wk">10 Aug 2026</td><td class="n">2,238</td><td class="n">273</td><td class="n">101 MB</td><td class="dl"><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-10/replays.tar">replays.tar</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/week/2026-08-10/results.json.gz">results</a><a href="https://tagpro-archive-tunnel.bambitagpro.workers.dev/go/eu/week/2026-08-10.json.gz">tagpro.eu</a></td></tr>
@@ -307,9 +307,9 @@ these links always work, host up or down.</p>
 <tr><td><a href="data/all.replay.json" download>all.replay.json</a></td>
 <td>every match: <code>uuid</code> plus the <code>game_id</code> a recording is requested by</td></tr>
 <tr><td><a href="data/missing_replays.json" download>missing_replays.json</a></td>
-<td>the 113,400 matches with no recording held &mdash; the wanted list</td></tr>
+<td>the 113,402 matches with no recording held &mdash; the wanted list</td></tr>
 <tr><td><a href="data/all.eu.json" download>all.eu.json</a></td>
-<td>every linked tagpro.eu match id (124,512 of them)</td></tr>
+<td>every linked tagpro.eu match id (124,878 of them)</td></tr>
 <tr><td><a href="data/coverage.json">coverage.json</a></td>
 <td>the per-week totals behind the tables on the Coverage tab</td></tr>
 <tr><td><a href="DATA_MAP.md">DATA_MAP.md</a></td>
@@ -344,7 +344,7 @@ on Discord &mdash; any format, any size, any dates. <a href="about.html">Why tha
 
 <footer><div class="wrap">
 Recordings are <code>.ndjson.gz</code>, one JSON event per line, as the recorder served them. tagpro.eu records follow <a href="https://tagpro.eu/?science" target="_blank" rel="noopener">tagpro.eu&rsquo;s own format</a>. Field reference: <a href="DATA_MAP.md">DATA_MAP.md</a>.<br><br>
-Generated 03 Sep 2026.
+Generated 04 Sep 2026.
 </div></footer>
 </div><script>
 (function () {
@@ -398,7 +398,7 @@ Generated 03 Sep 2026.
 
 (function () {
   var W = "https://tagpro-archive-tunnel.bambitagpro.workers.dev";
-  var TOTAL = 126786;
+  var TOTAL = 127152;
   var el = function (id) { return document.getElementById(id); };
   var flags = ["replays", "results", "eu", "map", "rebuilt"];
   var est = el("est"), btn = el("build"), urlOut = el("url"), span = el("span");

@@ -826,13 +826,13 @@
  },
  {
   "week": "2026-08-31",
-  "ids": 1229,
-  "replay": 1208,
-  "record": 1228,
-  "rebuilt": 33,
-  "bytes": 448521610,
+  "ids": 1595,
+  "replay": 1572,
+  "record": 1594,
+  "rebuilt": 40,
+  "bytes": 582986369,
   "missing_ids": 0,
-  "est": 1229,
+  "est": 1595,
   "partial": true
  }
 ]
