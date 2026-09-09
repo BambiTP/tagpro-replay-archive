@@ -837,13 +837,13 @@
  },
  {
   "week": "2026-09-07",
-  "ids": 398,
-  "replay": 393,
-  "record": 398,
-  "rebuilt": 9,
-  "bytes": 141559082,
+  "ids": 706,
+  "replay": 699,
+  "record": 706,
+  "rebuilt": 13,
+  "bytes": 257160456,
   "missing_ids": 0,
-  "est": 398,
+  "est": 706,
   "partial": true
  }
 ]
