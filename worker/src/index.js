@@ -1,7 +1,7 @@
 /**
- * Holds the current address of the archive host.
+ * Holds the current address of each archive host.
  *
- * The host is exposed through a free cloudflared quick tunnel, which is handed
+ * A host is exposed through a free cloudflared quick tunnel, which is handed
  * a fresh *.trycloudflare.com hostname every time it starts. A static site
  * cannot link to something that moves, so the tunnel supervisor registers the
  * hostname here each time it changes and the site links to /go instead, which
@@ -17,12 +17,28 @@
  * hostname while /status still reported the host offline. A single DO is
  * strongly consistent, and one small object serving a handful of requests a
  * minute is nothing.
+ *
+ * More than one host registers here now, each in its own object, reached
+ * through a /h/<host>/ prefix. See HOSTS.
  */
 import { DurableObject } from "cloudflare:workers";
 
 // The supervisor re-registers every 60s. Three missed heartbeats and we call
 // the host down rather than hand out a hostname that no longer answers.
 const STALE_S = 300;
+
+// Every host keeps its own record, so two supervisors heartbeating a minute
+// apart cannot overwrite each other. Addressed as /h/<host>/register,
+// /h/<host>/go/..., /h/<host>/status, /h/<host>/stats.
+//
+// An unprefixed path stays the tagpro host, which was here first: its records
+// live under "v1" and the links already published against /go and /status have
+// to keep resolving exactly as they did before any of this was keyed.
+const HOSTS = {
+  tagpro: { key: "v1", site: "https://bambitp.github.io/tagpro-replay-archive/" },
+  naltp: { key: "naltp", site: "https://bambitp.github.io/naltp-archive/" },
+};
+const DEFAULT_HOST = HOSTS.tagpro;
 
 export class TunnelRegistry extends DurableObject {
   /**
@@ -83,7 +99,19 @@ const json = (obj, status = 200) =>
     },
   });
 
-const registry = (env) => env.REGISTRY.get(env.REGISTRY.idFromName("v1"));
+const registry = (env, host) => env.REGISTRY.get(env.REGISTRY.idFromName(host.key));
+
+// Splits /h/<host>/rest into the host and the route it was asking for, and
+// leaves an unprefixed path alone as the default host's. An unknown host name
+// is a 404 rather than a fresh empty registry, so a typo or a probe cannot
+// park a record here.
+function route(pathname) {
+  const m = pathname.match(/^\/h\/([a-z0-9-]{1,32})(\/.*)?$/);
+  if (!m) return { host: DEFAULT_HOST, path: pathname };
+  const host = HOSTS[m[1]];
+  if (!host) return null;
+  return { host, path: m[2] || "/" };
+}
 
 function withAge(rec) {
   if (!rec || !rec.url) return null;
@@ -119,7 +147,6 @@ function validOrigin(url) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const { pathname } = url;
 
     if (request.method === "OPTIONS") {
       return new Response(null, {
@@ -132,11 +159,16 @@ export default {
       });
     }
 
+    const hit = route(url.pathname);
+    if (!hit) return json({ error: "not found" }, 404);
+    const { host, path: pathname } = hit;
+    const reg = registry(env, host);
+
     if (pathname === "/register") {
       if (!authorized(request, env)) return json({ error: "unauthorized" }, 401);
 
       if (request.method === "DELETE") {
-        await registry(env).clear();
+        await reg.clear();
         return json({ ok: true, online: false });
       }
       if (request.method !== "POST") return json({ error: "method not allowed" }, 405);
@@ -154,25 +186,25 @@ export default {
         Number.isFinite(body.downloads) && Number.isFinite(body.bytes)
           ? { downloads: body.downloads, bytes: body.bytes, at: new Date().toISOString() }
           : null;
-      const rec = await registry(env).set(origin, totals);
+      const rec = await reg.set(origin, totals);
       return json({ ok: true, ...rec });
     }
 
     if (pathname === "/go" || pathname.startsWith("/go/")) {
-      const rec = withAge(await registry(env).current());
+      const rec = withAge(await reg.current());
       if (!rec || !rec.online) {
         return new Response(
           "The archive host is not online right now.\n\n" +
             "It is a home machine behind a tunnel, so it is up when it is up. " +
             "Coverage data is always available at\n" +
-            "https://bambitp.github.io/tagpro-replay-archive/\n",
+            host.site + "\n",
           { status: 503, headers: { "Content-Type": "text/plain", "Cache-Control": "no-store" } }
         );
       }
       const rest = pathname.slice("/go".length); // "" or "/something"
       // Counted off the critical path - a redirect should not wait on a write.
       const kind = (rest.split("/")[1] || "root").slice(0, 32);
-      ctx.waitUntil(registry(env).hit(kind));
+      ctx.waitUntil(reg.hit(kind));
       return new Response(null, {
         status: 302,
         headers: {
@@ -184,18 +216,12 @@ export default {
     }
 
     if (pathname === "/stats") {
-      const [clicks, totals] = await Promise.all([
-        registry(env).counts(),
-        registry(env).totals(),
-      ]);
+      const [clicks, totals] = await Promise.all([reg.counts(), reg.totals()]);
       return json({ served: totals, clicks });
     }
 
     if (pathname === "/" || pathname === "/status") {
-      const [rec, totals] = await Promise.all([
-        registry(env).current().then(withAge),
-        registry(env).totals(),
-      ]);
+      const [rec, totals] = await Promise.all([reg.current().then(withAge), reg.totals()]);
       if (!rec) {
         return json({ online: false, url: null, updated: null, age: null, served: totals });
       }
