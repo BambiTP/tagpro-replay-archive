@@ -848,13 +848,13 @@
  },
  {
   "week": "2026-09-14",
-  "ids": 1558,
-  "replay": 1484,
-  "record": 1556,
-  "rebuilt": 36,
-  "bytes": 538587180,
+  "ids": 1792,
+  "replay": 1714,
+  "record": 1790,
+  "rebuilt": 43,
+  "bytes": 626493988,
   "missing_ids": 0,
-  "est": 1558,
+  "est": 1792,
   "partial": true
  }
 ]
