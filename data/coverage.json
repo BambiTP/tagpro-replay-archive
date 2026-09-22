@@ -848,13 +848,24 @@
  },
  {
   "week": "2026-09-14",
-  "ids": 1792,
-  "replay": 1714,
-  "record": 1790,
-  "rebuilt": 43,
-  "bytes": 626493988,
+  "ids": 1893,
+  "replay": 1813,
+  "record": 1891,
+  "rebuilt": 48,
+  "bytes": 662335090,
   "missing_ids": 0,
-  "est": 1792,
+  "est": 1893,
+  "partial": false
+ },
+ {
+  "week": "2026-09-21",
+  "ids": 460,
+  "replay": 415,
+  "record": 457,
+  "rebuilt": 10,
+  "bytes": 151150970,
+  "missing_ids": 0,
+  "est": 460,
   "partial": true
  }
 ]
