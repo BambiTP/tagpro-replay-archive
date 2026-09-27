@@ -859,13 +859,13 @@
  },
  {
   "week": "2026-09-21",
-  "ids": 460,
-  "replay": 415,
-  "record": 457,
-  "rebuilt": 10,
-  "bytes": 151150970,
-  "missing_ids": 0,
-  "est": 460,
+  "ids": 1470,
+  "replay": 1060,
+  "record": 1452,
+  "rebuilt": 35,
+  "bytes": 395396484,
+  "missing_ids": 567,
+  "est": 2037,
   "partial": true
  }
 ]
