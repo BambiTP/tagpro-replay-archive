@@ -881,13 +881,13 @@
  },
  {
   "week": "2026-10-05",
-  "ids": 67,
-  "replay": 66,
-  "record": 67,
-  "rebuilt": 0,
-  "bytes": 19567927,
+  "ids": 345,
+  "replay": 341,
+  "record": 345,
+  "rebuilt": 3,
+  "bytes": 120557520,
   "missing_ids": 0,
-  "est": 67,
+  "est": 345,
   "partial": true
  }
 ]
