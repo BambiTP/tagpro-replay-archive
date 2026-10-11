@@ -886,8 +886,8 @@
   "record": 1456,
   "rebuilt": 28,
   "bytes": 523169207,
-  "missing_ids": 0,
-  "est": 1456,
+  "missing_ids": 169,
+  "est": 1625,
   "partial": true
  }
 ]
