@@ -903,13 +903,13 @@
  },
  {
   "week": "2026-10-19",
-  "ids": 1208,
-  "replay": 1167,
-  "record": 1208,
-  "rebuilt": 32,
-  "bytes": 439432026,
+  "ids": 1448,
+  "replay": 1404,
+  "record": 1448,
+  "rebuilt": 38,
+  "bytes": 530752583,
   "missing_ids": 0,
-  "est": 1208,
+  "est": 1448,
   "partial": true
  }
 ]
