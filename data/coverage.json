@@ -936,13 +936,13 @@
  },
  {
   "week": "2026-11-09",
-  "ids": 112,
-  "replay": 109,
-  "record": 112,
-  "rebuilt": 0,
-  "bytes": 39153738,
+  "ids": 370,
+  "replay": 360,
+  "record": 370,
+  "rebuilt": 6,
+  "bytes": 130001488,
   "missing_ids": 0,
-  "est": 112,
+  "est": 370,
   "partial": true
  }
 ]
